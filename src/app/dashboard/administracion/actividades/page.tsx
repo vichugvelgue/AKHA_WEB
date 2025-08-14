@@ -30,7 +30,7 @@ const initialFormState: ActividadFormState = {
 // URL base de tu API de NestJS, ahora usando una variable de entorno
 // La URL base no debe incluir el endpoint.
 // Asegúrate de definir NEXT_PUBLIC_API_BASE_URL en tu archivo .env.local (ej: http://localhost:3000)
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3000';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000';
 const ENDPOINT_ACTUAL = '/actividades';
 
 // Componente para la vista de listado de actividades
