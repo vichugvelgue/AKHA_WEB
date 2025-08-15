@@ -7,40 +7,10 @@ import { useRouter } from 'next/navigation'; // Importa el hook useRouter
 import ToggleSwitch from "@/src/hooks/ToggleSwitch";
 import Cargando from '@/src/hooks/Cargando';
 import { useNotification } from '@/src/hooks/useNotifications';
+import { Modulo, Permiso, TipoUsuario } from '@/src/Interfaces/Interfaces';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000';
 
-
-// Definimos una interfaz para el tipo de datos de un usuario
-interface User {
-  id: number;
-  nombre: string;
-  email: string;
-  rol: string;
-}
-
-// Definimos una interfaz para los datos de un nuevo usuario desde el formulario
-interface TipoUsuario {
-  _id?: string | null;
-  Nombre: string;
-  Estado?: number;
-  Permisos?: Permiso[];
-}
-interface Modulo {
-  idPadre?: string;
-  _id?: string;
-  Nombre?: string;
-  Estado?: number;
-  FechaCreacion?: Date;
-  seleccionado?: boolean;
-
-}
-
-interface Permiso {
-  _id?: string;
-  idTipoUsuario?: string | null;
-  idModulo: string;
-}
 
 // Definimos una interfaz para las propiedades del modal de registro
 interface RegistroUsuarioModalProps {

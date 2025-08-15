@@ -5,19 +5,7 @@
 import { useState, useMemo, useEffect, ChangeEventHandler } from 'react';
 // Importamos el custom hook para las notificaciones
 import { useNotification } from '@/src/hooks/useNotifications';
-
-// Interfaz para el tipo de datos de una actividad, usando _id de MongoDB
-interface Actividad {
-  _id: string;
-  nombre: string;
-  descripcion: string;
-  frecuencia: 'Diaria' | 'Semanal' | 'Mensual' | 'Trimestral';
-}
-
-// Nueva interfaz para el estado del formulario
-interface ActividadFormState extends Omit<Actividad, '_id'> {
-  _id: string | null;
-}
+import { Actividad,ActividadFormState } from '@/src/Interfaces/Interfaces';
 
 // Valores iniciales para el formulario
 const initialFormState: ActividadFormState = {
