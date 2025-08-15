@@ -4,8 +4,8 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation'; // Importa el hook useRouter
-import ToggleSwitch from "@/src/app/componentes/ToggleSwitch";
-import Cargando from '@/src/app/componentes/Cargando';
+import ToggleSwitch from "@/src/hooks/ToggleSwitch";
+import Cargando from '@/src/hooks/Cargando';
 import { useNotification } from '@/src/hooks/useNotifications';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000';
@@ -54,7 +54,7 @@ interface RegistroUsuarioModalProps {
 const UsuariosCRUD = () => {
   // Inicializa el router para la navegación
   const router = useRouter();
-const { notification, showNotification, hideNotification } = useNotification();
+  const { notification, showNotification, hideNotification } = useNotification();
 
   const [tiposUsuarios, setTiposUsuarios] = useState<TipoUsuario[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -146,7 +146,7 @@ const { notification, showNotification, hideNotification } = useNotification();
       showNotification(err.message || 'Hubo un error al desactivar/activar el tipo de usuario. Verifica que la API esté corriendo y responda correctamente.', "error");
     }
   };
-  
+
   const EliminarTipoUsuario = async (id: string = "") => {
     try {
       const response = await fetch(`${API_BASE_URL}/TiposUsuario/EliminarTipoUsuario/${id}`, {
@@ -167,7 +167,7 @@ const { notification, showNotification, hideNotification } = useNotification();
   };
 
   // La función ahora recibe un objeto con el tipo User
-  const handleRegister = (Mensaje: string, Color: "success" | "error" | "warning" = "success" )  => {
+  const handleRegister = (Mensaje: string, Color: "success" | "error" | "warning" = "success") => {
     showNotification(Mensaje, Color);
     setIsModalOpen(false);
     ListarTiposUsuarios();
@@ -250,9 +250,13 @@ const { notification, showNotification, hideNotification } = useNotification();
 
       {isModalOpen && <RegistroUsuarioModal idEditar={idTipoUsuarioToEdit} Editar={editar} onClose={handleCloceModal} onRegister={handleRegister} />}
 
+      {/* Modal de confirmación de eliminación con animación */}
       {showConfirm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900 bg-opacity-50">
-          <div className="rounded-lg bg-white p-6 shadow-xl">
+        <div 
+          className={`fixed inset-0 z-50 flex items-center justify-center transition-all duration-300 opacity-100 backdrop-blur-sm}`}
+          style={{ backgroundColor: 'rgba(255, 255, 255, 0.60)' }}
+        >
+          <div className={`w-full max-w-sm rounded-2xl bg-white p-8 shadow-2xl transform transition-transform duration-300 border-2 border-blue-500 scale-100`}>
             <p className="text-lg font-semibold text-gray-800">{pregunta}</p>
             <div className="mt-4 flex justify-end space-x-2">
               <button onClick={cancelDelete} className="rounded-md bg-gray-300 px-4 py-2 text-gray-800 transition-colors hover:bg-gray-400">
@@ -265,9 +269,9 @@ const { notification, showNotification, hideNotification } = useNotification();
           </div>
         </div>
       )}
-      <Cargando isLoading={isLoading}  />
+      <Cargando isLoading={isLoading} />
       {notification.visible && (
-        <div 
+        <div
           className={`fixed right-4 top-4 z-[999] flex items-center rounded-lg p-4 text-white shadow-lg transition-transform duration-300 transform ${notification.visible ? 'translate-x-0 opacity-100' : 'translate-x-full opacity-0'}
             ${notification.type === 'success' ? 'bg-green-500' : notification.type === 'error' ? 'bg-red-500' : 'bg-yellow-500'}`}
         >
@@ -306,25 +310,25 @@ const RegistroUsuarioModal = ({ idEditar, Editar = false, onClose, onRegister }:
   // Usa useEffect para manejar la animación de entrada y salida del modal
   useEffect(() => {
     const iniciarModal = async () => {
-      let nuevosModulos= await ObtenerModulos();
+      let nuevosModulos = await ObtenerModulos();
       // Si el modal se está abriendo, lo hacemos visible después de un pequeño delay
       if (Editar) {
-        let permisos:Permiso[] = await ObtenerPorID();
+        let permisos: Permiso[] = await ObtenerPorID();
 
-        console.log("nuevosModulos", modulos);
         for (let modulo of nuevosModulos) {
           const tienePermiso = permisos?.some(item => item.idModulo == modulo._id);
 
-          console.log(tienePermiso);
           modulo.seleccionado = tienePermiso
         }
-        console.log(nuevosModulos);
         setModulos(nuevosModulos);
       }
     }
+    
     iniciarModal();
     // Agrega una clase 'modal-open' al body para deshabilitar el scroll de fondo
     document.body.classList.add('overflow-hidden');
+
+    
     return () => {
       // Limpia la clase cuando el componente se desmonte (el modal se cierre)
       document.body.classList.remove('overflow-hidden');
@@ -377,7 +381,9 @@ const RegistroUsuarioModal = ({ idEditar, Editar = false, onClose, onRegister }:
       if (contentType && contentType.includes('application/json')) {
         const data = await response.json();
         setModulos(data.data);
-        setModulosPadres(data.data.filter((modulo: Modulo) => modulo.idPadre == null));
+        let padres = data.data.filter((modulo: Modulo) => modulo.idPadre == null);
+        setModulosPadres(padres);
+        setTab(padres[0]?._id || '');
         return data.data;
       } else {
         const text = await response.text();
@@ -479,7 +485,7 @@ const RegistroUsuarioModal = ({ idEditar, Editar = false, onClose, onRegister }:
       }}
     >
       <div
-        className={`w-full max-w-xl rounded-2xl bg-white p-8 shadow-2xl transform transition-transform duration-300 ${modalVisible ? 'scale-100' : 'scale-95'}`}
+        className={`border-2 border-blue-500 w-full max-w-xl rounded-2xl bg-white p-8 shadow-2xl transform transition-transform duration-300 ${modalVisible ? 'scale-100' : 'scale-95'}`}
       >
         <div className="flex items-center justify-between">
           <h3 className="text-2xl font-bold text-gray-900">Registrar Nuevo Usuario</h3>
@@ -489,53 +495,55 @@ const RegistroUsuarioModal = ({ idEditar, Editar = false, onClose, onRegister }:
             </svg>
           </button>
         </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Nombre del rol</label>
-            <input
-              type="text"
-              name="Nombre"
-              value={formState.Nombre}
-              onChange={handleInputChange}
-              required
-              className="mt-1 w-full rounded-md border-gray-300 bg-gray-50 p-2 text-gray-900 focus:border-blue-500 focus:ring-blue-500"
-            />
-          </div>
-          <div className="tab">
-            {modulosPadres.map((modulo: Modulo, index) => (
-              <button key={modulo._id} className="tablinks" type='button' onClick={() => setTab(modulo._id!)}>{modulo.Nombre}</button>
-            ))}
-          </div>
-          <div className="tabcontent">
-            {
-              modulos.map((modulo: Modulo, index) => (
-                <div hidden={modulo.idPadre != tab} key={modulo._id} className="flex items-center justify-between mb-2">
-                  <h4>{modulo.Nombre}</h4>
-                  <ToggleSwitch enabled={modulo.seleccionado} onChange={() => SeleccionarModulo(index)} />
-                </div>
-              ))
-            }
-          </div>
+        <div className='mt-4 mb-4'>
 
-          <div className="flex justify-end space-x-2 pt-2">
-            <button
-              type="button"
-              onClick={handleClose}
-              className="rounded-md bg-gray-300 px-4 py-2 text-gray-800 transition-colors duration-200 hover:bg-gray-400"
-            >
-              Cancelar
-            </button>
-            <button
-              type="submit"
-              className="rounded-md bg-blue-600 px-4 py-2 text-white transition-colors duration-200 hover:bg-blue-700"
-              onClick={Guardar}
-            >
-              Registrar
-            </button>
-          </div>
+          <label className="block text-sm font-medium text-gray-700">Nombre del rol</label>
+          <input
+            type="text"
+            name="Nombre"
+            value={formState.Nombre}
+            onChange={handleInputChange}
+            required
+            className="mt-1 w-full rounded-md border-gray-300 bg-gray-50 p-2 text-gray-900 focus:border-blue-500 focus:ring-blue-500"
+          />
+        </div>
+        <div className="tab">
+          {modulosPadres.map((modulo: Modulo, index) => (
+            <button key={modulo._id} className={`tablinks ${tab == modulo._id? " bg-blue-500 text-white":""}`} type='button' onClick={() => setTab(modulo._id!)}>{modulo.Nombre}</button>
+
+          ))}
+        </div>
+        <div className="tabcontent">
+          {
+            modulos.map((modulo: Modulo, index) => (
+              <div hidden={modulo.idPadre != tab} key={modulo._id} className="flex items-center justify-between mb-2">
+                <h4>{modulo.Nombre}</h4>
+                <ToggleSwitch enabled={modulo.seleccionado} onChange={() => SeleccionarModulo(index)} />
+              </div>
+            ))
+          }
+        </div>
+
+        <div className="flex justify-end space-x-2 pt-2">
+          <button
+            type="button"
+            onClick={handleClose}
+            className="rounded-md bg-gray-300 px-4 py-2 text-gray-800 transition-colors duration-200 hover:bg-gray-400"
+          >
+            Cancelar
+          </button>
+          <button
+            type="submit"
+            className="rounded-md bg-blue-600 px-4 py-2 text-white transition-colors duration-200 hover:bg-blue-700"
+            onClick={Guardar}
+          >
+            Registrar
+          </button>
+        </div>
       </div>
-      <Cargando isLoading={isLoading}  />
+      <Cargando isLoading={isLoading} />
       {notification.visible && (
-        <div 
+        <div
           className={`fixed right-4 top-4 z-[999] flex items-center rounded-lg p-4 text-white shadow-lg transition-transform duration-300 transform ${notification.visible ? 'translate-x-0 opacity-100' : 'translate-x-full opacity-0'}
             ${notification.type === 'success' ? 'bg-green-500' : notification.type === 'error' ? 'bg-red-500' : 'bg-yellow-500'}`}
         >
