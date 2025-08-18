@@ -72,7 +72,7 @@ export default function AdministracionLayout({ children }: { children: React.Rea
               currentPath={pathname}
             />
             <MenuItem 
-              href="/dashboard/administracion/tipos-de-documentos" 
+              href="/dashboard/administracion/tipos-documentos" 
               icon="📄" 
               text="Tipos de Documentos"
               currentPath={pathname}

@@ -65,7 +65,7 @@ const ActividadesListado = () => {
       }
       const contentType = response.headers.get('content-type');
       if (contentType && contentType.includes('application/json')) {
-        const data: Actividad[] = await response.json();
+        const data: Actividad[] = await response.json();        
         setActividades(data);
       } else {
         const text = await response.text();
@@ -300,7 +300,6 @@ const ActividadesListado = () => {
         <table className="min-w-full table-auto">
           <thead>
             <tr className="bg-gray-200 text-left text-gray-700">
-              <th className="px-4 py-2">ID</th>
               <th className="px-4 py-2">Nombre</th>
               <th className="px-4 py-2">Descripción</th>
               <th className="px-4 py-2">Frecuencia</th>
@@ -310,7 +309,6 @@ const ActividadesListado = () => {
           <tbody>
             {filteredActividades.map(actividad => (
               <tr key={actividad._id} className="border-t border-gray-200 hover:bg-gray-50">
-                <td className="px-4 py-2">{actividad._id}</td>
                 <td className="px-4 py-2">{actividad.nombre}</td>
                 <td className="px-4 py-2">{actividad.descripcion}</td>
                 <td className="px-4 py-2">{actividad.frecuencia}</td>
