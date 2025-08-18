@@ -28,3 +28,40 @@ export interface Permiso {
   idTipoUsuario?: string | null;
   idModulo: string;
 }
+export interface RegimenFiscal {
+  _id?: string;
+  Nombre?: string;
+  Clave: number;
+}
+export interface Cliente {
+  _id?: string;
+  Estado?: number;
+
+  RazonSocial: string;
+  RFC: string;
+  RegimenFiscal?: number
+  CodigoPostal?: string;
+  Direccion?: string;
+
+  ClasificacionComercial?: string;
+  OrigenContacto?: string;
+  RecomendadoPor?: string;
+  ValorGrupo?: string;
+
+  CanalPreferente?: string;
+  CorreoElectronico?: string;
+  CorreoInstitucional?: string;
+  NumeroTelefono?: string;
+  WhatsApp?: string;
+
+  Observaciones?: string;
+
+  Servicios?: string[];
+
+  idUsuarioCreacion?: string;
+  idGrupoEmpresarial?: string;
+
+  FechaCreacion?: Date;
+  FechaActualizacion?: Date;
+  FechaEliminacion?: Date;
+}

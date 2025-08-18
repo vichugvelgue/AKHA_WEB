@@ -21,7 +21,7 @@ interface RegistroUsuarioModalProps {
 }
 
 // Componente para la vista de CRUD de Usuarios
-const UsuariosCRUD = () => {
+const TiposUsuarioCRUD = () => {
   // Inicializa el router para la navegación
   const router = useRouter();
   const { notification, showNotification, hideNotification } = useNotification();
@@ -86,7 +86,6 @@ const UsuariosCRUD = () => {
     setShowConfirm(false);
   }
   const confirm = () => {
-    debugger
     if (idTipoUsuarioToEdit !== "") {
       if (operacion == "eliminar") {
         EliminarTipoUsuario(idTipoUsuarioToEdit);
@@ -535,7 +534,7 @@ const RegistroUsuarioModal = ({ idEditar, Editar = false, onClose, onRegister }:
 export default function UsuariosPage() {
   return (
     <div className="p-10 flex-1 overflow-auto">
-      <UsuariosCRUD />
+      <TiposUsuarioCRUD />
     </div>
   );
 }
