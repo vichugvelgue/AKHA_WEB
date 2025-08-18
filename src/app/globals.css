@@ -18,6 +18,9 @@
     --foreground: #ededed;
   }
 }
+input,select,textarea {
+  border: 1px solid #ccc;
+}
 
 body {
   background: var(--background);

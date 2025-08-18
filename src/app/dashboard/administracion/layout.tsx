@@ -78,7 +78,7 @@ export default function AdministracionLayout({ children }: { children: React.Rea
               currentPath={pathname}
             />
             <MenuItem 
-              href="/dashboard/administracion/razones-sociales" 
+              href="/dashboard/administracion/razonessociales" 
               icon="🏢" 
               text="Razones Sociales"
               currentPath={pathname}
