@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, ChangeEventHandler } from 'react';
-
+import { API_BASE_URL } from '@/src/utils/constantes';
 // Interfaz para el tipo de datos de un usuario
 interface User {
   _id: string;
@@ -50,7 +50,6 @@ const initialSearchState: SearchCriteria = {
 };
 
 // URL base de tus APIs
-const API_BASE_URL = 'http://localhost:5000';
 const ENDPOINT_BASE = '/usuarios';
 const ENDPOINT_BUSCAR = '/Buscar';
 const ENDPOINT_TIPOS = '/TiposUsuario/ObternerListadoTiposUsuario';

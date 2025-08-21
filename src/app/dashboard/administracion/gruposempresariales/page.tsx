@@ -10,7 +10,7 @@ import { useNotification } from '@/src/hooks/useNotifications';
 import { Modulo, Permiso, GrupoEmpresarial } from '@/src/Interfaces/Interfaces';
 import GruposEmpresarialesAgregar from '@/src/app/dashboard/administracion/gruposempresariales/Agregar';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000';
+import { API_BASE_URL } from '@/src/utils/constantes';
 
 
 // Definimos una interfaz para las propiedades del modal de registro

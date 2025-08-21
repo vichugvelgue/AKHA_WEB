@@ -5,6 +5,7 @@
 import { useState, useMemo, useEffect, ChangeEventHandler } from 'react';
 // Importamos el custom hook para las notificaciones con la ruta corregida
 import { useNotification } from '@/src/hooks/useNotifications';
+import { API_BASE_URL } from '@/src/utils/constantes';
 
 // Interfaz para el tipo de datos de un tipo de documento
 interface TipoDocumento {
@@ -25,8 +26,6 @@ const initialFormState: TipoDocumentoFormState = {
   Descripcion: '',
 };
 
-// URL base de tu API de NestJS
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3000';
 // Endpoint corregido
 const ENDPOINT_BASE = '/tiposdocumentos';
 

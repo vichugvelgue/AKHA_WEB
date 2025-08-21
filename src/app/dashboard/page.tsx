@@ -5,6 +5,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation'; // Importamos useRouter para la redirección
+import { ObtenerSesionUsuario } from '@/src/utils/constantes';
 
 // Datos de los módulos para generar los botones dinámicamente
 const modulos = [
@@ -17,8 +18,11 @@ const modulos = [
   { href: '/dashboard/reportes', icon: '📈', text: 'Reportes' },
 ];
 
+
 export default function DashboardPage() {
   const router = useRouter();
+  const sesion = ObtenerSesionUsuario();
+
 
   // En una aplicación real, obtendrías el nombre del usuario de un estado global o de una API.
   // Aquí, lo simulamos para que veas la funcionalidad.
@@ -39,7 +43,7 @@ export default function DashboardPage() {
       <div className="absolute right-8 top-8 z-20 flex items-center space-x-4">
         {/* Se ajustaron los colores del texto para que se vean en el fondo claro */}
         <p className="text-lg text-gray-700">
-          Bienvenido, <span className="font-bold text-gray-900">{nombreUsuario}</span>.
+          Bienvenido, <span className="font-bold text-gray-900">{sesion.nombreUsuario}</span>.
         </p>
         <button
           onClick={handleLogout}
