@@ -50,6 +50,7 @@ const ENDPOINT_SERVICIOS = '/servicios';
 const ENDPOINT_ACTIVIDADES = '/actividades';
 const ENDPOINT_BUSCAR = '/Buscar';
 const ENDPOINT_DESACTIVAR = '/servicios/Desactivar';
+const ENDPOINT_ACTIVAR = '/servicios/Activar';
 
 
 // Componente principal para la gestión de servicios
@@ -73,6 +74,10 @@ const ServiceList = () => {
   const [isDeactivateModalOpen, setIsDeactivateModalOpen] = useState(false);
 const [isDeactivateModalVisible, setIsDeactivateModalVisible] = useState(false);
 const [serviceIdToDeactivate, setServiceIdToDeactivate] = useState<string | null>(null);
+
+const [isActivateModalOpen, setIsActivateModalOpen] = useState(false);
+const [isActivateModalVisible, setIsActivateModalVisible] = useState(false);
+const [serviceIdToActivate, setServiceIdToActivate] = useState<string | null>(null);
 
 
   const [notification, setNotification] = useState<{ message: string; type: 'success' | 'error' | null }>({
@@ -266,6 +271,58 @@ const confirmDeactivateService = async () => {
   } finally {
     setIsLoading(false);
     closeDeactivateModal();
+  }
+};
+
+const openActivateModal = (id: string) => {
+  setServiceIdToActivate(id);
+  setIsActivateModalOpen(true);
+  setTimeout(() => setIsActivateModalVisible(true), 10);
+};
+
+const closeActivateModal = () => {
+  setIsActivateModalVisible(false);
+  setTimeout(() => {
+    setIsActivateModalOpen(false);
+    setServiceIdToActivate(null);
+  }, 300);
+};
+
+const confirmActivateService = async () => {
+  if (!serviceIdToActivate) return;
+
+  setIsLoading(true);
+  setError(null);
+  try {
+    const response = await fetch(`${API_BASE_URL}${ENDPOINT_ACTIVAR}/${serviceIdToActivate}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+    });
+    const result = await response.json();
+
+    if (!response.ok || result?.error) {
+      throw new Error(result?.message || `Error: ${response.statusText}`);
+    }
+
+    showNotification('Servicio acivado correctamente.', 'success');
+
+    // Refresca respetando los filtros actuales (usar Buscar si lo tienes implementado)
+    const estadoNum =
+      appliedFilterStatus === Estatus.Activo ? 1 :
+      appliedFilterStatus === Estatus.Desactivado ? 2 : 3;
+
+    // Si ya implementaste fetchServicesBuscar(params):
+    await fetchServicesBuscar?.({ Nombre: appliedFilterName || "", Estado: estadoNum })
+      // si no existe, cae al listado base con filtro local
+      ?? fetchServices(appliedFilterName, appliedFilterStatus);
+
+  } catch (err: any) {
+    console.error('Error al activar el servicio:', err);
+    setError('Hubo un error al activar el servicio.');
+    showNotification(`Error al activar el servicio: ${err.message}`, 'error');
+  } finally {
+    setIsLoading(false);
+    closeActivateModal();
   }
 };
 
@@ -576,6 +633,15 @@ const confirmDeactivateService = async () => {
                         Desactivar
                         </button>
                     )}
+                    {service.Estado === Estatus.Desactivado && (
+                        <button
+                        onClick={() => openActivateModal(service._id)}
+                        className="rounded-md bg-green-600 px-4 py-1 text-sm text-white transition-colors duration-200 hover:bg-green-700"
+                        title="Activar servicio"
+                        >
+                        Activar
+                        </button>
+                    )}
                     <button
                       onClick={() => handleDelete(service._id)}
                       className="rounded-md bg-red-600 px-4 py-1 text-sm text-white transition-colors duration-200 hover:bg-red-700"
@@ -636,6 +702,34 @@ const confirmDeactivateService = async () => {
     </div>
   </div>
 )}
+
+{isActivateModalOpen && (
+  <div
+    className={`fixed inset-0 z-50 flex items-center justify-center transition-all duration-300 ${isActivateModalVisible ? 'opacity-100 backdrop-blur-sm' : 'opacity-0'}`}
+    style={{ backgroundColor: 'rgba(255, 255, 255, 0.60)' }}
+  >
+    <div className={`w-full max-w-sm rounded-2xl bg-white p-8 shadow-2xl transform transition-transform duration-300 border-2 border-green-500 ${isActivateModalVisible ? 'scale-100' : 'scale-95'}`}>
+      <p className="text-lg font-semibold text-gray-800">
+        ¿Estás seguro de que quieres activar este servicio?
+      </p>
+      <div className="mt-4 flex justify-end space-x-2">
+        <button
+          onClick={closeActivateModal}
+          className="rounded-md bg-gray-300 px-4 py-2 text-gray-800 transition-colors hover:bg-gray-400"
+        >
+          Cancelar
+        </button>
+        <button
+          onClick={confirmActivateService}
+          className="rounded-md bg-green-600 px-4 py-2 text-white transition-colors hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-300"
+        >
+          Activar
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+
 
       
       {/* Modal para crear o editar servicio */}
