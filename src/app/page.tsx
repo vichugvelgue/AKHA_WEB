@@ -6,28 +6,53 @@ import Image from 'next/image';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import React from 'react';
+import { API_BASE_URL } from '@/src/utils/constantes';
+
 
 // Este es el componente de la página de inicio de sesión.
 export default function LoginPage() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [correo, setCorreo] = useState('');
+  const [contrasena, setContrasena] = useState('');
   const [error, setError] = useState('');
   const router = useRouter();
 
   // Función para manejar el envío del formulario
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async(e: React.FormEvent) => {
     e.preventDefault();
     setError('');
 
-    // En un escenario real, harías una llamada a tu API para autenticar.
-    // Aquí, simulamos un inicio de sesión exitoso.
-    if (email !== '' && password !== '') {
-      console.log('Login exitoso. Redirigiendo...');
-      // Redirigimos al usuario a la página principal del dashboard
-      router.push('/dashboard');
-    } else {
-      setError('Credenciales incorrectas. Por favor, inténtalo de nuevo.');
+        // router.push('/dashboard');
+    if (!correo || !contrasena ) {
+      setError('Por favor, ingresa tu correo electrónico y contraseña.');
+      return;
     }
+
+    try{
+      const response = await fetch(`${API_BASE_URL}/IniciarSesion`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          Correo: correo,
+          Contrasena: contrasena,
+        }),
+      });
+
+      const data = await response.json();
+      if (response.ok) {
+        localStorage.setItem('idUsuario', data.data._id);
+        localStorage.setItem('NombreUsuario', (data.data.NombreCompleto));
+        localStorage.setItem('Permisos', JSON.stringify(data.data.Permisos));
+        router.push('/dashboard');
+      } else {
+        setError(data.mensaje || 'Error en el inicio de sesión');
+      }
+    }catch(error){
+      setError('Error en el servidor. Por favor, inténtalo de nuevo.');
+    }
+    
+
   };
 
   return (
@@ -85,8 +110,8 @@ export default function LoginPage() {
                 type="email"
                 autoComplete="email"
                 required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                value={correo}
+                onChange={(e) => setCorreo(e.target.value)}
                 className="w-full rounded-md border border-gray-300 p-3 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-gray-900"
               />
             </div>
@@ -105,8 +130,8 @@ export default function LoginPage() {
                 type="password"
                 autoComplete="current-password"
                 required
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                value={contrasena}
+                onChange={(e) => setContrasena(e.target.value)}
                 className="w-full rounded-md border border-gray-300 p-3 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-gray-900"
               />
             </div>

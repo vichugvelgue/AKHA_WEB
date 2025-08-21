@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, ChangeEventHandler } from 'react';
+import { API_BASE_URL } from '@/src/utils/constantes';
 
 // Enum para los estados de un servicio
 export enum Estatus {
@@ -45,7 +46,6 @@ const initialFormState: Omit<Servicio, 'Estado'> = {
 };
 
 // URL base de tus APIs
-const API_BASE_URL = 'http://localhost:5000';
 const ENDPOINT_SERVICIOS = '/servicios';
 const ENDPOINT_ACTIVIDADES = '/actividades';
 const ENDPOINT_BUSCAR = '/Buscar';
