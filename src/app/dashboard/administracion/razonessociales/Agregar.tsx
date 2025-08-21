@@ -58,7 +58,6 @@ const RazonesSocialesAgregar = ({ idEditar, Editar = false, onClose, onRegister 
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    console.log({ idEditar, Editar });
     if (idEditar) {
       setFormState({
         ...formState,
