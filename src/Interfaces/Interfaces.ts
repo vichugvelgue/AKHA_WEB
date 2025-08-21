@@ -65,3 +65,17 @@ export interface Cliente {
   FechaActualizacion?: Date;
   FechaEliminacion?: Date;
 }
+export interface GrupoEmpresarial {
+  _id?: string;
+  Estado?: number;
+
+  Nombre?: string;
+  Responsable?: string
+  idResponsable?: string|null;
+  Contacto?: string
+
+  Integrantes?: Cliente[];
+
+  Observaciones?: string;
+  FechaCreacion?: Date;
+}
