@@ -2,33 +2,41 @@
 
 import React, { useState, useEffect, ChangeEventHandler } from 'react';
 
-// Interfaz para el tipo de datos de un usuario
+// Enum fijo para los tipos de usuario, coincidiendo con la API.
+export enum TipoEmpleado {
+  Administrador = 0,
+  Contador = 1,
+  Supervisor = 2,
+  Cobranza = 3,
+  Auxiliar = 4,
+}
+
+// Interfaz para el tipo de datos de un usuario.
+// idTipoUsuario ahora usa un tipo numérico para coincidir con el enum.
 interface User {
   _id: string;
   Nombres: string;
   Apellidos: string;
   Correo: string;
-  idTipoUsuario: string;
+  idTipoUsuario: TipoEmpleado;
 }
 
-// Interfaz para los tipos de usuario
-interface UserType {
-  _id: string;
-  Nombre: string;
-}
-
-// Interfaz para el estado del formulario de usuario
-interface UserFormState extends Omit<User, '_id'> {
+// Interfaz para el estado del formulario de usuario.
+// idTipoUsuario ahora es numérico, pero permitimos un string vacío
+// para el estado inicial del select.
+interface UserFormState extends Omit<User, '_id' | 'idTipoUsuario'> {
   _id: string | null;
   Contrasena?: string;
   ConfirmarContrasena?: string;
+  idTipoUsuario: number | '';
 }
 
-// Interfaz para los criterios de búsqueda
+// Interfaz para los criterios de búsqueda.
+// idTipoUsuario ahora es numérico o una cadena vacía.
 interface SearchCriteria {
   Nombres: string;
   Correo: string;
-  idTipoUsuario: string;
+  idTipoUsuario: number | '';
 }
 
 // Valores iniciales para el formulario
@@ -53,12 +61,10 @@ const initialSearchState: SearchCriteria = {
 const API_BASE_URL = 'http://localhost:5000';
 const ENDPOINT_BASE = '/usuarios';
 const ENDPOINT_BUSCAR = '/Buscar';
-const ENDPOINT_TIPOS = '/TiposUsuario/ObternerListadoTiposUsuario';
 
 // Componente principal para la gestión de usuarios
 const UserList = () => {
   const [users, setUsers] = useState<User[]>([]);
-  const [userTypes, setUserTypes] = useState<UserType[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -87,7 +93,7 @@ const UserList = () => {
     setNotification({ message, type });
     setTimeout(() => {
       setNotification({ message: '', type: null });
-    }, 5000); // La notificación desaparece después de 5 segundos
+    }, 5000);
   };
 
   // Función para obtener los usuarios de la API, ahora acepta parámetros de búsqueda
@@ -120,40 +126,30 @@ const UserList = () => {
     }
   };
 
-  // Función para obtener los tipos de usuario de la API
-  const fetchUserTypes = async () => {
-    try {
-      const response = await fetch(`${API_BASE_URL}${ENDPOINT_TIPOS}`);
-      const result = await response.json();
-
-      if (!response.ok || !Array.isArray(result.data)) {
-        throw new Error(result.message || 'La respuesta de la API de tipos de usuario no es un array válido.');
-      }
-      setUserTypes(result.data);
-    } catch (err: any) {
-      console.error('Error al obtener los tipos de usuario:', err);
-      showNotification('Error al cargar los tipos de usuario.', 'error');
-    }
-  };
-
-  // Carga los usuarios y tipos de usuario al montar el componente
+  // Carga los usuarios al montar el componente
   useEffect(() => {
-    fetchUsers(initialSearchState); // Carga la lista completa al inicio
-    fetchUserTypes();
+    fetchUsers(initialSearchState);
   }, []);
 
-  // Maneja los cambios en los campos del formulario
+  // Maneja los cambios en los campos del formulario.
+  // Es crucial convertir el valor del select a número.
   const handleFormChange: ChangeEventHandler<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement> = (e) => {
     const { name, value } = e.target;
-    setFormState(prev => ({ ...prev, [name]: value }));
+    // Convierte el valor a número si el campo es idTipoUsuario.
+    const finalValue = name === 'idTipoUsuario' ? Number(value) : value;
+
+    setFormState(prev => ({ ...prev, [name]: finalValue }));
     // Limpiamos el error del campo cuando el usuario comienza a escribir
     setFormErrors(prev => ({ ...prev, [name]: '' }));
   };
 
-  // Maneja los cambios en los campos del filtro de búsqueda
+  // Maneja los cambios en los campos del filtro de búsqueda.
+  // Es crucial convertir el valor a número y manejar el caso de string vacío.
   const handleSearchChange: ChangeEventHandler<HTMLInputElement | HTMLSelectElement> = (e) => {
     const { name, value } = e.target;
-    setSearchCriteria(prev => ({ ...prev, [name]: value }));
+    // Convierte el valor a número para la búsqueda, excepto si el valor es un string vacío.
+    const finalValue = value === '' ? '' : Number(value);
+    setSearchCriteria(prev => ({ ...prev, [name]: finalValue }));
   };
 
   // Lógica de validación
@@ -166,18 +162,17 @@ const UserList = () => {
     } else if (!/\S+@\S+\.\S+/.test(formState.Correo)) {
       errors.Correo = 'El formato del correo no es válido.';
     }
-    if (!formState.idTipoUsuario) errors.idTipoUsuario = 'El tipo de usuario es obligatorio.';
+   // if (formState.idTipoUsuario === '') errors.idTipoUsuario = 'El tipo de usuario es obligatorio.';
     
-    // Validación de contraseña: si el campo no está vacío, validamos
+    // Validación de contraseña
     if (formState.Contrasena && formState.Contrasena.trim() !== '') {
         if (formState.Contrasena.length < 6) {
-            errors.Contrasena = 'La contraseña debe tener al menos 6 caracteres.';
+          errors.Contrasena = 'La contraseña debe tener al menos 6 caracteres.';
         }
         if (formState.Contrasena !== formState.ConfirmarContrasena) {
-            errors.ConfirmarContrasena = 'Las contraseñas no coinciden.';
+          errors.ConfirmarContrasena = 'Las contraseñas no coinciden.';
         }
     } else if (!editingUser) {
-      // Si estamos creando un nuevo usuario, la contraseña es obligatoria.
       errors.Contrasena = 'La contraseña es obligatoria.';
     }
 
@@ -216,7 +211,7 @@ const UserList = () => {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(dataToSave),
         });
-      }            
+      }          
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.message || `Error: ${response.statusText}`);
@@ -244,9 +239,9 @@ const UserList = () => {
     fetchUsers();
   };
 
-
   const handleOpenFormModal = (user: User | null = null) => {
     setEditingUser(user);
+    // Asigna el valor del enum directamente al estado
     setFormState(user ? { ...user, _id: user._id, Contrasena: '', ConfirmarContrasena: '' } : initialFormState);
     setFormErrors({});
     setIsFormModalOpen(true);
@@ -314,6 +309,22 @@ const UserList = () => {
       document.body.classList.remove('overflow-hidden');
     };
   }, [isFormModalOpen, isConfirmModalOpen]);
+  
+ const getRoleName = (value: number): string => {
+  // El enum en TypeScript crea un "mapeo inverso"
+  // que te permite acceder al nombre directamente por su valor numérico.
+  const roleName = TipoEmpleado[value];
+
+  // Si roleName no es 'undefined', significa que se encontró un nombre.
+  if (roleName !== undefined) {
+    return roleName;
+  }
+  
+  // Si no se encontró un nombre (porque el valor no existe), retorna 'Desconocido'.
+  return 'Desconocido';
+};
+  
+
 
   return (
     <div className="space-y-6 p-4">
@@ -371,14 +382,20 @@ const UserList = () => {
             <select
               id="search-idTipoUsuario"
               name="idTipoUsuario"
-              value={searchCriteria.idTipoUsuario}
+              // Convertimos el valor numérico del estado a string para el select.
+              // El select siempre espera un valor de tipo string.
+              value={searchCriteria.idTipoUsuario.toString()}
               onChange={handleSearchChange}
               className="mt-1 block w-full rounded-md border-gray-300 p-2 shadow-sm focus:border-blue-500 focus:ring-blue-500"
             >
               <option value="">Todos</option>
-              {userTypes.map(type => (
-                <option key={type._id} value={type._id}>{type.Nombre}</option>
-              ))}
+              {Object.keys(TipoEmpleado)
+                .filter(key => isNaN(Number(key)))
+                .map((key) => (
+                  <option key={key} value={TipoEmpleado[key as keyof typeof TipoEmpleado]}>
+                    {key}
+                  </option>
+                ))}
             </select>
           </div>
         </div>
@@ -432,7 +449,7 @@ const UserList = () => {
                   <td className="px-4 py-2">{user.Apellidos}</td>
                   <td className="px-4 py-2">{user.Correo}</td>
                   <td className="px-4 py-2">
-                    {userTypes.find(type => type._id === user.idTipoUsuario)?.Nombre || 'Desconocido'}
+                    {getRoleName(user.idTipoUsuario)}
                   </td>
                   <td className="px-4 py-2 flex space-x-2">
                     <button onClick={() => handleOpenFormModal(user)} className="rounded-md bg-blue-600 px-4 py-1 text-sm text-white transition-colors duration-200 hover:bg-blue-700">
@@ -544,9 +561,14 @@ const UserList = () => {
                   className={`mt-1 block w-full rounded-md border p-2 shadow-sm focus:border-blue-500 focus:ring-blue-500 ${formErrors.idTipoUsuario ? 'border-red-500' : 'border-gray-300'}`}
                 >
                   <option value="">Selecciona un tipo</option>
-                  {userTypes.map(type => (
-                    <option key={type._id} value={type._id}>{type.Nombre}</option>
-                  ))}
+                  {/* Se mapea sobre las claves del enum para obtener los nombres */}
+                  {Object.keys(TipoEmpleado)
+                    .filter(key => isNaN(Number(key)))
+                    .map((key) => (
+                      <option key={key} value={TipoEmpleado[key as keyof typeof TipoEmpleado]}>
+                        {key}
+                      </option>
+                    ))}
                 </select>
                 {formErrors.idTipoUsuario && <p className="mt-1 text-sm text-red-600">{formErrors.idTipoUsuario}</p>}
               </div>
@@ -580,13 +602,6 @@ const UserList = () => {
               </div>
             </div>
             <div className="mt-6 flex justify-end space-x-2">
-              <button
-                onClick={handleCloseFormModal}
-                className="rounded-md bg-gray-300 px-4 py-2 text-gray-800 transition-colors hover:bg-gray-400"
-                disabled={isSaving}
-              >
-                Cancelar
-              </button>
               <button
                 onClick={handleSaveUser}
                 className="rounded-md bg-blue-600 px-4 py-2 text-white transition-colors hover:bg-blue-700"

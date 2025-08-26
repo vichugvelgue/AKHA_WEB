@@ -60,6 +60,7 @@ export interface Cliente {
 
   idUsuarioCreacion?: string;
   idGrupoEmpresarial?: string;
+  idContador?: string;
 
   FechaCreacion?: Date;
   FechaActualizacion?: Date;
