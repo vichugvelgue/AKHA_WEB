@@ -7,10 +7,10 @@ import { useRouter } from 'next/navigation'; // Importa el hook useRouter
 import ToggleSwitch from "@/src/hooks/ToggleSwitch";
 import Cargando from '@/src/hooks/Cargando';
 import { useNotification } from '@/src/hooks/useNotifications';
-import { Modulo, Permiso, TipoUsuario, Cliente } from '@/src/Interfaces/Interfaces';
-import ContribuyentesAgregar from '@/src/app/dashboard/administracion/contribuyentes/Agregar';
+import { Modulo, Permiso, GrupoEmpresarial } from '@/src/Interfaces/Interfaces';
+import GruposEmpresarialesAgregar from '@/src/app/dashboard/administracion/gruposempresariales/Agregar';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000';
+import { API_BASE_URL } from '@/src/utils/constantes';
 
 
 // Definimos una interfaz para las propiedades del modal de registro
@@ -22,12 +22,12 @@ interface ModalProps {
 }
 
 // Componente para la vista de CRUD de Usuarios
-const RazonesSocialesCRUD = () => {
+const GruposEmpresarialesCRUD = () => {
   // Inicializa el router para la navegación
   const router = useRouter();
   const { notification, showNotification, hideNotification } = useNotification();
 
-  const [tiposUsuarios, setTiposUsuarios] = useState<Cliente[]>([]);
+  const [ListaGrupos, setTiposUsuarios] = useState<GrupoEmpresarial[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [idEditar, setIdEditar] = useState<string>("");
@@ -48,7 +48,7 @@ const RazonesSocialesCRUD = () => {
     setIsLoading(true);
     setTiposUsuarios([]);
     try {
-      const response = await fetch(`${API_BASE_URL}/clientes/ListarClientes`);
+      const response = await fetch(`${API_BASE_URL}/gruposempresariales/ListarGrupos`);
       if (!response.ok) {
         throw new Error(`Error: ${response.statusText}`);
       }
@@ -73,15 +73,14 @@ const RazonesSocialesCRUD = () => {
     setIsLoading(true);
     setTiposUsuarios([]);
     try {
-      const response = await fetch(`${API_BASE_URL}/clientes/BuscarClientes`, {
+      const response = await fetch(`${API_BASE_URL}/gruposempresariales/BuscarGrupo`,{
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          RazonSocial: NombreBuscar,
-          RFC: RfcBuscar,
-        } as Cliente),
+          Nombre: NombreBuscar,
+        } as GrupoEmpresarial),
       });
       if (!response.ok) {
         throw new Error(`Error: ${response.statusText}`);
@@ -137,17 +136,18 @@ const RazonesSocialesCRUD = () => {
 
   const DesactivarTipoUsuario = async (id: string = "") => {
     try {
-      const response = await fetch(`${API_BASE_URL}/Clientes/DesactivarCliente/${id}`, {
+      const response = await fetch(`${API_BASE_URL}/gruposempresariales/DesactivarGrupo/${id}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
       });
-      if (!response.ok) {
-        throw new Error(`Error: ${response.statusText}`);
-      }
       const data = await response.json();
-      showNotification(data.mensaje, "success");
+      if (!response.ok) {
+        showNotification(data.mensaje, "error");
+      } else {
+        showNotification(data.mensaje, "success");
+      }
       Listar();
     } catch (err: any) {
       showNotification(err.message || 'Hubo un error al desactivar/activar el tipo de usuario. Verifica que la API esté corriendo y responda correctamente.', "error");
@@ -156,17 +156,18 @@ const RazonesSocialesCRUD = () => {
 
   const EliminarTipoUsuario = async (id: string = "") => {
     try {
-      const response = await fetch(`${API_BASE_URL}/Clientes/EliminarCliente/${id}`, {
+      const response = await fetch(`${API_BASE_URL}/gruposempresariales/EliminarGrupo/${id}`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
         },
       });
-      if (!response.ok) {
-        throw new Error(`Error: ${response.statusText}`);
-      }
       const data = await response.json();
-      showNotification(data.mensaje, "success");
+      if (!response.ok) {
+        showNotification(data.mensaje, "error");
+      } else {
+        showNotification(data.mensaje, "success");
+      }
       Listar();
     } catch (err: any) {
       showNotification(err.message || 'Hubo un error al desactivar/activar el tipo de usuario. Verifica que la API esté corriendo y responda correctamente.', "error");
@@ -195,16 +196,15 @@ const RazonesSocialesCRUD = () => {
     setIsModalOpen(false);
     Listar();
   };
-
+  
   if (isModalOpen) {
-    console.log({ idEditar, editar });
-    return (<ContribuyentesAgregar idEditar={idEditar} Editar={editar} onClose={handleCloceModal} onRegister={handleRegister} />)
+    return (<GruposEmpresarialesAgregar idEditar={idEditar} Editar={editar} onClose={handleCloceModal} onRegister={handleRegister} />)
   }
 
   return (
     <div className="space-y-6 p-4">
       <div className="flex items-center justify-between">
-        <h2 className="text-3xl font-extrabold text-blue-900">Gestión de Contribuyentes</h2>
+        <h2 className="text-3xl font-extrabold text-blue-900">Gestión de Grupos Empresariales</h2>
 
         <div className="flex space-x-4">
           <button
@@ -220,13 +220,13 @@ const RazonesSocialesCRUD = () => {
             onClick={handleOpenModal}
             className="rounded-lg bg-yellow-400 px-6 py-2 text-gray-900 font-semibold transition-colors duration-200 hover:bg-yellow-500"
           >
-            Nuevo Contribuyente
+            Crear Nuevo Grupo empresarial
           </button>
         </div>
       </div>
-      <div className="rounded-xl bg-white p-6 shadow-md">
+<div className="rounded-xl bg-white p-6 shadow-md">
         <div className="flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-6">
-          <div className="w-full sm:w-1/3">
+          <div className="w-full sm:w-2/3">
             <label htmlFor="nombreFilter" className="block text-sm font-medium text-gray-700">
               Filtrar por Nombre
             </label>
@@ -240,25 +240,12 @@ const RazonesSocialesCRUD = () => {
             />
           </div>
           <div className="w-full sm:w-1/3">
-            <label htmlFor="nombreFilter" className="block text-sm font-medium text-gray-700">
-              Filtrar por RFC
-            </label>
-            <input
-              type="text"
-              id="RfcBuscar"
-              value={RfcBuscar}
-              onChange={(e) => setRfcBuscar(e.target.value)}
-              placeholder="Buscar por nombre..."
-              className="mt-1 block w-full rounded-md border-gray-300 bg-gray-50 p-2 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-            />
-          </div>
-          <div className="w-full sm:w-1/3">
-            <button
-              onClick={Buscar}
-              className="float-right rounded-lg text-white bg-blue-600 px-6 py-2 text-sm font-medium transition-colors duration-200 hover:bg-blue-700"
-            >
-              Buscar
-            </button>
+          <button
+            onClick={Buscar}
+            className="float-right rounded-lg text-white bg-blue-600 px-6 py-2 text-sm font-medium transition-colors duration-200 hover:bg-blue-700"
+          >
+            Buscar
+          </button>
           </div>
         </div>
       </div>
@@ -267,28 +254,34 @@ const RazonesSocialesCRUD = () => {
         <table className="min-w-full table-auto">
           <thead>
             <tr className="bg-gray-200 text-left text-gray-700 ">
-              <th className="px-4 py-2 ">Razon social</th>
-              <th className="px-4 py-2 ">RFC</th>
-              <th className=" px-4 py-2 text-right">Acciones</th>
+              <th className="px-4 py-2 ">Nombre</th>
+              <th className="px-4 py-2">Estado</th>
+              <th className="px-4 py-2 text-right">Acciones</th>
             </tr>
           </thead>
           <tbody>
-            {tiposUsuarios.map(usuario => (
-              <tr key={usuario._id} className="border-t border-gray-200 hover:bg-gray-50">
-                <td className="px-4 py-2">{usuario.RazonSocial}</td>
-                <td className="px-4 py-2">{usuario.RFC}</td>
+            {ListaGrupos.map(grupo => (
+              <tr key={grupo._id} className="border-t border-gray-200 hover:bg-gray-50">
+                <td className="px-4 py-2">{grupo.Nombre}</td>
+                <td className="px-4 py-2">
+                  <span className={`py-1 px-3 rounded-full text-xs font-semibold ${
+                      grupo.Estado == 1 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                    }`}>
+                      {grupo.Estado == 1 ? "Activo" : "Inactivo"}
+                    </span>
+                </td>
                 <td className="px-4 py-2 flex justify-end space-x-2 ">
-                  <button onClick={() => handleEditModal(usuario._id || "")} className="rounded-md bg-blue-600 px-4 py-1 text-sm text-white transition-colors duration-200 hover:bg-blue-700">
+                  <button onClick={() => handleEditModal(grupo._id || "")} className="rounded-md bg-blue-600 px-4 py-1 text-sm text-white transition-colors duration-200 hover:bg-blue-700">
                     Editar
                   </button>
                   <button
-                    onClick={() => handleDesactivar(usuario._id || "")}
-                    className="rounded-md bg-yellow-600 px-4 py-1 text-sm text-white transition-colors duration-200 hover:bg-yellow-700"
+                    onClick={() => handleDesactivar(grupo._id || "")}
+                    className={`rounded-md px-4 py-1 text-sm text-white transition-colors duration-200 ${grupo.Estado == 1 ?  "bg-yellow-600 hover:bg-yellow-700":"bg-green-600 hover:bg-green-700" }`}
                   >
-                    {usuario.Estado == 1 ? "Desactivar" : "Activar"}
+                    {grupo.Estado == 1 ? "Desactivar" : "Activar"}
                   </button>
                   <button
-                    onClick={() => handleDelete(usuario._id || "")}
+                    onClick={() => handleDelete(grupo._id || "")}
                     className="rounded-md bg-red-600 px-4 py-1 text-sm text-white transition-colors duration-200 hover:bg-red-700"
                   >
                     Eliminar
@@ -303,7 +296,7 @@ const RazonesSocialesCRUD = () => {
 
       {/* Modal de confirmación de eliminación con animación */}
       {showConfirm && (
-        <div
+        <div 
           className={`fixed inset-0 z-50 flex items-center justify-center transition-all duration-300 opacity-100 backdrop-blur-sm}`}
           style={{ backgroundColor: 'rgba(255, 255, 255, 0.60)' }}
         >
@@ -314,7 +307,7 @@ const RazonesSocialesCRUD = () => {
                 Cancelar
               </button>
               <button onClick={confirm} className="rounded-md bg-red-600 px-4 py-2 text-white transition-colors hover:bg-red-700">
-                Eliminar
+                Aceptar
               </button>
             </div>
           </div>
@@ -344,7 +337,7 @@ const RazonesSocialesCRUD = () => {
 export default function UsuariosPage() {
   return (
     <div className="p-10 flex-1 overflow-auto">
-      <RazonesSocialesCRUD />
+      <GruposEmpresarialesCRUD />
     </div>
   );
 }

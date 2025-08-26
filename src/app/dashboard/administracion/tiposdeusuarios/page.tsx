@@ -8,8 +8,7 @@ import ToggleSwitch from "@/src/hooks/ToggleSwitch";
 import Cargando from '@/src/hooks/Cargando';
 import { useNotification } from '@/src/hooks/useNotifications';
 import { Modulo, Permiso, TipoUsuario } from '@/src/Interfaces/Interfaces';
-
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000';
+import { API_BASE_URL } from '@/src/utils/constantes';
 
 
 // Definimos una interfaz para las propiedades del modal de registro

@@ -84,6 +84,12 @@ export default function AdministracionLayout({ children }: { children: React.Rea
               currentPath={pathname}
             />
             <MenuItem 
+              href="/dashboard/administracion/gruposempresariales" 
+              icon="🏨" 
+              text="Grupos Empresariales"
+              currentPath={pathname}
+            />
+            <MenuItem 
               href="/dashboard/administracion/contadores" 
               icon="📊" 
               text="Contadores"
