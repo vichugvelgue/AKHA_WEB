@@ -8,7 +8,7 @@ import ToggleSwitch from "@/src/hooks/ToggleSwitch";
 import Cargando from '@/src/hooks/Cargando';
 import { useNotification } from '@/src/hooks/useNotifications';
 import { Modulo, Permiso, TipoUsuario, Cliente } from '@/src/Interfaces/Interfaces';
-import RazonesSocialesAgregar from '@/src/app/dashboard/administracion/razonessociales/Agregar';
+import ContribuyentesAgregar from '@/src/app/dashboard/administracion/contribuyentes/Agregar';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000';
 
@@ -73,7 +73,7 @@ const RazonesSocialesCRUD = () => {
     setIsLoading(true);
     setTiposUsuarios([]);
     try {
-      const response = await fetch(`${API_BASE_URL}/clientes/BuscarClientes`,{
+      const response = await fetch(`${API_BASE_URL}/clientes/BuscarClientes`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -195,15 +195,16 @@ const RazonesSocialesCRUD = () => {
     setIsModalOpen(false);
     Listar();
   };
-  
+
   if (isModalOpen) {
-    return (<RazonesSocialesAgregar idEditar={idEditar} Editar={editar} onClose={handleCloceModal} onRegister={handleRegister} />)
+    console.log({ idEditar, editar });
+    return (<ContribuyentesAgregar idEditar={idEditar} Editar={editar} onClose={handleCloceModal} onRegister={handleRegister} />)
   }
 
   return (
     <div className="space-y-6 p-4">
       <div className="flex items-center justify-between">
-        <h2 className="text-3xl font-extrabold text-blue-900">Gestión de Razones sociales</h2>
+        <h2 className="text-3xl font-extrabold text-blue-900">Gestión de Contribuyentes</h2>
 
         <div className="flex space-x-4">
           <button
@@ -219,11 +220,11 @@ const RazonesSocialesCRUD = () => {
             onClick={handleOpenModal}
             className="rounded-lg bg-yellow-400 px-6 py-2 text-gray-900 font-semibold transition-colors duration-200 hover:bg-yellow-500"
           >
-            Crear Nuevo Usuario
+            Nuevo Contribuyente
           </button>
         </div>
       </div>
-<div className="rounded-xl bg-white p-6 shadow-md">
+      <div className="rounded-xl bg-white p-6 shadow-md">
         <div className="flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-6">
           <div className="w-full sm:w-1/3">
             <label htmlFor="nombreFilter" className="block text-sm font-medium text-gray-700">
@@ -252,12 +253,12 @@ const RazonesSocialesCRUD = () => {
             />
           </div>
           <div className="w-full sm:w-1/3">
-          <button
-            onClick={Buscar}
-            className="float-right rounded-lg text-white bg-blue-600 px-6 py-2 text-sm font-medium transition-colors duration-200 hover:bg-blue-700"
-          >
-            Buscar
-          </button>
+            <button
+              onClick={Buscar}
+              className="float-right rounded-lg text-white bg-blue-600 px-6 py-2 text-sm font-medium transition-colors duration-200 hover:bg-blue-700"
+            >
+              Buscar
+            </button>
           </div>
         </div>
       </div>
@@ -266,7 +267,7 @@ const RazonesSocialesCRUD = () => {
         <table className="min-w-full table-auto">
           <thead>
             <tr className="bg-gray-200 text-left text-gray-700 ">
-              <th className="px-4 py-2 ">Razón Social</th>
+              <th className="px-4 py-2 ">Razon social</th>
               <th className="px-4 py-2 ">RFC</th>
               <th className=" px-4 py-2 text-right">Acciones</th>
             </tr>
@@ -302,7 +303,7 @@ const RazonesSocialesCRUD = () => {
 
       {/* Modal de confirmación de eliminación con animación */}
       {showConfirm && (
-        <div 
+        <div
           className={`fixed inset-0 z-50 flex items-center justify-center transition-all duration-300 opacity-100 backdrop-blur-sm}`}
           style={{ backgroundColor: 'rgba(255, 255, 255, 0.60)' }}
         >
