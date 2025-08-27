@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation'; // Importa el hook useRouter
 import ToggleSwitch from "@/src/hooks/ToggleSwitch";
 import Cargando from '@/src/hooks/Cargando';
@@ -155,6 +155,7 @@ const ContribuyentesAgregar = ({ idEditar, Editar = false, onClose, onRegister }
   const [ServiciosSeleccionados, setSelectedServicios] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const inputXMLREF = useRef<HTMLInputElement | null>(null);
 
   // Nuevo estado para controlar la pestaña activa
   const [activeTab, setActiveTab] = useState('informacion-interna');
@@ -226,13 +227,10 @@ const ContribuyentesAgregar = ({ idEditar, Editar = false, onClose, onRegister }
   const listarServicios = async () => {
     try {
       const response = await fetch(`${API_BASE_URL}/Servicios/ObtenerLista`);
-      console.log(response);
       const result = await response.json();
-      console.log(result);
       if (!response.ok) {
         throw new Error(result.message || 'La respuesta de la API de servicios no es un array válido.');
       }
-      console.log(result.data);
       setservicios(result.data);
     } catch (err: any) {
       showNotification('Error al cargar los servicios.', 'error');
@@ -314,18 +312,55 @@ const ContribuyentesAgregar = ({ idEditar, Editar = false, onClose, onRegister }
       setIsLoading(false);
     }
   };
+  
+  const AbrirInputXML = () => inputXMLREF.current?.click();
+  
+   const importarXML = (event: React.ChangeEvent<HTMLInputElement>) => {
+     let { files } = event.target
+    const file = files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const text = e.target?.result as string;
+      const parser = new DOMParser();
+      const xml = parser.parseFromString(text, "text/xml");
+
+      // Obtener nodo principal <cfdi:Comprobante>
+      const comprobante = xml.getElementsByTagName("cfdi:Comprobante")[0];
+      if (!comprobante) {
+        alert("XML no válido de CFDI SAT");
+        return;
+      }
+      const emisor = xml.getElementsByTagName("cfdi:Emisor")[0];
+      const rfc = emisor?.getAttribute("Rfc") ?? ""
+      setFormState(prev => ({
+        ...prev,
+        RFC:rfc,
+        TipoPersona: rfc.length == 12 ? "Fisica" : "Moral",
+        RazonSocial:emisor?.getAttribute("Nombre") ?? "",
+        RegimenFiscal: parseInt(emisor?.getAttribute("RegimenFiscal") ?? "0"),
+        CodigoPostal:comprobante?.getAttribute("LugarExpedicion") ?? "",
+      }));
+
+    };
+    reader.readAsText(file);
+  };
 
   return (
     <div className="space-y-6 p-4">
       <div className="flex items-center justify-between">
         <h2 className="text-3xl font-extrabold text-blue-900">{Editar ? "Editar Contribuyente" : "Agregar Contribuyente"}</h2>
-        <div className="flex space-x-4">
-          <button
-            onClick={onClose}
-            className="rounded-lg bg-gray-300 px-6 py-2 text-gray-800 transition-colors duration-200 hover:bg-gray-400"
-          >
+        <div className="flex-grow mx-2">
+          <button onClick={onClose} className="float-right rounded-lg bg-gray-300 px-6 py-2 text-gray-800 transition-colors duration-200 hover:bg-gray-400"          >
             Regresar
           </button>
+        </div>
+        <div className="flex-none">
+          <button onClick={AbrirInputXML} className="rounded-lg bg-gray-300 px-6 py-2 text-gray-800 transition-colors duration-200 hover:bg-gray-400"          >
+            Inportar con XML
+          </button>
+          <input ref={inputXMLREF} className='hidden' type="file" accept="text/xml"  onChange={importarXML}/>
         </div>
       </div>
 
