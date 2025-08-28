@@ -6,55 +6,12 @@ import { useRouter } from 'next/navigation'; // Importa el hook useRouter
 import ToggleSwitch from "@/src/hooks/ToggleSwitch";
 import Cargando from '@/src/hooks/Cargando';
 import { useNotification } from '@/src/hooks/useNotifications';
+import { Cliente,PersonaContacto,RepresentanteLegal  } from '@/src/Interfaces/Interfaces';
 
 
 
 // Definición de interfaces para los nuevos campos
-interface PersonaContacto {
-  Nombre: string;
-  Telefono: string;
-  Correo: string;
-}
 
-interface RepresentanteLegal {
-  Nombre: string;
-  RFC: string;
-  Alias: string;
-  Cumpleanos: string;
-}
-
-// Interfaz Cliente actualizada para incluir todos los nuevos campos anidados
-interface Cliente {
-  _id?: string;
-  Estado: number;
-  RazonSocial: string;
-  RFC: string;
-  TipoPersona: "Fisica" | "Moral" | ""; // Nuevo campo para tipo de persona
-  RegimenFiscal: number;
-  CodigoPostal: string;
-  Direccion: string;
-  ClasificacionComercial: string;
-  OrigenContacto: string;
-  RecomendadoPor: string;
-  ValorGrupo: string;
-  CanalPreferente: string;
-  CorreoInstitucional: string;
-  CorreoElectronico: string;
-  NumeroTelefono: string;
-  WhatsApp: string;
-  Observaciones: string;
-  Servicios: string[];
-  ServiciosSeleccionados: string[];
-  idUsuarioCreacion: string;
-  idGrupoEmpresarial: string;
-  idContador: string;
-  // Nuevos objetos para los campos de contacto
-  RepresentanteLegal: RepresentanteLegal;
-  DuenoEmpresa: PersonaContacto;
-  ContactoCobranza: PersonaContacto;
-  GerenteOperativo: PersonaContacto;
-  EnlaceAkha: PersonaContacto;
-}
 
 
 type servicioItem = {
@@ -90,7 +47,7 @@ const Separador = ({ Titulo }: SeparadorProps) => {
       <div className="flex-grow border-t-2 border-blue-900"></div>
     </div>
   );
-};
+}
 
 // Componente para la vista de CRUD de Usuarios
 const ContribuyentesAgregar = ({ idEditar, Editar = false, onClose, onRegister }: ModalProps) => {
