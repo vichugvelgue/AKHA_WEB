@@ -1,17 +1,16 @@
-// app/dashboard/administracion/usuarios/page.tsx
-
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation'; // Importa el hook useRouter
-import ToggleSwitch from "@/src/hooks/ToggleSwitch";
+import { useRouter } from 'next/navigation';
 import Cargando from '@/src/hooks/Cargando';
-import Separador from '@/src/hooks/Separador';
+
+
 
 import { useNotification } from '@/src/hooks/useNotifications';
-import { Cliente, GrupoEmpresarial, } from '@/src/Interfaces/Interfaces';
+import { Cliente, GrupoEmpresarial } from '@/src/Interfaces/Interfaces';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000';
+
 
 
 // Definimos una interfaz para las propiedades del modal de registro
@@ -22,6 +21,7 @@ interface ModalProps {
   onRegister: (Mensaje: string, Color: "success" | "error" | "warning") => void;
 }
 
+
 // Componente para la vista de CRUD de Usuarios
 const GruposEmpresarialesAgregar = ({ idEditar, Editar = false, onClose, onRegister }: ModalProps) => {
   // Inicializa el router para la navegación
@@ -31,6 +31,7 @@ const GruposEmpresarialesAgregar = ({ idEditar, Editar = false, onClose, onRegis
     idResponsable: "",
     Contacto: "",
     Observaciones: "",
+    ContactoPrincipal: { Nombre: '', Telefono: '', Correo: '' }
   });
 
   const router = useRouter();
@@ -38,6 +39,59 @@ const GruposEmpresarialesAgregar = ({ idEditar, Editar = false, onClose, onRegis
   const [clientesAsociados, setClientesAsociados] = useState<Cliente[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+
+  type Contribuyente = {
+    id: string;
+    RazonSocial: string;
+  };
+  // Mock de una base de datos de contribuyentes para simular datos
+  const mockContribuyentes: Contribuyente[] = [
+    { id: '1', RazonSocial: 'Contribuyente A S.A. de C.V.' },
+    { id: '2', RazonSocial: 'Contribuyente B S. de R.L.' },
+    { id: '3', RazonSocial: 'Contribuyente C S.C.' },
+    { id: '4', RazonSocial: 'Contribuyente D S.A.' },
+    { id: '5', RazonSocial: 'Contribuyente E S. de C.V.' },
+  ];
+
+
+  const [clientesAsociados1, setClientesAsociados1] = useState<Contribuyente[]>([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  // El estado de los resultados de búsqueda también es tipado
+  const [searchResults, setSearchResults] = useState<Contribuyente[]>([]);
+
+  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const term = e.target.value.toLowerCase();
+    setSearchTerm(term);
+    if (term.length > 2) {
+      // Filtra los resultados si el término de búsqueda tiene más de 2 caracteres
+      const results = mockContribuyentes.filter(contribuyente =>
+        contribuyente.RazonSocial.toLowerCase().includes(term)
+      );
+      setSearchResults(results);
+    } else {
+      setSearchResults([]);
+    }
+  };
+
+  // El parámetro 'contribuyente' ahora tiene un tipo explícito
+  const addContribuyente = (contribuyente: Contribuyente) => {
+    // Evita duplicados en la lista
+    if (!clientesAsociados1.some(c => c.id === contribuyente.id)) {
+      setClientesAsociados1([...clientesAsociados1, contribuyente]);
+    }
+    // Cierra el modal y limpia el estado de búsqueda
+    setIsModalOpen(false);
+    setSearchTerm('');
+    setSearchResults([]);
+  };
+
+  // Lógica para eliminar un contribuyente de la lista
+  const removeContribuyente = (id: string) => {
+    // Filtra la lista para crear una nueva sin el contribuyente eliminado
+    setClientesAsociados1(clientesAsociados1.filter(c => c.id !== id));
+  };
+
 
   useEffect(() => {
     if (idEditar) {
@@ -50,6 +104,21 @@ const GruposEmpresarialesAgregar = ({ idEditar, Editar = false, onClose, onRegis
     }
 
   }, []);
+
+  interface SeparadorProps {
+    Titulo: string;
+  }
+
+  const Separador = ({ Titulo }: SeparadorProps) => {
+    return (
+      <div className="flex items-center my-8">
+        <span className="flex-shrink text-xl font-bold tracking-tight text-blue-900 bg-transparent pr-4">
+          {Titulo}
+        </span>
+        <div className="flex-grow border-t-2 border-blue-900"></div>
+      </div>
+    );
+  };
 
   const ObtenerPorId = async () => {
     setIsLoading(true);
@@ -140,12 +209,12 @@ const GruposEmpresarialesAgregar = ({ idEditar, Editar = false, onClose, onRegis
       if (!response.ok) {
         throw new Error(`Error: ${data.mensaje}`);
       }
-      showNotification("Razón Social guardada exitosamente", "success");
+      showNotification("Grupo empresarial guardado exitosamente", "success");
       onClose();
     } catch (err: any) {
-      console.error('Error al guardar la razón social:', err);
-      setError(err.message || 'Hubo un error al guardar la razón social. Verifica que la API esté corriendo y responda correctamente.');
-      showNotification("Error al guardar la razón social", "error");
+      console.error('Error al guardar el grupo empresarial:', err);
+      setError(err.message || 'Hubo un error al guardar el grupo empresarial. Verifica que la API esté corriendo y responda correctamente.');
+      showNotification("Error al guardar el grupo emrpesarial", "error");
     } finally {
       setIsLoading(false);
     }
@@ -153,12 +222,29 @@ const GruposEmpresarialesAgregar = ({ idEditar, Editar = false, onClose, onRegis
   }
 
 
+  const handleNestedInputChange = (section: keyof GrupoEmpresarial, e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setFormState(prev => ({
+      ...prev,
+      [section]: {
+        ...(prev[section] as any), // Corrección: aserción de tipo a 'any'
+        [name]: value
+      }
+    }));
+  };
+
+   // Lógica para cerrar el modal y limpiar el estado
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setSearchTerm('');
+    setSearchResults([]);
+  };
 
 
   return (
     <div className="space-y-6 p-4">
       <div className="flex items-center justify-between">
-        <h2 className="text-3xl font-extrabold text-blue-900">{Editar ? "Editar Razón Social" : "Agregar Razón Social"}</h2>
+        <h2 className="text-3xl font-extrabold text-blue-900">{Editar ? "Editar Grupo Empresarial" : "Agregar Grupo Empresarial"}</h2>
 
         <div className="flex space-x-4">
           <button
@@ -171,12 +257,10 @@ const GruposEmpresarialesAgregar = ({ idEditar, Editar = false, onClose, onRegis
       </div>
 
       <div className="grid overflow-x-auto rounded-xl bg-white p-6 shadow-md">
-        <label>* Datos obligatorio</label>
-        <br />
 
-        <Separador Titulo="Informacion General" />
+        <Separador Titulo="Información General" />
         <div id="INFORMACION GENERAL" className='grid grid-cols-2 gap-4'>
-          <div className='col-span-2'>
+          <div className='col-span-1'>
             <label className="block text-sm font-medium text-gray-700">Nombre *</label>
             <input
               type="text"
@@ -187,14 +271,9 @@ const GruposEmpresarialesAgregar = ({ idEditar, Editar = false, onClose, onRegis
               className="mt-1 w-full rounded-md border-gray-300 bg-gray-50 p-2 text-gray-900 focus:border-blue-500 focus:ring-blue-500"
             />
           </div>
-        </div>
-        <br />
-
-        <Separador Titulo="Responsable" />
-        <div id="RESPONSABLE" className="grid grid-cols-6 gap-6 items-start">
-          <div className="md:col-span-12 lg:col-span-3">
+          <div className="col-span-1">
             <label className="block text-sm font-medium text-gray-700">
-              Responsable *
+              Responsable Comercial*
             </label>
             <input
               type="text"
@@ -208,41 +287,6 @@ const GruposEmpresarialesAgregar = ({ idEditar, Editar = false, onClose, onRegis
 
           </div>
 
-          <div className="md:col-span-12 lg:col-span-2">
-            <label className="block text-sm font-medium text-gray-700">
-              Contacto *
-            </label>
-            <input
-              type="text"
-              name="Contacto"
-              value={formState.Contacto}
-              onChange={handleInputChange}
-              required
-              className="mt-1 w-full rounded-md border-gray-300 bg-gray-50 p-2 text-gray-900 
-                 focus:border-blue-500 focus:ring-blue-500"
-            />
-          </div>
-        </div>
-
-        <br />
-        <Separador Titulo="Razones sociales asociadas" />
-        <div style={{ marginTop: "-10px" }}>
-          <div id="RAZONES SOCIALES ASOCIADAS" className='grid grid-cols-1 gap-4'>
-            <table className="table-auto">
-              <tbody className="">
-                {clientesAsociados.map((item, index) => (
-                  <tr key={index} className="border border-gray-300">
-                    <td className="px-4 py-2">{item.RazonSocial}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-
-        <br />
-        <div id="OBSERVACIONES" className='grid grid-cols-5 gap-4'>
           <div className='col-span-5'>
             <label className="block text-sm font-medium text-gray-700">Observaciones</label>
             <textarea
@@ -252,6 +296,142 @@ const GruposEmpresarialesAgregar = ({ idEditar, Editar = false, onClose, onRegis
               className="mt-1 w-full rounded-md border-gray-300 bg-gray-50 p-2 text-gray-900 focus:border-blue-500 focus:ring-blue-500"
             />
           </div>
+        </div>
+
+        <Separador Titulo="Contacto Principal" />
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className='col-span-1'>
+            <label className="block text-sm font-medium text-gray-700">Nombre</label>
+            <input
+              type="text"
+              name="Nombre"
+              value={formState.ContactoPrincipal.Nombre}
+              onChange={(e) => handleNestedInputChange('ContactoPrincipal', e)}
+              className="mt-1 w-full rounded-md border-gray-300 bg-gray-50 p-2 text-gray-900 focus:border-blue-500 focus:ring-blue-500"
+            />
+          </div>
+          <div className='col-span-1'>
+            <label className="block text-sm font-medium text-gray-700">Teléfono</label>
+            <input
+              type="tel"
+              name="Telefono"
+              value={formState.ContactoPrincipal.Telefono}
+              onChange={(e) => handleNestedInputChange('ContactoPrincipal', e)}
+              className="mt-1 w-full rounded-md border-gray-300 bg-gray-50 p-2 text-gray-900 focus:border-blue-500 focus:ring-blue-500"
+            />
+          </div>
+          <div className='col-span-1'>
+            <label className="block text-sm font-medium text-gray-700">Correo</label>
+            <input
+              type="email"
+              name="Correo"
+              value={formState.ContactoPrincipal.Correo}
+              onChange={(e) => handleNestedInputChange('ContactoPrincipal', e)}
+              className="mt-1 w-full rounded-md border-gray-300 bg-gray-50 p-2 text-gray-900 focus:border-blue-500 focus:ring-blue-500"
+            />
+          </div>
+
+        </div>
+
+        <Separador Titulo="Contribuyentes asociados" />
+        <div style={{ marginTop: "-10px" }}>
+          <div className="p-4 bg-gray-100 font-sans">                     
+        <div className="mt-4">
+          <div className='grid grid-cols-1 gap-4'>
+            <div className="flex justify-end">
+            <button
+              onClick={() => setIsModalOpen(true)}
+              className="bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-semibold py-2 px-4 rounded-full transition-colors duration-200">
+              Asociar Contribuyente
+            </button>
+          </div>            
+            <table className="table-auto w-full border-collapse">
+              <tbody className="">
+                {clientesAsociados1.length > 0 ? (
+                  clientesAsociados1.map((item) => (
+                    <tr key={item.id} className="border-t border-gray-300 last:border-b">
+                      <td className="px-4 py-2 text-gray-800">{item.RazonSocial}</td>
+                      <td className="px-4 py-2 text-right">
+                        <button
+                          onClick={() => removeContribuyente(item.id)}
+                          className="text-red-500 hover:text-red-700 font-bold transition-colors duration-200">
+                          Eliminar
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td className="px-4 py-2 text-gray-500 italic" colSpan={2}>No hay contribuyentes asociados.</td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>                    
+        </div>
+            
+            
+
+            {/* Modal de Búsqueda */}
+            {isModalOpen && (
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center transition-all duration-300 backdrop-blur-sm"
+            style={{ backgroundColor: 'rgba(255, 255, 255, 0.60)' }}
+          >
+            <div className="w-full max-w-xl rounded-2xl bg-white p-8 shadow-2xl transform transition-transform duration-300 border-2 border-blue-500 scale-100">
+              <div className="flex items-center justify-between">
+                <h3 className="text-2xl font-bold text-gray-900">Buscar Contribuyente</h3>
+                <button onClick={handleCloseModal} className="text-gray-400 transition-colors duration-200 hover:text-gray-600">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+
+              <div className="mt-6 space-y-4">
+                <input
+                  type="text"
+                  placeholder="Buscar por nombre..."
+                  value={searchTerm}
+                  onChange={handleSearch}
+                  className="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+
+                {searchTerm.length > 2 && searchResults.length > 0 && (
+                  <ul className="max-h-48 overflow-y-auto border border-gray-200 rounded-md">
+                    {searchResults.map((contribuyente) => (
+                      <li
+                        key={contribuyente.id}
+                        onClick={() => addContribuyente(contribuyente)}
+                        className="p-3 cursor-pointer hover:bg-gray-100 border-b border-gray-200 last:border-b-0"
+                      >
+                        {contribuyente.RazonSocial}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+
+                {searchTerm.length > 2 && searchResults.length === 0 && (
+                  <p className="mt-4 text-sm text-gray-500">No se encontraron resultados.</p>
+                )}
+              </div>
+
+              <div className="mt-6 flex justify-end">
+                <button
+                  onClick={handleCloseModal}
+                  className="rounded-md bg-gray-300 px-4 py-2 text-gray-800 transition-colors hover:bg-gray-400"
+                >
+                  Cerrar
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+          </div>
+
+
+
         </div>
 
         <br />
@@ -284,7 +464,7 @@ const GruposEmpresarialesAgregar = ({ idEditar, Editar = false, onClose, onRegis
           </button>
         </div>
       )}
-       </div>
+    </div>
   );
 };
 

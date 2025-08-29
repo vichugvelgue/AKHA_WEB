@@ -107,13 +107,13 @@ const RazonesSocialesCRUD = () => {
   };
 
   const handleDelete = (id: string = "") => {
-    setPregunta("¿Estás seguro de que quieres eliminar este tipo de usuario?");
+    setPregunta("¿Estás seguro de que quieres eliminar el contribuyente?");
     setOperacion("eliminar");
     setIdEditar(id);
     setShowConfirm(true);
   };
   const handleDesactivar = (id: string = "") => {
-    setPregunta("¿Estás seguro de que quieres desactivar/activar este tipo de usuario?");
+    setPregunta("¿Estás seguro de que quieres desactivar/activar el contribuyente?");
     setOperacion("desactivar");
     setIdEditar(id);
     setShowConfirm(true);
@@ -153,7 +153,7 @@ const RazonesSocialesCRUD = () => {
       showNotification(data.mensaje, "success");
       Listar();
     } catch (err: any) {
-      showNotification(err.message || 'Hubo un error al desactivar/activar el tipo de usuario. Verifica que la API esté corriendo y responda correctamente.', "error");
+      showNotification(err.message || 'Hubo un error al desactivar/activar el contribuyente. Verifica que la API esté corriendo y responda correctamente.', "error");
     }
   };
 
@@ -173,11 +173,11 @@ const RazonesSocialesCRUD = () => {
       showNotification(data.mensaje, "success");
       Listar();
     } catch (err: any) {
-      showNotification(err.message || 'Hubo un error al desactivar/activar el tipo de usuario. Verifica que la API esté corriendo y responda correctamente.', "error");
+      showNotification(err.message || 'Hubo un error al desactivar/activar el contribuyente. Verifica que la API esté corriendo y responda correctamente.', "error");
     }
   };
 
-  // La función ahora recibe un objeto con el tipo User
+  // La función ahora recibe un objeto
   const handleRegister = (Mensaje: string, Color: "success" | "error" | "warning" = "success") => {
     showNotification(Mensaje, Color);
     setIsModalOpen(false);

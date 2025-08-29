@@ -78,6 +78,13 @@ export interface Cliente {
   GerenteOperativo: PersonaContacto;
   EnlaceAkha: PersonaContacto;
 }
+
+export interface ContactoPrincipal {
+  Nombre: string;
+  Telefono: string;
+  Correo: string;
+}
+
 export interface GrupoEmpresarial {
   _id?: string;
   Estado?: number;
@@ -91,6 +98,7 @@ export interface GrupoEmpresarial {
 
   Observaciones?: string;
   FechaCreacion?: Date;
+  ContactoPrincipal: ContactoPrincipal;
 }
 export interface RazonSocial {
   _id?: string;
