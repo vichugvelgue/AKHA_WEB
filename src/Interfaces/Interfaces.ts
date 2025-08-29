@@ -33,38 +33,50 @@ export interface RegimenFiscal {
   Nombre?: string;
   Clave: number;
 }
+export interface PersonaContacto {
+  Nombre: string;
+  Telefono: string;
+  Correo: string;
+}
+
+export interface RepresentanteLegal {
+  Nombre: string;
+  RFC: string;
+  Alias: string;
+  Cumpleanos: string;
+}
+
+// Interfaz Cliente actualizada para incluir todos los nuevos campos anidados
 export interface Cliente {
   _id?: string;
   Estado?: number;
-
-  RazonSocial: string;
-  RFC: string;
-  RegimenFiscal?: number
+  RazonSocial?: string;
+  RFC?: string;
+  TipoPersona?: "Fisica" | "Moral" | ""; // Nuevo campo para tipo de persona
+  RegimenFiscal?: number;
   CodigoPostal?: string;
   Direccion?: string;
-
   ClasificacionComercial?: string;
   OrigenContacto?: string;
   RecomendadoPor?: string;
   ValorGrupo?: string;
-
   CanalPreferente?: string;
-  CorreoElectronico?: string;
   CorreoInstitucional?: string;
+  CorreoElectronico?: string;
   NumeroTelefono?: string;
   WhatsApp?: string;
-
   Observaciones?: string;
-
   Servicios?: string[];
-
+  ServiciosSeleccionados: string[];
   idUsuarioCreacion?: string;
   idGrupoEmpresarial?: string;
   idContador?: string;
-
-  FechaCreacion?: Date;
-  FechaActualizacion?: Date;
-  FechaEliminacion?: Date;
+  // Nuevos objetos para los campos de contacto
+  RepresentanteLegal: RepresentanteLegal;
+  DuenoEmpresa: PersonaContacto;
+  ContactoCobranza: PersonaContacto;
+  GerenteOperativo: PersonaContacto;
+  EnlaceAkha: PersonaContacto;
 }
 export interface GrupoEmpresarial {
   _id?: string;
@@ -79,4 +91,21 @@ export interface GrupoEmpresarial {
 
   Observaciones?: string;
   FechaCreacion?: Date;
+}
+export interface RazonSocial {
+  _id?: string;
+  Estado?: number;
+
+  RazonSocial: string;
+  RFC: string;
+  RegimenFiscal?: number
+  CodigoPostal?: string;
+  Direccion?: string;
+  TipoPersona?: string;
+
+  Observaciones?: string;
+
+  FechaCreacion?: Date;
+  FechaActualizacion?: Date;
+  FechaEliminacion?: Date;
 }

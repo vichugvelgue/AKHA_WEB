@@ -7,9 +7,8 @@ import { useRouter } from 'next/navigation'; // Importa el hook useRouter
 import ToggleSwitch from "@/src/hooks/ToggleSwitch";
 import Cargando from '@/src/hooks/Cargando';
 import { useNotification } from '@/src/hooks/useNotifications';
-import { Modulo, Permiso, TipoUsuario, Cliente } from '@/src/Interfaces/Interfaces';
-import ContribuyentesAgregar from '@/src/app/dashboard/administracion/contribuyentes/Agregar';
-import { ObtenerSesionUsuario } from '@/src/utils/constantes';
+import { RazonSocial } from '@/src/Interfaces/Interfaces';
+import RazonSocialAgregar from './Agregar';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000';
 
@@ -26,10 +25,9 @@ interface ModalProps {
 const RazonesSocialesCRUD = () => {
   // Inicializa el router para la navegación
   const router = useRouter();
-  const sesion = ObtenerSesionUsuario();
   const { notification, showNotification, hideNotification } = useNotification();
 
-  const [tiposUsuarios, setTiposUsuarios] = useState<Cliente[]>([]);
+  const [tiposUsuarios, setRazonesSociales] = useState<RazonSocial[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [idEditar, setIdEditar] = useState<string>("");
@@ -48,9 +46,9 @@ const RazonesSocialesCRUD = () => {
 
   const Listar = async () => {
     setIsLoading(true);
-    setTiposUsuarios([]);
+    setRazonesSociales([]);
     try {
-      const response = await fetch(`${API_BASE_URL}/clientes/ListarClientes`);
+      const response = await fetch(`${API_BASE_URL}/razonessociales/ListarRazonSocial`);
       if (!response.ok) {
         throw new Error(`Error: ${response.statusText}`);
       }
@@ -58,7 +56,7 @@ const RazonesSocialesCRUD = () => {
       const contentType = response.headers.get('content-type');
       if (contentType && contentType.includes('application/json')) {
         const data = await response.json();
-        setTiposUsuarios(data.data);
+        setRazonesSociales(data.data);
       } else {
         const text = await response.text();
         console.error('La respuesta de la API no es JSON:', text);
@@ -73,9 +71,9 @@ const RazonesSocialesCRUD = () => {
   };
   const Buscar = async () => {
     setIsLoading(true);
-    setTiposUsuarios([]);
+    setRazonesSociales([]);
     try {
-      const response = await fetch(`${API_BASE_URL}/clientes/BuscarClientes`, {
+      const response = await fetch(`${API_BASE_URL}/razonessociales/BuscarRazonesSociales`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -83,7 +81,7 @@ const RazonesSocialesCRUD = () => {
         body: JSON.stringify({
           RazonSocial: NombreBuscar,
           RFC: RfcBuscar,
-        } as Cliente),
+        } as RazonSocial),
       });
       if (!response.ok) {
         throw new Error(`Error: ${response.statusText}`);
@@ -92,7 +90,7 @@ const RazonesSocialesCRUD = () => {
       const contentType = response.headers.get('content-type');
       if (contentType && contentType.includes('application/json')) {
         const data = await response.json();
-        setTiposUsuarios(data.data);
+        setRazonesSociales(data.data);
       } else {
         const text = await response.text();
         console.error('La respuesta de la API no es JSON:', text);
@@ -139,12 +137,11 @@ const RazonesSocialesCRUD = () => {
 
   const DesactivarTipoUsuario = async (id: string = "") => {
     try {
-      const response = await fetch(`${API_BASE_URL}/Clientes/DesactivarCliente/${id}`, {
+      const response = await fetch(`${API_BASE_URL}/razonessociales/DesactivarRazonSocial/${id}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-      body: JSON.stringify({ UsuarioAplico: sesion.idUsuario }), 
       });
       if (!response.ok) {
         throw new Error(`Error: ${response.statusText}`);
@@ -159,12 +156,11 @@ const RazonesSocialesCRUD = () => {
 
   const EliminarTipoUsuario = async (id: string = "") => {
     try {
-      const response = await fetch(`${API_BASE_URL}/Clientes/EliminarCliente/${id}`, {
+      const response = await fetch(`${API_BASE_URL}/razonessociales/EliminarRazonSocial/${id}`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
         },
-      body: JSON.stringify({ UsuarioAplico: sesion.idUsuario }), 
       });
       if (!response.ok) {
         throw new Error(`Error: ${response.statusText}`);
@@ -202,13 +198,13 @@ const RazonesSocialesCRUD = () => {
 
   if (isModalOpen) {
     console.log({ idEditar, editar });
-    return (<ContribuyentesAgregar idEditar={idEditar} Editar={editar} onClose={handleCloceModal} onRegister={handleRegister} />)
+    return (<RazonSocialAgregar idEditar={idEditar} Editar={editar} onClose={handleCloceModal} onRegister={handleRegister} />)
   }
 
   return (
     <div className="space-y-6 p-4">
       <div className="flex items-center justify-between">
-        <h2 className="text-3xl font-extrabold text-blue-900">Gestión de Contribuyentes</h2>
+        <h2 className="text-3xl font-extrabold text-blue-900">Gestión de Razones sociales</h2>
 
         <div className="flex space-x-4">
           <button
