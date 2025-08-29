@@ -7,6 +7,7 @@ import ToggleSwitch from "@/src/hooks/ToggleSwitch";
 import Cargando from '@/src/hooks/Cargando';
 import { useNotification } from '@/src/hooks/useNotifications';
 import { Cliente,PersonaContacto,RepresentanteLegal  } from '@/src/Interfaces/Interfaces';
+import { ObtenerSesionUsuario } from '@/src/utils/constantes';
 
 
 
@@ -51,6 +52,7 @@ const Separador = ({ Titulo }: SeparadorProps) => {
 
 // Componente para la vista de CRUD de Usuarios
 const ContribuyentesAgregar = ({ idEditar, Editar = false, onClose, onRegister }: ModalProps) => {
+  const sesion = ObtenerSesionUsuario();
   const router = useRouter();
   const { notification, showNotification, hideNotification } = useNotification();
 
@@ -130,10 +132,15 @@ const ContribuyentesAgregar = ({ idEditar, Editar = false, onClose, onRegister }
     if (idEditar) {
       setFormState(prev => ({ ...prev, _id: idEditar }));
       ObtenerRazonSocial();
+    }else{
+      setFormState(prev => ({ 
+        ...prev, 
+        idUsuarioCreacion: sesion.idUsuario 
+      }));
     }
     listarServicios();
     ListarRazonSociales();
-  }, [idEditar]);
+  }, []);
 
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000';
 

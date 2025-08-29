@@ -9,6 +9,7 @@ import Cargando from '@/src/hooks/Cargando';
 import { useNotification } from '@/src/hooks/useNotifications';
 import { Modulo, Permiso, TipoUsuario, Cliente } from '@/src/Interfaces/Interfaces';
 import ContribuyentesAgregar from '@/src/app/dashboard/administracion/contribuyentes/Agregar';
+import { ObtenerSesionUsuario } from '@/src/utils/constantes';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000';
 
@@ -25,6 +26,7 @@ interface ModalProps {
 const RazonesSocialesCRUD = () => {
   // Inicializa el router para la navegación
   const router = useRouter();
+  const sesion = ObtenerSesionUsuario();
   const { notification, showNotification, hideNotification } = useNotification();
 
   const [tiposUsuarios, setTiposUsuarios] = useState<Cliente[]>([]);
@@ -142,6 +144,7 @@ const RazonesSocialesCRUD = () => {
         headers: {
           'Content-Type': 'application/json',
         },
+      body: JSON.stringify({ UsuarioAplico: sesion.idUsuario }), 
       });
       if (!response.ok) {
         throw new Error(`Error: ${response.statusText}`);
@@ -161,6 +164,7 @@ const RazonesSocialesCRUD = () => {
         headers: {
           'Content-Type': 'application/json',
         },
+      body: JSON.stringify({ UsuarioAplico: sesion.idUsuario }), 
       });
       if (!response.ok) {
         throw new Error(`Error: ${response.statusText}`);
