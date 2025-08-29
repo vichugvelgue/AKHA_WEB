@@ -101,6 +101,12 @@ export default function AdministracionLayout({ children }: { children: React.Rea
               text="Configuración"
               currentPath={pathname}
             />
+            <MenuItem 
+              href="/dashboard/administracion/razonessociales" 
+              icon="🧑‍⚖️" 
+              text="Razones sociales"
+              currentPath={pathname}
+            />
           </ul>
         </nav>
 

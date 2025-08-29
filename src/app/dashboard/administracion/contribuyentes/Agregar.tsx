@@ -1,60 +1,18 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation'; // Importa el hook useRouter
 import ToggleSwitch from "@/src/hooks/ToggleSwitch";
 import Cargando from '@/src/hooks/Cargando';
 import { useNotification } from '@/src/hooks/useNotifications';
+import { Cliente,PersonaContacto,RepresentanteLegal  } from '@/src/Interfaces/Interfaces';
+import { ObtenerSesionUsuario } from '@/src/utils/constantes';
 
 
 
 // Definición de interfaces para los nuevos campos
-interface PersonaContacto {
-  Nombre: string;
-  Telefono: string;
-  Correo: string;
-}
 
-interface RepresentanteLegal {
-  Nombre: string;
-  RFC: string;
-  Alias: string;
-  Cumpleanos: string;
-}
-
-// Interfaz Cliente actualizada para incluir todos los nuevos campos anidados
-interface Cliente {
-  _id?: string;
-  Estado: number;
-  RazonSocial: string;
-  RFC: string;
-  TipoPersona: "Fisica" | "Moral" | ""; // Nuevo campo para tipo de persona
-  RegimenFiscal: number;
-  CodigoPostal: string;
-  Direccion: string;
-  ClasificacionComercial: string;
-  OrigenContacto: string;
-  RecomendadoPor: string;
-  ValorGrupo: string;
-  CanalPreferente: string;
-  CorreoInstitucional: string;
-  CorreoElectronico: string;
-  NumeroTelefono: string;
-  WhatsApp: string;
-  Observaciones: string;
-  Servicios: string[];
-  ServiciosSeleccionados: string[];
-  idUsuarioCreacion: string;
-  idGrupoEmpresarial: string;
-  idContador: string;
-  // Nuevos objetos para los campos de contacto
-  RepresentanteLegal: RepresentanteLegal;
-  DuenoEmpresa: PersonaContacto;
-  ContactoCobranza: PersonaContacto;
-  GerenteOperativo: PersonaContacto;
-  EnlaceAkha: PersonaContacto;
-}
 
 
 type servicioItem = {
@@ -90,10 +48,11 @@ const Separador = ({ Titulo }: SeparadorProps) => {
       <div className="flex-grow border-t-2 border-blue-900"></div>
     </div>
   );
-};
+}
 
 // Componente para la vista de CRUD de Usuarios
 const ContribuyentesAgregar = ({ idEditar, Editar = false, onClose, onRegister }: ModalProps) => {
+  const sesion = ObtenerSesionUsuario();
   const router = useRouter();
   const { notification, showNotification, hideNotification } = useNotification();
 
@@ -155,6 +114,7 @@ const ContribuyentesAgregar = ({ idEditar, Editar = false, onClose, onRegister }
   const [ServiciosSeleccionados, setSelectedServicios] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const inputXMLREF = useRef<HTMLInputElement | null>(null);
 
   // Nuevo estado para controlar la pestaña activa
   const [activeTab, setActiveTab] = useState('informacion-interna');
@@ -172,10 +132,15 @@ const ContribuyentesAgregar = ({ idEditar, Editar = false, onClose, onRegister }
     if (idEditar) {
       setFormState(prev => ({ ...prev, _id: idEditar }));
       ObtenerRazonSocial();
+    }else{
+      setFormState(prev => ({ 
+        ...prev, 
+        idUsuarioCreacion: sesion.idUsuario 
+      }));
     }
     listarServicios();
     ListarRazonSociales();
-  }, [idEditar]);
+  }, []);
 
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000';
 
@@ -226,13 +191,10 @@ const ContribuyentesAgregar = ({ idEditar, Editar = false, onClose, onRegister }
   const listarServicios = async () => {
     try {
       const response = await fetch(`${API_BASE_URL}/Servicios/ObtenerLista`);
-      console.log(response);
       const result = await response.json();
-      console.log(result);
       if (!response.ok) {
         throw new Error(result.message || 'La respuesta de la API de servicios no es un array válido.');
       }
-      console.log(result.data);
       setservicios(result.data);
     } catch (err: any) {
       showNotification('Error al cargar los servicios.', 'error');
@@ -314,18 +276,55 @@ const ContribuyentesAgregar = ({ idEditar, Editar = false, onClose, onRegister }
       setIsLoading(false);
     }
   };
+  
+  const AbrirInputXML = () => inputXMLREF.current?.click();
+  
+   const importarXML = (event: React.ChangeEvent<HTMLInputElement>) => {
+     let { files } = event.target
+    const file = files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const text = e.target?.result as string;
+      const parser = new DOMParser();
+      const xml = parser.parseFromString(text, "text/xml");
+
+      // Obtener nodo principal <cfdi:Comprobante>
+      const comprobante = xml.getElementsByTagName("cfdi:Comprobante")[0];
+      if (!comprobante) {
+        alert("XML no válido de CFDI SAT");
+        return;
+      }
+      const emisor = xml.getElementsByTagName("cfdi:Emisor")[0];
+      const rfc = emisor?.getAttribute("Rfc") ?? ""
+      setFormState(prev => ({
+        ...prev,
+        RFC:rfc,
+        TipoPersona: rfc.length == 12 ? "Fisica" : "Moral",
+        RazonSocial:emisor?.getAttribute("Nombre") ?? "",
+        RegimenFiscal: parseInt(emisor?.getAttribute("RegimenFiscal") ?? "0"),
+        CodigoPostal:comprobante?.getAttribute("LugarExpedicion") ?? "",
+      }));
+
+    };
+    reader.readAsText(file);
+  };
 
   return (
     <div className="space-y-6 p-4">
       <div className="flex items-center justify-between">
         <h2 className="text-3xl font-extrabold text-blue-900">{Editar ? "Editar Contribuyente" : "Agregar Contribuyente"}</h2>
-        <div className="flex space-x-4">
-          <button
-            onClick={onClose}
-            className="rounded-lg bg-gray-300 px-6 py-2 text-gray-800 transition-colors duration-200 hover:bg-gray-400"
-          >
+        <div className="flex-grow mx-2">
+          <button onClick={onClose} className="float-right rounded-lg bg-gray-300 px-6 py-2 text-gray-800 transition-colors duration-200 hover:bg-gray-400"          >
             Regresar
           </button>
+        </div>
+        <div className="flex-none">
+          <button onClick={AbrirInputXML} className="rounded-lg bg-gray-300 px-6 py-2 text-gray-800 transition-colors duration-200 hover:bg-gray-400"          >
+            Inportar con XML
+          </button>
+          <input ref={inputXMLREF} className='hidden' type="file" accept="text/xml"  onChange={importarXML}/>
         </div>
       </div>
 
