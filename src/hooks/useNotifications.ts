@@ -1,9 +1,9 @@
 // hooks/useNotification.ts
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 // Interfaz para el estado de las notificaciones
-interface NotificationState {
+export interface NotificationState {
   message: string;
   type: 'success' | 'error' | 'warning';
   visible: boolean;
@@ -27,9 +27,9 @@ export const useNotification = () => {
     // Oculta la notificación automáticamente después de 5 segundos
     setTimeout(() => {
       setNotification(prev => ({ ...prev, visible: false }));
-    }, 5000); 
+    }, 5000);
   };
-  
+
   // Función para ocultar la notificación manualmente
   const hideNotification = () => {
     setNotification(prev => ({ ...prev, visible: false }));

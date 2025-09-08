@@ -3,11 +3,19 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Cargando from '@/src/hooks/Cargando';
+import Separador from '@/src/hooks/Separador';
 
 
 
 import { useNotification } from '@/src/hooks/useNotifications';
-import { Cliente, GrupoEmpresarial } from '@/src/Interfaces/Interfaces';
+import { Cliente, GrupoEmpresarial, User } from '@/src/Interfaces/Interfaces';
+import ModalBuscarContribuyentes from '@/src/hooks/ModalBuscarContribuyentes';
+import ModalBuscarContador from '@/src/hooks/ModalBuscarContador';
+import { ObtenerSesionUsuario } from '@/src/utils/constantes';
+import AccesoContribuyentesAgregar from '@/src/hooks/AccesoContribuyentesAgregar';
+import ModalPregunta from '@/src/hooks/ModalPregunta';
+import MensajeNotificacion from '@/src/hooks/MensajeNotificacion';
+import ModalMotivos from '@/src/hooks/ModalMotivos';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000';
 
@@ -34,64 +42,22 @@ const GruposEmpresarialesAgregar = ({ idEditar, Editar = false, onClose, onRegis
     ContactoPrincipal: { Nombre: '', Telefono: '', Correo: '' }
   });
 
+  const sesion = ObtenerSesionUsuario();
   const router = useRouter();
   const { notification, showNotification, hideNotification } = useNotification();
   const [clientesAsociados, setClientesAsociados] = useState<Cliente[]>([]);
+  const [contadorAsosiado, setContadorAsosiado] = useState<User | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isOpenContador, setIsOpenContador] = useState(false);
+  const [isOpenNuevoContribuyente, setIsOpenNuevoContribuyente] = useState(false);
+  const [isOpenMotivos, setIsOpenMotivos] = useState(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
-  type Contribuyente = {
-    id: string;
-    RazonSocial: string;
-  };
-  // Mock de una base de datos de contribuyentes para simular datos
-  const mockContribuyentes: Contribuyente[] = [
-    { id: '1', RazonSocial: 'Contribuyente A S.A. de C.V.' },
-    { id: '2', RazonSocial: 'Contribuyente B S. de R.L.' },
-    { id: '3', RazonSocial: 'Contribuyente C S.C.' },
-    { id: '4', RazonSocial: 'Contribuyente D S.A.' },
-    { id: '5', RazonSocial: 'Contribuyente E S. de C.V.' },
-  ];
-
-
-  const [clientesAsociados1, setClientesAsociados1] = useState<Contribuyente[]>([]);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [searchTerm, setSearchTerm] = useState('');
-  // El estado de los resultados de búsqueda también es tipado
-  const [searchResults, setSearchResults] = useState<Contribuyente[]>([]);
-
-  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const term = e.target.value.toLowerCase();
-    setSearchTerm(term);
-    if (term.length > 2) {
-      // Filtra los resultados si el término de búsqueda tiene más de 2 caracteres
-      const results = mockContribuyentes.filter(contribuyente =>
-        contribuyente.RazonSocial.toLowerCase().includes(term)
-      );
-      setSearchResults(results);
-    } else {
-      setSearchResults([]);
-    }
-  };
-
-  // El parámetro 'contribuyente' ahora tiene un tipo explícito
-  const addContribuyente = (contribuyente: Contribuyente) => {
-    // Evita duplicados en la lista
-    if (!clientesAsociados1.some(c => c.id === contribuyente.id)) {
-      setClientesAsociados1([...clientesAsociados1, contribuyente]);
-    }
-    // Cierra el modal y limpia el estado de búsqueda
-    setIsModalOpen(false);
-    setSearchTerm('');
-    setSearchResults([]);
-  };
-
-  // Lógica para eliminar un contribuyente de la lista
-  const removeContribuyente = (id: string) => {
-    // Filtra la lista para crear una nueva sin el contribuyente eliminado
-    setClientesAsociados1(clientesAsociados1.filter(c => c.id !== id));
-  };
-
+  const [asociadoEditar, setAsociadoEditar] = useState<string>("");
+  const [Pregunta, setPregunta] = useState<string>("");
+  const [OpenPreguntaContador, setOpenPreguntaContador] = useState<boolean>(false);
+  const [OpenPreguntaEliminar, setOpenPreguntaEliminar] = useState<boolean>(false);
 
   useEffect(() => {
     if (idEditar) {
@@ -103,22 +69,11 @@ const GruposEmpresarialesAgregar = ({ idEditar, Editar = false, onClose, onRegis
       ObtenerClientesDelGrupo()
     }
 
+    setFormState({
+      ...formState,
+      idUsuarioCreacion: sesion.idUsuario,
+    });
   }, []);
-
-  interface SeparadorProps {
-    Titulo: string;
-  }
-
-  const Separador = ({ Titulo }: SeparadorProps) => {
-    return (
-      <div className="flex items-center my-8">
-        <span className="flex-shrink text-xl font-bold tracking-tight text-blue-900 bg-transparent pr-4">
-          {Titulo}
-        </span>
-        <div className="flex-grow border-t-2 border-blue-900"></div>
-      </div>
-    );
-  };
 
   const ObtenerPorId = async () => {
     setIsLoading(true);
@@ -132,6 +87,7 @@ const GruposEmpresarialesAgregar = ({ idEditar, Editar = false, onClose, onRegis
       if (contentType && contentType.includes('application/json')) {
         const data = await response.json();
         setFormState(data.data);
+        setContadorAsosiado(data.data.idContador);
       } else {
         const text = await response.text();
         throw new Error('La API no devolvió un formato JSON válido.');
@@ -185,6 +141,16 @@ const GruposEmpresarialesAgregar = ({ idEditar, Editar = false, onClose, onRegis
   const validarDatos = () => {
     let valido = true;
 
+    if(!formState.Nombre){
+      valido = false
+    }
+    if(!formState.Responsable){
+      valido = false
+    }
+    if(!contadorAsosiado){
+      valido = false
+    }
+
     if (!valido) {
       showNotification("Por favor, complete todos los campos", "error");
     }
@@ -203,7 +169,11 @@ const GruposEmpresarialesAgregar = ({ idEditar, Editar = false, onClose, onRegis
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(formState),
+        body: JSON.stringify({
+          ...formState,
+          Integrantes: clientesAsociados,
+          idContador: contadorAsosiado?._id ?? null
+        }),
       });
       const data = await response.json();
       if (!response.ok) {
@@ -233,18 +203,85 @@ const GruposEmpresarialesAgregar = ({ idEditar, Editar = false, onClose, onRegis
     }));
   };
 
-   // Lógica para cerrar el modal y limpiar el estado
-  const handleCloseModal = () => {
+  // Lógica para cerrar el modal y limpiar el estado
+  const CerrarModalContribuyente = (value: boolean | null | Cliente | Cliente[]) => {
     setIsModalOpen(false);
-    setSearchTerm('');
-    setSearchResults([]);
+
+    if (value != false) {
+      let nuevosClientes = value as Cliente[]
+      const listaUnificada = [...clientesAsociados, ...nuevosClientes]
+        .reduce<Cliente[]>((acc, cliente) => {
+          if (!acc.some(c => c._id === cliente._id)) acc.push(cliente);
+          return acc;
+        }, []);
+
+      setClientesAsociados(listaUnificada);
+    }
   };
+  const QuitarContribuyente = (id: string) => {
+    setClientesAsociados(clientesAsociados.filter(c => c._id !== id));
+  };
+  const CerrarModalContador = (value: boolean | null | User | User[]) => {
+    setIsOpenContador(false);
+
+    if (value) {
+      setContadorAsosiado(value as User);
+    }
+  };
+  const AgregarNuevoContribuyente = (value: boolean | Cliente) => {
+    setIsOpenNuevoContribuyente(false);
+
+    if (value != false) {
+      let nuevosClientes = value as Cliente
+      const listaUnificada = [...clientesAsociados, nuevosClientes]
+        .reduce<Cliente[]>((acc, cliente) => {
+          if (!acc.some(c => c._id === cliente._id)) acc.push(cliente);
+          return acc;
+        }, []);
+
+      setClientesAsociados(listaUnificada);
+    }
+  };
+  const ValidarEliminarContribuyente = (id: string) => {
+    setAsociadoEditar(id)
+    setPregunta("¿Está seguro de cambiar el contador asignado?")
+    setOpenPreguntaEliminar(true)
+  }
+  const CerrarEliminarContribuyente  = (value: boolean) => {
+    setOpenPreguntaEliminar(false);
+    if (value) {
+      QuitarContribuyente(asociadoEditar);
+    }
+  }
+  const AbrirModalContador =()=>{
+    if(!contadorAsosiado){
+      setIsOpenContador(true)
+    }else{
+      setOpenPreguntaContador(true)
+    }
+  }
+  const CerrarModalPreguntaContador = (value: boolean) => {
+    setOpenPreguntaContador(false);
+    if (value) {
+    setIsOpenMotivos(true);
+    }
+  }
+  const CerrarMotivo = (value: string) => {
+    setIsOpenMotivos(false);
+    if (value) {
+      setFormState(prev => ({
+        ...prev,
+        MotivoReasignacion: value,
+      }))
+      setIsOpenContador(true)
+    }
+  }
 
 
   return (
     <div className="space-y-6 p-4">
       <div className="flex items-center justify-between">
-        <h2 className="text-3xl font-extrabold text-blue-900">{Editar ? "Editar Grupo Empresarial" : "Agregar Grupo Empresarial"}</h2>
+        <h2 className="text-3xl font-extrabold text-blue-900">{Editar ? "Editar Grupo o cliente" : "Agregar Grupo o cliente"}</h2>
 
         <div className="flex space-x-4">
           <button
@@ -298,6 +335,27 @@ const GruposEmpresarialesAgregar = ({ idEditar, Editar = false, onClose, onRegis
           </div>
         </div>
 
+        <Separador Titulo="Contador asignado" />
+        <div className="flex">
+          <div className='flex-1'>
+            <label className="block text-sm font-medium text-gray-700">Nombre</label>
+            <input
+              type="text"
+              name="Nombre"
+              value={contadorAsosiado?.NombreCompleto || ""}
+              // onChange={(e) => handleNestedInputChange('ContactoPrincipal', e)}
+              disabled
+              className="mt-1 w-full rounded-md border-gray-300 bg-gray-50 p-2 text-gray-900 focus:border-blue-500 focus:ring-blue-500"
+            />
+          </div>
+          <div className='flex-none flex  items-end'>
+            <button onClick={() => AbrirModalContador()}
+              className="bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-semibold py-2 px-4 rounded-md transition-colors duration-200">
+              Asociar Contador
+            </button>
+          </div>
+        </div>
+
         <Separador Titulo="Contacto Principal" />
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           <div className='col-span-1'>
@@ -305,7 +363,7 @@ const GruposEmpresarialesAgregar = ({ idEditar, Editar = false, onClose, onRegis
             <input
               type="text"
               name="Nombre"
-              value={formState.ContactoPrincipal.Nombre}
+              value={formState.ContactoPrincipal?.Nombre}
               onChange={(e) => handleNestedInputChange('ContactoPrincipal', e)}
               className="mt-1 w-full rounded-md border-gray-300 bg-gray-50 p-2 text-gray-900 focus:border-blue-500 focus:ring-blue-500"
             />
@@ -315,7 +373,7 @@ const GruposEmpresarialesAgregar = ({ idEditar, Editar = false, onClose, onRegis
             <input
               type="tel"
               name="Telefono"
-              value={formState.ContactoPrincipal.Telefono}
+              value={formState.ContactoPrincipal?.Telefono}
               onChange={(e) => handleNestedInputChange('ContactoPrincipal', e)}
               className="mt-1 w-full rounded-md border-gray-300 bg-gray-50 p-2 text-gray-900 focus:border-blue-500 focus:ring-blue-500"
             />
@@ -325,7 +383,7 @@ const GruposEmpresarialesAgregar = ({ idEditar, Editar = false, onClose, onRegis
             <input
               type="email"
               name="Correo"
-              value={formState.ContactoPrincipal.Correo}
+              value={formState.ContactoPrincipal?.Correo}
               onChange={(e) => handleNestedInputChange('ContactoPrincipal', e)}
               className="mt-1 w-full rounded-md border-gray-300 bg-gray-50 p-2 text-gray-900 focus:border-blue-500 focus:ring-blue-500"
             />
@@ -335,98 +393,79 @@ const GruposEmpresarialesAgregar = ({ idEditar, Editar = false, onClose, onRegis
 
         <Separador Titulo="Contribuyentes asociados" />
         <div style={{ marginTop: "-10px" }}>
-          <div className="p-4 bg-gray-100 font-sans">                     
-        <div className="mt-4">
-          <div className='grid grid-cols-1 gap-4'>
-            <div className="flex justify-end">
-            <button
-              onClick={() => setIsModalOpen(true)}
-              className="bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-semibold py-2 px-4 rounded-full transition-colors duration-200">
-              Asociar Contribuyente
-            </button>
-          </div>            
-            <table className="table-auto w-full border-collapse">
-              <tbody className="">
-                {clientesAsociados1.length > 0 ? (
-                  clientesAsociados1.map((item) => (
-                    <tr key={item.id} className="border-t border-gray-300 last:border-b">
-                      <td className="px-4 py-2 text-gray-800">{item.RazonSocial}</td>
-                      <td className="px-4 py-2 text-right">
-                        <button
-                          onClick={() => removeContribuyente(item.id)}
-                          className="text-red-500 hover:text-red-700 font-bold transition-colors duration-200">
-                          Eliminar
-                        </button>
-                      </td>
-                    </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td className="px-4 py-2 text-gray-500 italic" colSpan={2}>No hay contribuyentes asociados.</td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>                    
-        </div>
-            
-            
+          <div className="p-4 bg-gray-100 font-sans">
+            <div className="mt-4">
+              <div className='grid grid-cols-1 gap-4'>
+                <div className="flex justify-between">
+                  <button
+                    onClick={() => setIsOpenNuevoContribuyente(true)}
+                    className="bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-semibold py-2 px-4 rounded-full transition-colors duration-200">
+                    Nuevo Contribuyente
+                  </button>
+
+                  <button
+                    onClick={() => setIsModalOpen(true)}
+                    className="bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-semibold py-2 px-4 rounded-full transition-colors duration-200">
+                    Asociar Contribuyente
+                  </button>
+                </div>
+                <table className="table-auto w-full border-collapse">
+                  <tbody className="">
+                    {clientesAsociados.length > 0 ? (
+                      clientesAsociados.map((item) => (
+                        <tr key={item._id} className="border-t border-gray-300 last:border-b">
+                          <td className="px-4 py-2 text-gray-800">{item.RazonSocial}</td>
+                          <td className="px-4 py-2 text-right">
+                            <button
+                              onClick={() => ValidarEliminarContribuyente(item._id || "")}
+                              className="text-red-500 hover:text-red-700 font-bold transition-colors duration-200">
+                              Eliminar
+                            </button>
+                          </td>
+                        </tr>
+                      ))
+                    ) : (
+                      <tr>
+                        <td className="px-4 py-2 text-gray-500 italic" colSpan={2}>No hay contribuyentes asociados.</td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+
 
             {/* Modal de Búsqueda */}
             {isModalOpen && (
-          <div
-            className="fixed inset-0 z-50 flex items-center justify-center transition-all duration-300 backdrop-blur-sm"
-            style={{ backgroundColor: 'rgba(255, 255, 255, 0.60)' }}
-          >
-            <div className="w-full max-w-xl rounded-2xl bg-white p-8 shadow-2xl transform transition-transform duration-300 border-2 border-blue-500 scale-100">
-              <div className="flex items-center justify-between">
-                <h3 className="text-2xl font-bold text-gray-900">Buscar Contribuyente</h3>
-                <button onClick={handleCloseModal} className="text-gray-400 transition-colors duration-200 hover:text-gray-600">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
-              </div>
-
-              <div className="mt-6 space-y-4">
-                <input
-                  type="text"
-                  placeholder="Buscar por nombre..."
-                  value={searchTerm}
-                  onChange={handleSearch}
-                  className="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-
-                {searchTerm.length > 2 && searchResults.length > 0 && (
-                  <ul className="max-h-48 overflow-y-auto border border-gray-200 rounded-md">
-                    {searchResults.map((contribuyente) => (
-                      <li
-                        key={contribuyente.id}
-                        onClick={() => addContribuyente(contribuyente)}
-                        className="p-3 cursor-pointer hover:bg-gray-100 border-b border-gray-200 last:border-b-0"
-                      >
-                        {contribuyente.RazonSocial}
-                      </li>
-                    ))}
-                  </ul>
-                )}
-
-                {searchTerm.length > 2 && searchResults.length === 0 && (
-                  <p className="mt-4 text-sm text-gray-500">No se encontraron resultados.</p>
-                )}
-              </div>
-
-              <div className="mt-6 flex justify-end">
-                <button
-                  onClick={handleCloseModal}
-                  className="rounded-md bg-gray-300 px-4 py-2 text-gray-800 transition-colors hover:bg-gray-400"
-                >
-                  Cerrar
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
+              <ModalBuscarContribuyentes
+                multiple={true}
+                onChange={CerrarModalContribuyente}
+              />
+            )}
+            {isOpenContador && (
+              <ModalBuscarContador
+                multiple={false}
+                onChange={CerrarModalContador}
+              />
+            )}
+            {isOpenNuevoContribuyente && (
+              <AccesoContribuyentesAgregar
+                onChange={AgregarNuevoContribuyente}
+              />
+            )}
+            {OpenPreguntaEliminar && (
+              <ModalPregunta
+                Pregunta="¿Está seguro de eliminar el contribuyente?"
+                Cerrar={CerrarEliminarContribuyente}
+              />
+            )}
+            {OpenPreguntaContador && (
+              <ModalPregunta
+                Pregunta="¿Está seguro de cambiar el contador asignado?"
+                Cerrar={CerrarModalPreguntaContador}  
+              />
+            )}
 
           </div>
 
@@ -448,22 +487,12 @@ const GruposEmpresarialesAgregar = ({ idEditar, Editar = false, onClose, onRegis
       </div>
 
       <Cargando isLoading={isLoading} />
-      {notification.visible && (
-        <div
-          className={`fixed right-4 top-4 z-[999] flex items-center rounded-lg p-4 text-white shadow-lg transition-transform duration-300 transform ${notification.visible ? 'translate-x-0 opacity-100' : 'translate-x-full opacity-0'}
-            ${notification.type === 'success' ? 'bg-green-500' : notification.type === 'error' ? 'bg-red-500' : 'bg-yellow-500'}`}
-        >
-          <div className="flex-1">
-            <p className="font-semibold">{notification.message}</p>
-          </div>
-          {/* Usamos la nueva función del hook para ocultar la notificación */}
-          <button onClick={hideNotification} className="ml-4 text-white opacity-70 hover:opacity-100">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-        </div>
-      )}
+      <ModalMotivos
+        Visible={isOpenMotivos}
+        Mensaje="Por favor, ingrese el motivo de la reasignación"
+        Cerrar={CerrarMotivo}
+      />
+      <MensajeNotificacion {...notification} hideNotification={hideNotification} />
     </div>
   );
 };

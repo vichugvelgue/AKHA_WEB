@@ -605,7 +605,7 @@ const confirmActivateService = async () => {
                 <th className="px-4 py-2">Nombre</th>
                 <th className="px-4 py-2">Descripción</th>
                 <th className="px-4 py-2">Estado</th>
-                <th className="px-4 py-2">Acciones</th>
+                <th className="px-4 py-2 text-right">Acciones</th>
               </tr>
             </thead>
             <tbody>
@@ -620,9 +620,9 @@ const confirmActivateService = async () => {
                       {service.Estado}
                     </span>
                   </td>
-                  <td className="px-4 py-2 flex space-x-2">
+                  <td className="px-4 py-2 flex space-x-2 float-right">
                     <button onClick={() => handleOpenFormModal(service)} className="rounded-md bg-blue-600 px-4 py-1 text-sm text-white transition-colors duration-200 hover:bg-blue-700">
-                      Editar
+                      <i className="material-symbols-rounded filled">stylus</i>
                     </button>
                     {service.Estado === Estatus.Activo && (
                         <button
@@ -630,7 +630,7 @@ const confirmActivateService = async () => {
                         className="rounded-md bg-amber-600 px-4 py-1 text-sm text-white transition-colors duration-200 hover:bg-amber-700"
                         title="Desactivar servicio"
                         >
-                        Desactivar
+                        <i className="material-symbols-rounded filled">block</i>
                         </button>
                     )}
                     {service.Estado === Estatus.Desactivado && (
@@ -639,14 +639,14 @@ const confirmActivateService = async () => {
                         className="rounded-md bg-green-600 px-4 py-1 text-sm text-white transition-colors duration-200 hover:bg-green-700"
                         title="Activar servicio"
                         >
-                        Activar
+                        <i className="material-symbols-rounded filled">check</i>
                         </button>
                     )}
                     <button
                       onClick={() => handleDelete(service._id)}
                       className="rounded-md bg-red-600 px-4 py-1 text-sm text-white transition-colors duration-200 hover:bg-red-700"
                     >
-                      Eliminar
+                        <i className="material-symbols-rounded filled">delete</i>
                     </button>
                   </td>
                 </tr>

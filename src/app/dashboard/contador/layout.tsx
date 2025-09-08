@@ -48,63 +48,9 @@ export default function AdministracionLayout({ children }: { children: React.Rea
         <nav>
           <ul className="space-y-3 font-medium">
             <MenuItem 
-              href="/dashboard/administracion/usuarios" 
+              href="/dashboard/contador/contador" 
               icon="👤" 
-              text="Usuarios"
-              currentPath={pathname}
-            />
-            <MenuItem 
-              href="/dashboard/administracion/tiposdeusuarios" 
-              icon="👥" 
-              text="Tipos de Usuarios"
-              currentPath={pathname}
-            />
-            <MenuItem 
-              href="/dashboard/administracion/servicios" 
-              icon="🛠️" 
-              text="Servicios"
-              currentPath={pathname}
-            />
-            <MenuItem 
-              href="/dashboard/administracion/actividades" 
-              icon="📝" 
-              text="Actividades"
-              currentPath={pathname}
-            />
-            <MenuItem 
-              href="/dashboard/administracion/tipos-documentos" 
-              icon="📄" 
-              text="Tipos de Documentos"
-              currentPath={pathname}
-            />
-            <MenuItem 
-              href="/dashboard/administracion/contribuyentes" 
-              icon="🤝" 
-              text="Contribuyentes"
-              currentPath={pathname}
-            />
-            <MenuItem 
-              href="/dashboard/administracion/gruposclientes" 
-              icon="🏨" 
-              text="Grupos clientes"
-              currentPath={pathname}
-            />
-            {/* <MenuItem 
-              href="/dashboard/administracion/contadores" 
-              icon="📊" 
-              text="Contadores"
-              currentPath={pathname}
-            /> */}
-            {/* <MenuItem 
-              href="/dashboard/administracion/configuracion" 
-              icon="⚙️" 
-              text="Configuración"
-              currentPath={pathname}
-            /> */}
-            <MenuItem 
-              href="/dashboard/administracion/razonessociales" 
-              icon="🧑‍⚖️" 
-              text="Razones sociales"
+              text="Contador"
               currentPath={pathname}
             />
           </ul>

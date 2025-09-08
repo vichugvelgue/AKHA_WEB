@@ -17,6 +17,7 @@ import { API_BASE_URL } from '@/src/utils/constantes';
 // Interfaz para el tipo de datos de un usuario
 interface User {
   _id: string;
+  Estado?: Number;
   Nombres: string;
   Apellidos: string;
   Correo: string;
@@ -76,6 +77,9 @@ const UserList = () => {
   const [isConfirmModalVisible, setIsConfirmModalVisible] = useState(false);
 
   const [userIdToDelete, setUserIdToDelete] = useState<string | null>(null);
+  const [operacion, setOperacion] = useState<string>("");
+  const [Pregunta, setPregunta] = useState<string>("");
+
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [formState, setFormState] = useState<UserFormState>(initialFormState);
   const [formErrors, setFormErrors] = useState<Partial<UserFormState>>({});
@@ -113,10 +117,10 @@ const UserList = () => {
       });
 
       const result = await response.json();
-      
+
       if (!response.ok || !Array.isArray(result.data)) {
         throw new Error(result.message || 'La respuesta de la API de usuarios no es un array válido.');
-      }        
+      }
       setUsers(result.data);
     } catch (err: any) {
       console.error('Error al obtener los usuarios:', err);
@@ -163,16 +167,16 @@ const UserList = () => {
     } else if (!/\S+@\S+\.\S+/.test(formState.Correo)) {
       errors.Correo = 'El formato del correo no es válido.';
     }
-   // if (formState.idTipoUsuario === '') errors.idTipoUsuario = 'El tipo de usuario es obligatorio.';
-    
+    // if (formState.idTipoUsuario === '') errors.idTipoUsuario = 'El tipo de usuario es obligatorio.';
+
     // Validación de contraseña
     if (formState.Contrasena && formState.Contrasena.trim() !== '') {
-        if (formState.Contrasena.length < 6) {
-          errors.Contrasena = 'La contraseña debe tener al menos 6 caracteres.';
-        }
-        if (formState.Contrasena !== formState.ConfirmarContrasena) {
-          errors.ConfirmarContrasena = 'Las contraseñas no coinciden.';
-        }
+      if (formState.Contrasena.length < 6) {
+        errors.Contrasena = 'La contraseña debe tener al menos 6 caracteres.';
+      }
+      if (formState.Contrasena !== formState.ConfirmarContrasena) {
+        errors.ConfirmarContrasena = 'Las contraseñas no coinciden.';
+      }
     } else if (!editingUser) {
       errors.Contrasena = 'La contraseña es obligatoria.';
     }
@@ -197,7 +201,7 @@ const UserList = () => {
         delete dataToSave.Contrasena;
         delete dataToSave.ConfirmarContrasena;
       }
-      
+
       if (editingUser) {
         // Petición PUT para actualizar
         response = await fetch(`${API_BASE_URL}${ENDPOINT_BASE}/Actualizar`, {
@@ -212,12 +216,12 @@ const UserList = () => {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(dataToSave),
         });
-      }          
+      }
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.message || `Error: ${response.statusText}`);
       }
-      
+
       await fetchUsers();
       handleCloseFormModal();
       showNotification('Usuario guardado correctamente.', 'success');
@@ -261,30 +265,68 @@ const UserList = () => {
   // Manejadores de eliminación
   const handleDelete = (id: string) => {
     setUserIdToDelete(id);
+    setPregunta("¿Estás seguro de eliminar este usuario?");
+    setOperacion("eliminar");
+    setIsConfirmModalOpen(true);
+    setTimeout(() => setIsConfirmModalVisible(true), 10);
+  };
+  const handleBlock = (id: string) => {
+    setUserIdToDelete(id);
+    setPregunta("¿Estás seguro de desactivar/activar este usuario?");
+    setOperacion("desactivar");
     setIsConfirmModalOpen(true);
     setTimeout(() => setIsConfirmModalVisible(true), 10);
   };
 
   const confirmDelete = async () => {
-    if (userIdToDelete !== null) {
-      const id = userIdToDelete;
-      try {
-        const response = await fetch(`${API_BASE_URL}${ENDPOINT_BASE}/Eliminar/${id}`, {
-          method: 'DELETE',
-        });
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.message || `Error: ${response.statusText}`);
-        }
-        
-        await fetchUsers();
-        showNotification('Usuario eliminado correctamente.', 'success');
-      } catch (err: any) {
-        console.error('Error al eliminar el usuario:', err);
-        showNotification(`Error al eliminar el usuario: ${err.message}`, 'error');
+    if (userIdToDelete) {
+      if (operacion == "eliminar") {
+        EliminarUsuario(userIdToDelete);
+      } else if (operacion == "desactivar") {
+        DesactivarUsuario(userIdToDelete);
       }
     }
     handleCloseConfirmModal();
+  };
+  const DesactivarUsuario = async (id: string = "") => {
+    try {
+      const response = await fetch(`${API_BASE_URL}${ENDPOINT_BASE}/Bloquear/${id}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      body: JSON.stringify({  }), 
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        showNotification(data.mensaje, "error");
+      } else {
+        showNotification(data.mensaje, "success");
+      }
+      fetchUsers(initialSearchState);
+    } catch (err: any) {
+      showNotification(err.message || 'Hubo un error al desactivar/activar el  usuario. Verifica que la API esté corriendo y responda correctamente.', "error");
+    }
+  };
+  const EliminarUsuario = async (id: string = "") => {
+    try {
+      const response = await fetch(`${API_BASE_URL}${ENDPOINT_BASE}/Eliminar/${id}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      body: JSON.stringify({  }), 
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        showNotification(data.mensaje, "error");
+      } else {
+        showNotification(data.mensaje, "success");
+      }
+      fetchUsers(initialSearchState);
+    } catch (err: any) {
+      showNotification(err.message || 'Hubo un error al desactivar/activar el  usuario. Verifica que la API esté corriendo y responda correctamente.', "error");
+    }
   };
 
   const cancelDelete = () => {
@@ -298,7 +340,7 @@ const UserList = () => {
       setIsConfirmModalOpen(false);
     }, 300);
   };
-  
+
   // Efecto para controlar el scroll del body
   useEffect(() => {
     if (isFormModalOpen || isConfirmModalOpen) {
@@ -310,21 +352,21 @@ const UserList = () => {
       document.body.classList.remove('overflow-hidden');
     };
   }, [isFormModalOpen, isConfirmModalOpen]);
-  
- const getRoleName = (value: number): string => {
-  // El enum en TypeScript crea un "mapeo inverso"
-  // que te permite acceder al nombre directamente por su valor numérico.
-  const roleName = TipoEmpleado[value];
 
-  // Si roleName no es 'undefined', significa que se encontró un nombre.
-  if (roleName !== undefined) {
-    return roleName;
-  }
-  
-  // Si no se encontró un nombre (porque el valor no existe), retorna 'Desconocido'.
-  return 'Desconocido';
-};
-  
+  const getRoleName = (value: number): string => {
+    // El enum en TypeScript crea un "mapeo inverso"
+    // que te permite acceder al nombre directamente por su valor numérico.
+    const roleName = TipoEmpleado[value];
+
+    // Si roleName no es 'undefined', significa que se encontró un nombre.
+    if (roleName !== undefined) {
+      return roleName;
+    }
+
+    // Si no se encontró un nombre (porque el valor no existe), retorna 'Desconocido'.
+    return 'Desconocido';
+  };
+
 
 
   return (
@@ -345,7 +387,7 @@ const UserList = () => {
           Crear Nuevo Usuario
         </button>
       </div>
-      
+
       {/* Formulario de búsqueda */}
       <div className="rounded-xl bg-white p-6 shadow-md">
         <h3 className="text-xl font-bold mb-4 text-gray-900">Buscar Usuarios</h3>
@@ -440,27 +482,45 @@ const UserList = () => {
                 <th className="px-4 py-2">Apellidos</th>
                 <th className="px-4 py-2">Correo</th>
                 <th className="px-4 py-2">Tipo de Usuario</th>
-                <th className="px-4 py-2">Acciones</th>
+                <th className="px-4 py-2 text-right">Acciones</th>
               </tr>
             </thead>
             <tbody>
               {users.map(user => (
-                <tr key={user._id} className="border-t border-gray-200 hover:bg-gray-50">            
+                <tr key={user._id} className="border-t border-gray-200 hover:bg-gray-50">
                   <td className="px-4 py-2">{user.Nombres}</td>
                   <td className="px-4 py-2">{user.Apellidos}</td>
                   <td className="px-4 py-2">{user.Correo}</td>
                   <td className="px-4 py-2">
                     {getRoleName(user.idTipoUsuario)}
                   </td>
-                  <td className="px-4 py-2 flex space-x-2">
+                  <td className="px-4 py-2 flex space-x-2 float-right">
                     <button onClick={() => handleOpenFormModal(user)} className="rounded-md bg-blue-600 px-4 py-1 text-sm text-white transition-colors duration-200 hover:bg-blue-700">
-                      Editar
+                      <i className="material-symbols-rounded filled">stylus</i>
                     </button>
+                    {user.Estado == 1 && (
+                      <button
+                        onClick={() => handleBlock(user._id)}
+                        className="rounded-md bg-amber-600 px-4 py-1 text-sm text-white transition-colors duration-200 hover:bg-amber-700"
+                        title="Desactivar servicio"
+                      >
+                        <i className="material-symbols-rounded filled">block</i>
+                      </button>
+                    )}
+                    {user.Estado == 2 && (
+                      <button
+                        onClick={() => handleBlock(user._id)}
+                        className="rounded-md bg-green-600 px-4 py-1 text-sm text-white transition-colors duration-200 hover:bg-green-700"
+                        title="Activar servicio"
+                      >
+                        <i className="material-symbols-rounded filled">check</i>
+                      </button>
+                    )}
                     <button
                       onClick={() => handleDelete(user._id)}
                       className="rounded-md bg-red-600 px-4 py-1 text-sm text-white transition-colors duration-200 hover:bg-red-700"
                     >
-                      Eliminar
+                      <i className="material-symbols-rounded filled">delete</i>
                     </button>
                   </td>
                 </tr>
@@ -472,24 +532,24 @@ const UserList = () => {
 
       {/* Modal de confirmación de eliminación */}
       {isConfirmModalOpen && (
-        <div 
+        <div
           className={`fixed inset-0 z-50 flex items-center justify-center transition-all duration-300 ${isConfirmModalVisible ? 'opacity-100 backdrop-blur-sm' : 'opacity-0'}`}
           style={{ backgroundColor: 'rgba(255, 255, 255, 0.60)' }}
         >
           <div className={`w-full max-w-sm rounded-2xl bg-white p-8 shadow-2xl transform transition-transform duration-300 border-2 border-blue-500 ${isConfirmModalVisible ? 'scale-100' : 'scale-95'}`}>
-            <p className="text-lg font-semibold text-gray-800">¿Estás seguro de que quieres eliminar este usuario?</p>
+            <p className="text-lg font-semibold text-gray-800">{Pregunta}</p>
             <div className="mt-4 flex justify-end space-x-2">
               <button onClick={cancelDelete} className="rounded-md bg-gray-300 px-4 py-2 text-gray-800 transition-colors hover:bg-gray-400">
                 Cancelar
               </button>
               <button onClick={confirmDelete} className="rounded-md bg-red-600 px-4 py-2 text-white transition-colors hover:bg-red-700">
-                Eliminar
+                Continuar
               </button>
             </div>
           </div>
         </div>
       )}
-      
+
       {/* Modal para crear o editar usuario */}
       {isFormModalOpen && (
         <div

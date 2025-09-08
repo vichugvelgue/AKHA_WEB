@@ -7,8 +7,11 @@ import { useRouter } from 'next/navigation'; // Importa el hook useRouter
 import ToggleSwitch from "@/src/hooks/ToggleSwitch";
 import Cargando from '@/src/hooks/Cargando';
 import { useNotification } from '@/src/hooks/useNotifications';
-import { RazonSocial } from '@/src/Interfaces/Interfaces';
-import RazonSocialAgregar from './Agregar';
+import { Modulo, Permiso, TipoUsuario, Cliente } from '@/src/Interfaces/Interfaces';
+import { ObtenerSesionUsuario } from '@/src/utils/constantes';
+import ModalBitacoraContibuyente from '@/src/hooks/ModalBitacoraContibuyente';
+import ContribuyenteConsultar from './Agregar';
+import CredencialesCliente from './credencialesCliente';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000';
 
@@ -22,14 +25,17 @@ interface ModalProps {
 }
 
 // Componente para la vista de CRUD de Usuarios
-const RazonesSocialesCRUD = () => {
+const ContadorCRUD = () => {
   // Inicializa el router para la navegación
   const router = useRouter();
+  const sesion = ObtenerSesionUsuario();
   const { notification, showNotification, hideNotification } = useNotification();
 
-  const [tiposUsuarios, setRazonesSociales] = useState<RazonSocial[]>([]);
+  const [tiposUsuarios, setTiposUsuarios] = useState<Cliente[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isOpenCredenciales, setIsOpenCredenciales] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
+  const [showBitacora, setShowBitacora] = useState(false);
   const [idEditar, setIdEditar] = useState<string>("");
   const [editar, setEditar] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -46,9 +52,9 @@ const RazonesSocialesCRUD = () => {
 
   const Listar = async () => {
     setIsLoading(true);
-    setRazonesSociales([]);
+    setTiposUsuarios([]);
     try {
-      const response = await fetch(`${API_BASE_URL}/razonessociales/ListarRazonSocial`);
+      const response = await fetch(`${API_BASE_URL}/clientes/ListarClientesPorContador/${sesion.idUsuario}`);
       if (!response.ok) {
         throw new Error(`Error: ${response.statusText}`);
       }
@@ -56,7 +62,7 @@ const RazonesSocialesCRUD = () => {
       const contentType = response.headers.get('content-type');
       if (contentType && contentType.includes('application/json')) {
         const data = await response.json();
-        setRazonesSociales(data.data);
+        setTiposUsuarios(data.data);
       } else {
         const text = await response.text();
         console.error('La respuesta de la API no es JSON:', text);
@@ -71,9 +77,9 @@ const RazonesSocialesCRUD = () => {
   };
   const Buscar = async () => {
     setIsLoading(true);
-    setRazonesSociales([]);
+    setTiposUsuarios([]);
     try {
-      const response = await fetch(`${API_BASE_URL}/razonessociales/BuscarRazonesSociales`, {
+      const response = await fetch(`${API_BASE_URL}/clientes/BuscarClientesPorContador/${sesion.idUsuario}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -81,7 +87,7 @@ const RazonesSocialesCRUD = () => {
         body: JSON.stringify({
           RazonSocial: NombreBuscar,
           RFC: RfcBuscar,
-        } as RazonSocial),
+        } as Cliente),
       });
       if (!response.ok) {
         throw new Error(`Error: ${response.statusText}`);
@@ -90,7 +96,7 @@ const RazonesSocialesCRUD = () => {
       const contentType = response.headers.get('content-type');
       if (contentType && contentType.includes('application/json')) {
         const data = await response.json();
-        setRazonesSociales(data.data);
+        setTiposUsuarios(data.data);
       } else {
         const text = await response.text();
         console.error('La respuesta de la API no es JSON:', text);
@@ -104,76 +110,7 @@ const RazonesSocialesCRUD = () => {
     }
   };
 
-  const handleDelete = (id: string = "") => {
-    setPregunta("¿Estás seguro de que quieres eliminar este tipo de usuario?");
-    setOperacion("eliminar");
-    setIdEditar(id);
-    setShowConfirm(true);
-  };
-  const handleDesactivar = (id: string = "") => {
-    setPregunta("¿Estás seguro de que quieres desactivar/activar este tipo de usuario?");
-    setOperacion("desactivar");
-    setIdEditar(id);
-    setShowConfirm(true);
-  };
-
-  const cancelDelete = () => {
-    setPregunta("");
-    setOperacion("");
-    setIdEditar("");
-    setShowConfirm(false);
-  }
-  const confirm = () => {
-    if (idEditar !== "") {
-      if (operacion == "eliminar") {
-        EliminarTipoUsuario(idEditar);
-      } else if (operacion == "desactivar") {
-        DesactivarTipoUsuario(idEditar);
-      }
-    }
-    setIdEditar("");
-    setShowConfirm(false);
-  };
-
-  const DesactivarTipoUsuario = async (id: string = "") => {
-    try {
-      const response = await fetch(`${API_BASE_URL}/razonessociales/DesactivarRazonSocial/${id}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-      if (!response.ok) {
-        throw new Error(`Error: ${response.statusText}`);
-      }
-      const data = await response.json();
-      showNotification(data.mensaje, "success");
-      Listar();
-    } catch (err: any) {
-      showNotification(err.message || 'Hubo un error al desactivar/activar el tipo de usuario. Verifica que la API esté corriendo y responda correctamente.', "error");
-    }
-  };
-
-  const EliminarTipoUsuario = async (id: string = "") => {
-    try {
-      const response = await fetch(`${API_BASE_URL}/razonessociales/EliminarRazonSocial/${id}`, {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-      if (!response.ok) {
-        throw new Error(`Error: ${response.statusText}`);
-      }
-      const data = await response.json();
-      showNotification(data.mensaje, "success");
-      Listar();
-    } catch (err: any) {
-      showNotification(err.message || 'Hubo un error al desactivar/activar el tipo de usuario. Verifica que la API esté corriendo y responda correctamente.', "error");
-    }
-  };
-
-  // La función ahora recibe un objeto con el tipo User
+  // La función ahora recibe un objeto
   const handleRegister = (Mensaje: string, Color: "success" | "error" | "warning" = "success") => {
     showNotification(Mensaje, Color);
     setIsModalOpen(false);
@@ -195,16 +132,33 @@ const RazonesSocialesCRUD = () => {
     setIsModalOpen(false);
     Listar();
   };
+  const handleOpenModalBitacora = (id: string = "") => {
+    setIdEditar(id);
+    setShowBitacora(true);
+  };
+  const handleCloceModalBitacora = () => {
+    setShowBitacora(false);
+  };
+  const handleOpenCredencialesModal = (id: string = "") => {
+    setIdEditar(id);
+    setIsOpenCredenciales(true);
+  };
+  const handleCloseCredencialesModal = () => {
+    setIsOpenCredenciales(false);
+  };
 
   if (isModalOpen) {
     console.log({ idEditar, editar });
-    return (<RazonSocialAgregar idEditar={idEditar} Editar={editar} onClose={handleCloceModal} onRegister={handleRegister} />)
+    return (<ContribuyenteConsultar idEditar={idEditar} Editar={editar} onClose={handleCloceModal} onRegister={handleRegister} />)
+  } 
+  if (isOpenCredenciales) {
+    return (<CredencialesCliente idEditar={idEditar} onClose={handleCloseCredencialesModal} onRegister={handleCloseCredencialesModal} />)
   }
 
   return (
     <div className="space-y-6 p-4">
       <div className="flex items-center justify-between">
-        <h2 className="text-3xl font-extrabold text-blue-900">Gestión de Razones sociales</h2>
+        <h2 className="text-3xl font-extrabold text-blue-900">Gestión del contador</h2>
 
         <div className="flex space-x-4">
           <button
@@ -215,12 +169,6 @@ const RazonesSocialesCRUD = () => {
             className="rounded-lg bg-gray-300 px-6 py-2 text-gray-800 transition-colors duration-200 hover:bg-gray-400"
           >
             Regresar
-          </button>
-          <button
-            onClick={handleOpenModal}
-            className="rounded-lg bg-yellow-400 px-6 py-2 text-gray-900 font-semibold transition-colors duration-200 hover:bg-yellow-500"
-          >
-            Nuevo Contribuyente
           </button>
         </div>
       </div>
@@ -278,20 +226,14 @@ const RazonesSocialesCRUD = () => {
                 <td className="px-4 py-2">{usuario.RazonSocial}</td>
                 <td className="px-4 py-2">{usuario.RFC}</td>
                 <td className="px-4 py-2 flex justify-end space-x-2 ">
+                  <button onClick={() => handleOpenModalBitacora(usuario._id || "")} className="rounded-md bg-blue-600 px-4 py-1 text-sm text-white transition-colors duration-200 hover:bg-blue-700">
+                     <i className="material-symbols-rounded filled">visibility</i> 
+                  </button>
                   <button onClick={() => handleEditModal(usuario._id || "")} className="rounded-md bg-blue-600 px-4 py-1 text-sm text-white transition-colors duration-200 hover:bg-blue-700">
-                    <i className="material-symbols-rounded filled">stylus</i> 
+                    <i className="material-symbols-rounded filled">stylus</i>
                   </button>
-                  <button
-                    onClick={() => handleDesactivar(usuario._id || "")}
-                    className={`rounded-md px-4 py-1 text-sm text-white transition-colors duration-200 ${usuario.Estado == 1 ? "bg-yellow-600 hover:bg-yellow-700" : "bg-green-600 hover:bg-green-700"}`}
-                  >
-                    <i className="material-symbols-rounded filled">{usuario.Estado == 1 ? "block" : "check"}</i> 
-                  </button>
-                  <button
-                    onClick={() => handleDelete(usuario._id || "")}
-                    className="rounded-md bg-red-600 px-4 py-1 text-sm text-white transition-colors duration-200 hover:bg-red-700"
-                  >
-                    <i className="material-symbols-rounded filled">delete</i> 
+                  <button onClick={() => handleOpenCredencialesModal(usuario._id || "")} className="rounded-md bg-green-600 px-4 py-1 text-sm text-white transition-colors duration-200 hover:bg-green-700">
+                    <i className="material-symbols-rounded filled">vpn_key</i>
                   </button>
                 </td>
               </tr>
@@ -300,6 +242,13 @@ const RazonesSocialesCRUD = () => {
         </table>
       </div>
 
+      {
+        showBitacora && 
+        <ModalBitacoraContibuyente
+          Cerrar={handleCloceModalBitacora}
+          idContribuyente={idEditar}
+        />
+      }
 
       {/* Modal de confirmación de eliminación con animación */}
       {showConfirm && (
@@ -310,11 +259,11 @@ const RazonesSocialesCRUD = () => {
           <div className={`w-full max-w-sm rounded-2xl bg-white p-8 shadow-2xl transform transition-transform duration-300 border-2 border-blue-500 scale-100`}>
             <p className="text-lg font-semibold text-gray-800">{pregunta}</p>
             <div className="mt-4 flex justify-end space-x-2">
-              <button onClick={cancelDelete} className="rounded-md bg-gray-300 px-4 py-2 text-gray-800 transition-colors hover:bg-gray-400">
+              <button onClick={()=>{}} className="rounded-md bg-gray-300 px-4 py-2 text-gray-800 transition-colors hover:bg-gray-400">
                 Cancelar
               </button>
-              <button onClick={confirm} className="rounded-md bg-red-600 px-4 py-2 text-white transition-colors hover:bg-red-700">
-                Continuar
+              <button onClick={()=>{}} className="rounded-md bg-red-600 px-4 py-2 text-white transition-colors hover:bg-red-700">
+                Eliminar
               </button>
             </div>
           </div>
@@ -341,10 +290,10 @@ const RazonesSocialesCRUD = () => {
   );
 };
 
-export default function UsuariosPage() {
+export default function ContadorPage() {
   return (
     <div className="p-10 flex-1 overflow-auto">
-      <RazonesSocialesCRUD />
+      <ContadorCRUD />
     </div>
   );
 }

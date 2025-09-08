@@ -8,9 +8,10 @@ import ToggleSwitch from "@/src/hooks/ToggleSwitch";
 import Cargando from '@/src/hooks/Cargando';
 import { useNotification } from '@/src/hooks/useNotifications';
 import { Modulo, Permiso, GrupoEmpresarial } from '@/src/Interfaces/Interfaces';
-import GruposEmpresarialesAgregar from '@/src/app/dashboard/administracion/gruposempresariales/Agregar';
+import GruposEmpresarialesAgregar from '@/src/app/dashboard/administracion/gruposclientes/Agregar';
 
-import { API_BASE_URL } from '@/src/utils/constantes';
+import { API_BASE_URL, ObtenerSesionUsuario } from '@/src/utils/constantes';
+import ModalBitacoraGrupo from '@/src/hooks/ModalBitacoraGrupo';
 
 
 // Definimos una interfaz para las propiedades del modal de registro
@@ -24,12 +25,14 @@ interface ModalProps {
 // Componente para la vista de CRUD de Usuarios
 const GruposEmpresarialesCRUD = () => {
   // Inicializa el router para la navegación
+  const sesion = ObtenerSesionUsuario();
   const router = useRouter();
   const { notification, showNotification, hideNotification } = useNotification();
 
   const [ListaGrupos, setTiposUsuarios] = useState<GrupoEmpresarial[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
+  const [showBitacora, setShowBitacora] = useState(false);
   const [idEditar, setIdEditar] = useState<string>("");
   const [editar, setEditar] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -37,7 +40,8 @@ const GruposEmpresarialesCRUD = () => {
   const [pregunta, setPregunta] = useState<string>("");
   const [operacion, setOperacion] = useState<string>("");
   const [NombreBuscar, setNombreBuscar] = useState<string>("");
-  const [RfcBuscar, setRfcBuscar] = useState<string>("");
+  const [ResponsableBuscar, setResponsableBuscar] = useState<string>("");
+  const [EstadoBuscar, setEstadoBuscar] = useState<number>(0);
 
 
   useEffect(() => {
@@ -80,6 +84,8 @@ const GruposEmpresarialesCRUD = () => {
         },
         body: JSON.stringify({
           Nombre: NombreBuscar,
+          Responsable: ResponsableBuscar,
+          Estado: EstadoBuscar,
         } as GrupoEmpresarial),
       });
       if (!response.ok) {
@@ -141,6 +147,7 @@ const GruposEmpresarialesCRUD = () => {
         headers: {
           'Content-Type': 'application/json',
         },
+      body: JSON.stringify({ UsuarioAplico: sesion.idUsuario }), 
       });
       const data = await response.json();
       if (!response.ok) {
@@ -161,6 +168,7 @@ const GruposEmpresarialesCRUD = () => {
         headers: {
           'Content-Type': 'application/json',
         },
+      body: JSON.stringify({ UsuarioAplico: sesion.idUsuario }), 
       });
       const data = await response.json();
       if (!response.ok) {
@@ -196,6 +204,13 @@ const GruposEmpresarialesCRUD = () => {
     setIsModalOpen(false);
     Listar();
   };
+  const handleOpenModalBitacora = (id: string = "") => {
+    setIdEditar(id);
+    setShowBitacora(true);
+  };
+  const handleCloceModalBitacora = () => {
+    setShowBitacora(false);
+  };
   
   if (isModalOpen) {
     return (<GruposEmpresarialesAgregar idEditar={idEditar} Editar={editar} onClose={handleCloceModal} onRegister={handleRegister} />)
@@ -204,7 +219,7 @@ const GruposEmpresarialesCRUD = () => {
   return (
     <div className="space-y-6 p-4">
       <div className="flex items-center justify-between">
-        <h2 className="text-3xl font-extrabold text-blue-900">Gestión de Grupos Empresariales</h2>
+        <h2 className="text-3xl font-extrabold text-blue-900">Gestión de Grupos o clientes</h2>
 
         <div className="flex space-x-4">
           <button
@@ -226,7 +241,7 @@ const GruposEmpresarialesCRUD = () => {
       </div>
 <div className="rounded-xl bg-white p-6 shadow-md">
         <div className="flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-6">
-          <div className="w-full sm:w-2/3">
+          <div className="w-full sm:w-1/3">
             <label htmlFor="nombreFilter" className="block text-sm font-medium text-gray-700">
               Filtrar por Nombre
             </label>
@@ -239,6 +254,34 @@ const GruposEmpresarialesCRUD = () => {
               className="mt-1 block w-full rounded-md border-gray-300 bg-gray-50 p-2 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
             />
           </div>
+          <div className="w-full sm:w-1/3">
+            <label htmlFor="nombreFilter" className="block text-sm font-medium text-gray-700">
+              Filtrar por Responsable
+            </label>
+            <input
+              type="text"
+              id="ResponsableBuscar"
+              value={ResponsableBuscar}
+              onChange={(e) => setResponsableBuscar(e.target.value)}
+              placeholder="Buscar por responsable..."
+              className="mt-1 block w-full rounded-md border-gray-300 bg-gray-50 p-2 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+            />
+          </div>
+          <div className="w-full sm:w-1/3">
+            <label htmlFor="nombreFilter" className="block text-sm font-medium text-gray-700">
+              Filtrar por responsable
+            </label>
+            <select
+              value={EstadoBuscar}
+              onChange={(e) => setEstadoBuscar(parseInt(e.target.value))}
+              className="mt-1 block w-full rounded-md border-gray-300 bg-gray-50 p-2 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+            >
+              <option value={0}>Todos</option>
+              <option value={1}>Activo</option>
+              <option value={2}>Inactivo</option>
+            </select>
+          </div>
+          
           <div className="w-full sm:w-1/3">
           <button
             onClick={Buscar}
@@ -271,20 +314,23 @@ const GruposEmpresarialesCRUD = () => {
                     </span>
                 </td>
                 <td className="px-4 py-2 flex justify-end space-x-2 ">
+                  <button onClick={() => handleOpenModalBitacora(grupo._id || "")} className="rounded-md bg-blue-600 px-4 py-1 text-sm text-white transition-colors duration-200 hover:bg-blue-700">
+                     <i className="material-symbols-rounded filled">visibility</i> 
+                  </button>
                   <button onClick={() => handleEditModal(grupo._id || "")} className="rounded-md bg-blue-600 px-4 py-1 text-sm text-white transition-colors duration-200 hover:bg-blue-700">
-                    Editar
+                     <i className="material-symbols-rounded filled">stylus</i> 
                   </button>
                   <button
+                  className={`rounded-md px-4 py-1 text-sm text-white transition-colors duration-200 ${grupo.Estado == 1 ? 'bg-yellow-600 hover:bg-yellow-700' : 'bg-green-600 hover:bg-green-700'}`}
                     onClick={() => handleDesactivar(grupo._id || "")}
-                    className={`rounded-md px-4 py-1 text-sm text-white transition-colors duration-200 ${grupo.Estado == 1 ?  "bg-yellow-600 hover:bg-yellow-700":"bg-green-600 hover:bg-green-700" }`}
                   >
-                    {grupo.Estado == 1 ? "Desactivar" : "Activar"}
+                    <i className="material-symbols-rounded filled">{grupo.Estado == 1 ? "block" : "check"}</i> 
                   </button>
                   <button
                     onClick={() => handleDelete(grupo._id || "")}
                     className="rounded-md bg-red-600 px-4 py-1 text-sm text-white transition-colors duration-200 hover:bg-red-700"
                   >
-                    Eliminar
+                    <i className="material-symbols-rounded filled">delete</i> 
                   </button>
                 </td>
               </tr>
@@ -313,6 +359,13 @@ const GruposEmpresarialesCRUD = () => {
           </div>
         </div>
       )}
+      {
+        showBitacora && 
+        <ModalBitacoraGrupo
+          Cerrar={handleCloceModalBitacora}
+          idGrupo={idEditar}
+        />
+      }
       <Cargando isLoading={isLoading} />
       {notification.visible && (
         <div
