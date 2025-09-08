@@ -172,12 +172,8 @@ const TiposUsuarioCRUD = () => {
           >
             Regresar
           </button>
-          <button
-            onClick={handleOpenModal}
-            className="rounded-lg bg-yellow-400 px-6 py-2 text-gray-900 font-semibold transition-colors duration-200 hover:bg-yellow-500"
-          >
-            Crear Nuevo Usuario
-          </button>
+          {/* <button className="rounded-lg bg-yellow-400 px-6 py-2 text-gray-900 font-semibold transition-colors duration-200 hover:bg-yellow-500"
+            onClick={handleOpenModal} >Crear Nuevo Usuario</button> */}
         </div>
       </div>
 
@@ -195,20 +191,16 @@ const TiposUsuarioCRUD = () => {
                 <td className="px-4 py-2">{usuario.Nombre}</td>
                 <td className="px-4 py-2 flex justify-end space-x-2 ">
                   <button onClick={() => handleEditModal(usuario._id || "")} className="rounded-md bg-blue-600 px-4 py-1 text-sm text-white transition-colors duration-200 hover:bg-blue-700">
-                    Editar
+                    <i className="material-symbols-rounded filled">stylus</i>
                   </button>
-                  <button
-                    onClick={() => handleDesactivar(usuario._id || "")}
-                    className="rounded-md bg-yellow-600 px-4 py-1 text-sm text-white transition-colors duration-200 hover:bg-yellow-700"
-                  >
+                  {/* <button className="rounded-md bg-yellow-600 px-4 py-1 text-sm text-white transition-colors duration-200 hover:bg-yellow-700"
+                    onClick={() => handleDesactivar(usuario._id || "")} >
                     {usuario.Estado == 1 ? "Desactivar" : "Activar"}
                   </button>
-                  <button
-                    onClick={() => handleDelete(usuario._id || "")}
-                    className="rounded-md bg-red-600 px-4 py-1 text-sm text-white transition-colors duration-200 hover:bg-red-700"
-                  >
+                  <button className="rounded-md bg-red-600 px-4 py-1 text-sm text-white transition-colors duration-200 hover:bg-red-700"
+                    onClick={() => handleDelete(usuario._id || "")} >
                     Eliminar
-                  </button>
+                  </button> */}
                 </td>
               </tr>
             ))}
@@ -467,6 +459,7 @@ const RegistroUsuarioModal = ({ idEditar, Editar = false, onClose, onRegister }:
 
           <label className="block text-sm font-medium text-gray-700">Nombre del rol</label>
           <input
+            disabled
             type="text"
             name="Nombre"
             value={formState.Nombre}

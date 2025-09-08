@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation'; // Importa el hook useRouter
 import ToggleSwitch from "@/src/hooks/ToggleSwitch";
 import Cargando from '@/src/hooks/Cargando';
 import { useNotification } from '@/src/hooks/useNotifications';
-import { Cliente, PersonaContacto, RepresentanteLegal } from '@/src/Interfaces/Interfaces';
+import { Actividad, Cliente, PersonaContacto, RepresentanteLegal } from '@/src/Interfaces/Interfaces';
 import { ObtenerSesionUsuario } from '@/src/utils/constantes';
 
 
@@ -19,6 +19,11 @@ type servicioItem = {
   _id: string;
   Nombre: string;
   Estado: number;
+  Actividades: Actividad[];
+  ActividadesServicio: {
+    idActividad: string;
+    Orden?: number;
+  }[];
 };
 
 interface RegimenFiscal {
@@ -29,9 +34,9 @@ interface RegimenFiscal {
 // Definimos una interfaz para las propiedades del modal de registro
 interface ModalProps {
   idEditar?: string;
-  Editar?: boolean;
+  Editar: boolean;
   onClose: () => void;
-  onRegister: (Mensaje: string, Color: "success" | "error" | "warning", contribuyente: Cliente) => void;
+  onRegister: (Mensaje: string, Color: "success" | "error" | "warning") => void;
 }
 
 
@@ -51,7 +56,7 @@ const Separador = ({ Titulo }: SeparadorProps) => {
 }
 
 // Componente para la vista de CRUD de Usuarios
-const ContribuyentesAgregar = ({ idEditar, Editar = false, onClose, onRegister }: ModalProps) => {
+const ContribuyenteConsultar = ({ idEditar, Editar = false, onClose, onRegister }: ModalProps) => {
   const sesion = ObtenerSesionUsuario();
   const router = useRouter();
   const { notification, showNotification, hideNotification } = useNotification();
@@ -80,7 +85,6 @@ const ContribuyentesAgregar = ({ idEditar, Editar = false, onClose, onRegister }
     idUsuarioCreacion: "",
     idGrupoEmpresarial: "",
     idContador: "",
-    Cumpleanos: "",
     // Inicializar los objetos de contacto
     RepresentanteLegal: {
       Nombre: "",
@@ -91,25 +95,22 @@ const ContribuyentesAgregar = ({ idEditar, Editar = false, onClose, onRegister }
     DuenoEmpresa: {
       Nombre: "",
       Telefono: "",
-      Correo: "",
-      Cumpleanos: ""
+      Correo: ""
     },
     ContactoCobranza: {
       Nombre: "",
       Telefono: "",
-      Correo: "",
-      Cumpleanos: ""
+      Correo: ""
     },
     GerenteOperativo: {
       Nombre: "",
       Telefono: "",
-      Correo: "",
-      Cumpleanos: ""
+      Correo: ""
     },
     EnlaceAkha: {
       Nombre: "",
       Telefono: "",
-      Correo: "",
+      Correo: ""
     }
   });
 
@@ -121,14 +122,14 @@ const ContribuyentesAgregar = ({ idEditar, Editar = false, onClose, onRegister }
   const inputXMLREF = useRef<HTMLInputElement | null>(null);
 
   // Nuevo estado para controlar la pestaña activa
-  const [activeTab, setActiveTab] = useState('informacion-interna');
+  const [activeTab, setActiveTab] = useState('servicios');
 
   // Definimos las pestañas en un arreglo para que sea más escalable
   const tabs = [
+    { id: 'servicios', label: 'Servicios' },
     { id: 'informacion-interna', label: 'Información Interna' },
     { id: 'contactos-empresa', label: 'Contactos de la Empresa' },
     { id: 'enlace-akha', label: 'Enlace AKHA' },
-    { id: 'servicios', label: 'Servicios' },
 
   ];
 
@@ -194,16 +195,33 @@ const ContribuyentesAgregar = ({ idEditar, Editar = false, onClose, onRegister }
 
   const listarServicios = async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/Servicios/ObtenerLista`);
+      const response = await fetch(`${API_BASE_URL}/Servicios/ObtenerListadoPorCliente/${idEditar}`);
       const result = await response.json();
       if (!response.ok) {
         throw new Error(result.message || 'La respuesta de la API de servicios no es un array válido.');
       }
-      setservicios(result.data);
+      console.log('servicios:', result.data);
+      if(result.data){
+      UnidicarActividadesServicio(result.data);
+      }
     } catch (err: any) {
+      console.error('Error al cargar los servicios:', err);
       showNotification('Error al cargar los servicios.', 'error');
     }
   };
+  const UnidicarActividadesServicio = (listarServicios: servicioItem[]) => {
+    for (const servicio of listarServicios) {
+      for (const actividad of servicio.Actividades) {
+        let index = servicio.ActividadesServicio.findIndex((item) => item.idActividad === actividad._id);
+        if (index >= 0) {
+          actividad.Orden = servicio.ActividadesServicio[index].Orden;
+        }
+      }
+      servicio.Actividades = servicio.Actividades.sort((a, b) => (a.Orden || 0) - (b.Orden || 0))
+    }
+
+    setservicios(listarServicios);
+  }
 
   // Función para manejar cambios en campos anidados (Representante Legal, Dueño, etc.)
   const handleNestedInputChange = (section: keyof Cliente, e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -252,7 +270,7 @@ const ContribuyentesAgregar = ({ idEditar, Editar = false, onClose, onRegister }
     let valido = true;
     // Validaciones existentes
     if (!formState.RazonSocial || !formState.RFC || !formState.CodigoPostal || !formState.Direccion || !formState.RegimenFiscal || !formState.TipoPersona) {
-      showNotification("Por favor, complete todos los campos marcados con *", "error");
+      showNotification("Por favor, complete todos los campos marcados con", "error");
       valido = false;
     }
     // Puedes agregar más validaciones para los campos de los nuevos tabs si es necesario
@@ -270,8 +288,8 @@ const ContribuyentesAgregar = ({ idEditar, Editar = false, onClose, onRegister }
       });
       const data = await response.json();
       if (!response.ok) throw new Error(`Error: ${data.mensaje}`);
-      showNotification(data.mensaje, "success");
-      onRegister(data.mensaje, "success", data.data);
+      showNotification("Razón Social guardada exitosamente", "success");
+      onClose();
     } catch (err: any) {
       console.error('Error al guardar la razón social:', err);
       setError(err.message || 'Hubo un error al guardar la razón social. Verifica que la API esté corriendo y responda correctamente.');
@@ -318,7 +336,7 @@ const ContribuyentesAgregar = ({ idEditar, Editar = false, onClose, onRegister }
   return (
     <div className="space-y-6 p-4">
       <div className="flex items-center justify-between">
-        <h2 className="text-3xl font-extrabold text-blue-900">{Editar ? "Editar Contribuyente" : "Agregar Contribuyente"}</h2>
+        <h2 className="text-3xl font-extrabold text-blue-900">Consultar Contribuyente</h2>
         <div className="flex-grow mx-2">
           <button onClick={onClose} className="float-right rounded-lg bg-gray-300 px-6 py-2 text-gray-800 transition-colors duration-200 hover:bg-gray-400"          >
             Regresar
@@ -335,8 +353,9 @@ const ContribuyentesAgregar = ({ idEditar, Editar = false, onClose, onRegister }
       <Separador Titulo="Información General" />
       <div id="INFORMACION GENERAL" className='grid grid-cols-5 gap-4'>
         <div className='col-span-2'>
-          <label className="block text-sm font-medium text-gray-700">Razón Social *</label>
+          <label className="block text-sm font-medium text-gray-700">Razón Social</label>
           <input
+            disabled
             type="text"
             name="RazonSocial"
             value={formState.RazonSocial}
@@ -347,8 +366,9 @@ const ContribuyentesAgregar = ({ idEditar, Editar = false, onClose, onRegister }
         </div>
 
         <div className='col-span-1'>
-          <label className="block text-sm font-medium text-gray-700">Código Postal *</label>
+          <label className="block text-sm font-medium text-gray-700">Código Postal</label>
           <input
+            disabled
             type="number"
             name="CodigoPostal"
             value={formState.CodigoPostal}
@@ -359,8 +379,9 @@ const ContribuyentesAgregar = ({ idEditar, Editar = false, onClose, onRegister }
         </div>
 
         <div className='col-span-1'>
-          <label className="block text-sm font-medium text-gray-700">RFC *</label>
+          <label className="block text-sm font-medium text-gray-700">RFC</label>
           <input
+            disabled
             type="text"
             name="RFC"
             value={formState.RFC}
@@ -371,8 +392,9 @@ const ContribuyentesAgregar = ({ idEditar, Editar = false, onClose, onRegister }
         </div>
 
         <div className='col-span-2'>
-          <label className="block text-sm font-medium text-gray-700">Tipo de Persona *</label>
+          <label className="block text-sm font-medium text-gray-700">Tipo de Persona</label>
           <select
+            disabled
             name="TipoPersona"
             value={formState.TipoPersona}
             onChange={handleInputChange}
@@ -386,8 +408,9 @@ const ContribuyentesAgregar = ({ idEditar, Editar = false, onClose, onRegister }
         </div>
 
         <div className='col-span-2'>
-          <label className="block text-sm font-medium text-gray-700">Regimen Fiscal *</label>
+          <label className="block text-sm font-medium text-gray-700">Regimen Fiscal</label>
           <select
+            disabled
             name="RegimenFiscal"
             value={formState.RegimenFiscal}
             onChange={handleInputChange}
@@ -403,8 +426,9 @@ const ContribuyentesAgregar = ({ idEditar, Editar = false, onClose, onRegister }
           </select>
         </div>
         <div className='col-span-5'>
-          <label className="block text-sm font-medium text-gray-700">Dirección *</label>
+          <label className="block text-sm font-medium text-gray-700">Dirección</label>
           <textarea
+            disabled
             name="Direccion"
             value={formState.Direccion}
             onChange={handleInputChange}
@@ -436,6 +460,7 @@ const ContribuyentesAgregar = ({ idEditar, Editar = false, onClose, onRegister }
               <div className='col-span-1 md:col-span-3'>
                 <label className="block text-sm font-medium text-gray-700">Clasificación Comercial</label>
                 <input
+                  disabled
                   type="text"
                   name="ClasificacionComercial"
                   value={formState.ClasificacionComercial}
@@ -446,6 +471,7 @@ const ContribuyentesAgregar = ({ idEditar, Editar = false, onClose, onRegister }
               <div className='col-span-1 md:col-span-3'>
                 <label className="block text-sm font-medium text-gray-700">Origen / Suborigen</label>
                 <input
+                  disabled
                   type="text"
                   name="OrigenContacto"
                   value={formState.OrigenContacto}
@@ -456,6 +482,7 @@ const ContribuyentesAgregar = ({ idEditar, Editar = false, onClose, onRegister }
               <div className='col-span-1 md:col-span-3'>
                 <label className="block text-sm font-medium text-gray-700">Recomendado Por</label>
                 <input
+                  disabled
                   type="text"
                   name="RecomendadoPor"
                   value={formState.RecomendadoPor}
@@ -466,6 +493,7 @@ const ContribuyentesAgregar = ({ idEditar, Editar = false, onClose, onRegister }
               <div className='col-span-1 md:col-span-3'>
                 <label className="block text-sm font-medium text-gray-700">Valor Grupo</label>
                 <input
+                  disabled
                   type="text"
                   name="ValorGrupo"
                   value={formState.ValorGrupo}
@@ -473,15 +501,18 @@ const ContribuyentesAgregar = ({ idEditar, Editar = false, onClose, onRegister }
                   className="mt-1 w-full rounded-md border-gray-300 bg-gray-50 p-2 text-gray-900 focus:border-blue-500 focus:ring-blue-500"
                 />
               </div>
-              <div className='col-span-6'>
+              <div id="OBSERVACIONES" className='mt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4'>
+                <div className='col-span-1 md:col-span-2 lg:col-span-5'>
                   <label className="block text-sm font-medium text-gray-700">Observaciones</label>
                   <textarea
+                    disabled
                     name="Observaciones"
                     value={formState.Observaciones}
                     onChange={handleInputChange}
                     className="mt-1 w-full rounded-md border-gray-300 bg-gray-50 p-2 text-gray-900 focus:border-blue-500 focus:ring-blue-500"
                   />
                 </div>
+              </div>
             </div>
           )}
 
@@ -494,6 +525,7 @@ const ContribuyentesAgregar = ({ idEditar, Editar = false, onClose, onRegister }
                   <div className='col-span-1'>
                     <label className="block text-sm font-medium text-gray-700">Correo Institucional</label>
                     <input
+                      disabled
                       type="text"
                       name="CorreoInstitucional"
                       value={formState.CorreoInstitucional}
@@ -504,6 +536,7 @@ const ContribuyentesAgregar = ({ idEditar, Editar = false, onClose, onRegister }
                   <div className='col-span-1'>
                     <label className="block text-sm font-medium text-gray-700">Correo Electrónico</label>
                     <input
+                      disabled
                       type="email"
                       name="CorreoElectronico"
                       value={formState.CorreoElectronico}
@@ -514,6 +547,7 @@ const ContribuyentesAgregar = ({ idEditar, Editar = false, onClose, onRegister }
                   <div className='col-span-1'>
                     <label className="block text-sm font-medium text-gray-700">Número de Contacto</label>
                     <input
+                      disabled
                       type="text"
                       name="NumeroTelefono"
                       value={formState.NumeroTelefono}
@@ -524,6 +558,7 @@ const ContribuyentesAgregar = ({ idEditar, Editar = false, onClose, onRegister }
                   <div className='col-span-1'>
                     <label className="block text-sm font-medium text-gray-700">WhatsApp</label>
                     <input
+                      disabled
                       type="text"
                       name="WhatsApp"
                       value={formState.WhatsApp}
@@ -534,19 +569,10 @@ const ContribuyentesAgregar = ({ idEditar, Editar = false, onClose, onRegister }
                   <div className='col-span-1'>
                     <label className="block text-sm font-medium text-gray-700">Canal de contacto preferente</label>
                     <input
+                      disabled
                       type="text"
                       name="CanalPreferente"
                       value={formState.CanalPreferente}
-                      onChange={handleInputChange}
-                      className="mt-1 w-full rounded-md border-gray-300 bg-gray-50 p-2 text-gray-900 focus:border-blue-500 focus:ring-blue-500"
-                    />
-                  </div>
-                  <div className='col-span-1'>
-                    <label className="block text-sm font-medium text-gray-700">Cumpleaños</label>
-                    <input
-                      type="date"
-                      name="Cumpleanos"
-                      value={formState.Cumpleanos}
                       onChange={handleInputChange}
                       className="mt-1 w-full rounded-md border-gray-300 bg-gray-50 p-2 text-gray-900 focus:border-blue-500 focus:ring-blue-500"
                     />
@@ -560,6 +586,7 @@ const ContribuyentesAgregar = ({ idEditar, Editar = false, onClose, onRegister }
                   <div className='col-span-1 md:col-span-2'>
                     <label className="block text-sm font-medium text-gray-700">Nombre</label>
                     <input
+                      disabled
                       type="text"
                       name="Nombre"
                       value={formState.RepresentanteLegal.Nombre}
@@ -570,6 +597,7 @@ const ContribuyentesAgregar = ({ idEditar, Editar = false, onClose, onRegister }
                   <div className='col-span-1'>
                     <label className="block text-sm font-medium text-gray-700">RFC</label>
                     <input
+                      disabled
                       type="text"
                       name="RFC"
                       value={formState.RepresentanteLegal.RFC}
@@ -580,6 +608,7 @@ const ContribuyentesAgregar = ({ idEditar, Editar = false, onClose, onRegister }
                   <div className='col-span-1'>
                     <label className="block text-sm font-medium text-gray-700">Alias</label>
                     <input
+                      disabled
                       type="text"
                       name="Alias"
                       value={formState.RepresentanteLegal.Alias}
@@ -590,6 +619,7 @@ const ContribuyentesAgregar = ({ idEditar, Editar = false, onClose, onRegister }
                   <div className='col-span-1'>
                     <label className="block text-sm font-medium text-gray-700">Cumpleaños</label>
                     <input
+                      disabled
                       type="date"
                       name="Cumpleanos"
                       value={formState.RepresentanteLegal.Cumpleanos}
@@ -605,6 +635,7 @@ const ContribuyentesAgregar = ({ idEditar, Editar = false, onClose, onRegister }
                     <div className='col-span-1'>
                       <label className="block text-sm font-medium text-gray-700">Nombre</label>
                       <input
+                        disabled
                         type="text"
                         name="Nombre"
                         value={formState.DuenoEmpresa.Nombre}
@@ -615,6 +646,7 @@ const ContribuyentesAgregar = ({ idEditar, Editar = false, onClose, onRegister }
                     <div className='col-span-1'>
                       <label className="block text-sm font-medium text-gray-700">Celular</label>
                       <input
+                        disabled
                         type="tel"
                         name="Celular"
                         value={formState.DuenoEmpresa.Telefono} // Usamos 'Telefono' en la interfaz PersonaContacto
@@ -625,20 +657,11 @@ const ContribuyentesAgregar = ({ idEditar, Editar = false, onClose, onRegister }
                     <div className='col-span-1'>
                       <label className="block text-sm font-medium text-gray-700">Correo</label>
                       <input
+                        disabled
                         type="email"
                         name="Correo"
                         value={formState.DuenoEmpresa.Correo}
                         onChange={(e) => handleNestedInputChange('DuenoEmpresa', e)}
-                        className="mt-1 w-full rounded-md border-gray-300 bg-gray-50 p-2 text-gray-900 focus:border-blue-500 focus:ring-blue-500"
-                      />
-                    </div>
-                    <div className='col-span-1'>
-                      <label className="block text-sm font-medium text-gray-700">Cumpleaños</label>
-                      <input
-                        type="date"
-                        name="Cumpleanos"
-                        value={formState.DuenoEmpresa.Cumpleanos}
-                        onChange={(e) => handleNestedInputChange('RepresentanteLegal', e)}
                         className="mt-1 w-full rounded-md border-gray-300 bg-gray-50 p-2 text-gray-900 focus:border-blue-500 focus:ring-blue-500"
                       />
                     </div>
@@ -650,6 +673,7 @@ const ContribuyentesAgregar = ({ idEditar, Editar = false, onClose, onRegister }
                     <div className='col-span-1'>
                       <label className="block text-sm font-medium text-gray-700">Nombre</label>
                       <input
+                        disabled
                         type="text"
                         name="Nombre"
                         value={formState.ContactoCobranza.Nombre}
@@ -660,6 +684,7 @@ const ContribuyentesAgregar = ({ idEditar, Editar = false, onClose, onRegister }
                     <div className='col-span-1'>
                       <label className="block text-sm font-medium text-gray-700">Teléfono</label>
                       <input
+                        disabled
                         type="tel"
                         name="Telefono"
                         value={formState.ContactoCobranza.Telefono}
@@ -670,19 +695,10 @@ const ContribuyentesAgregar = ({ idEditar, Editar = false, onClose, onRegister }
                     <div className='col-span-1'>
                       <label className="block text-sm font-medium text-gray-700">Correo</label>
                       <input
+                        disabled
                         type="email"
                         name="Correo"
                         value={formState.ContactoCobranza.Correo}
-                        onChange={(e) => handleNestedInputChange('ContactoCobranza', e)}
-                        className="mt-1 w-full rounded-md border-gray-300 bg-gray-50 p-2 text-gray-900 focus:border-blue-500 focus:ring-blue-500"
-                      />
-                    </div>
-                    <div className='col-span-1'>
-                      <label className="block text-sm font-medium text-gray-700">Cumpleaños</label>
-                      <input
-                        type="date"
-                        name="Cumpleanos"
-                        value={formState.ContactoCobranza.Cumpleanos}
                         onChange={(e) => handleNestedInputChange('ContactoCobranza', e)}
                         className="mt-1 w-full rounded-md border-gray-300 bg-gray-50 p-2 text-gray-900 focus:border-blue-500 focus:ring-blue-500"
                       />
@@ -695,6 +711,7 @@ const ContribuyentesAgregar = ({ idEditar, Editar = false, onClose, onRegister }
                     <div className='col-span-1'>
                       <label className="block text-sm font-medium text-gray-700">Nombre</label>
                       <input
+                        disabled
                         type="text"
                         name="Nombre"
                         value={formState.GerenteOperativo.Nombre}
@@ -705,6 +722,7 @@ const ContribuyentesAgregar = ({ idEditar, Editar = false, onClose, onRegister }
                     <div className='col-span-1'>
                       <label className="block text-sm font-medium text-gray-700">Teléfono</label>
                       <input
+                        disabled
                         type="tel"
                         name="Telefono"
                         value={formState.GerenteOperativo.Telefono}
@@ -715,6 +733,7 @@ const ContribuyentesAgregar = ({ idEditar, Editar = false, onClose, onRegister }
                     <div className='col-span-1'>
                       <label className="block text-sm font-medium text-gray-700">Correo</label>
                       <input
+                        disabled
                         type="email"
                         name="Correo"
                         value={formState.GerenteOperativo.Correo}
@@ -736,6 +755,7 @@ const ContribuyentesAgregar = ({ idEditar, Editar = false, onClose, onRegister }
               <div className='col-span-1'>
                 <label className="block text-sm font-medium text-gray-700">Nombre</label>
                 <input
+                  disabled
                   type="text"
                   name="Nombre"
                   value={formState.EnlaceAkha.Nombre}
@@ -746,6 +766,7 @@ const ContribuyentesAgregar = ({ idEditar, Editar = false, onClose, onRegister }
               <div className='col-span-1'>
                 <label className="block text-sm font-medium text-gray-700">Teléfono</label>
                 <input
+                  disabled
                   type="tel"
                   name="Telefono"
                   value={formState.EnlaceAkha.Telefono}
@@ -756,6 +777,7 @@ const ContribuyentesAgregar = ({ idEditar, Editar = false, onClose, onRegister }
               <div className='col-span-1'>
                 <label className="block text-sm font-medium text-gray-700">Correo</label>
                 <input
+                  disabled
                   type="email"
                   name="Correo"
                   value={formState.EnlaceAkha.Correo}
@@ -770,46 +792,32 @@ const ContribuyentesAgregar = ({ idEditar, Editar = false, onClose, onRegister }
           {activeTab === 'servicios' && (
             <div id="Servicios" className='mt-4'>
               <Separador Titulo="Seleccione los servicios" />
-              <div className="mt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {servicios.length === 0 ? (
+              <div className="mt-4 grid grid-cols-1 md:grid-cols-2  gap-6">
+                {servicios.length === 0 && (
                   <p className="col-span-full text-center text-gray-500">
                     No hay servicios disponibles.
                   </p>
-                ) : (
+                ) }
+                {
                   servicios.map((servicio) => (
                     <div
                       key={servicio._id}
-                      onClick={() => handleServicioSelect(servicio._id)}
-                      className={`p-4 rounded-md cursor-pointer transition-all duration-200 relative ${formState.ServiciosSeleccionados.includes(servicio._id)
-                        ? 'bg-blue-100 border-2 border-blue-500 shadow-md'
-                        : 'bg-white border-2 border-gray-300 hover:border-blue-300'
-                        }`}
+                      className={`p-4 rounded-md cursor-pointer transition-all duration-200 relative bg-white border-2 border-gray-300 hover:border-blue-300`}
                     >
-                      <div className="flex items-center justify-between">
+                      <div className="grid grid-cols-1 items-center">
                         <h3 className="text-lg font-semibold text-gray-800">
                           {servicio.Nombre}
                         </h3>
-                        {formState.ServiciosSeleccionados.includes(servicio._id) && (
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="24"
-                            height="24"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            className="text-blue-500"
-                          >
-                            <path d="M22 11.08V12a10 10 0 1 1-5.93-8.66" />
-                            <path d="M22 4L12 14.01l-3-3" />
-                          </svg>
-                        )}
+                        
+                        {servicio.Actividades.map((actividad) => (
+                          <h4 key={actividad._id} className="text-sm text-gray-500 mt-1">
+                            {actividad.Orden} - {actividad.nombre}
+                          </h4>
+                        ))}
                       </div>
                     </div>
                   ))
-                )}
+                }
               </div>
 
 
@@ -818,16 +826,6 @@ const ContribuyentesAgregar = ({ idEditar, Editar = false, onClose, onRegister }
           )}
 
 
-        </div>
-
-        <div className="flex justify-end mt-6">
-          <button
-            type="submit"
-            className="rounded-md bg-blue-600 px-4 py-2 text-white transition-colors duration-200 hover:bg-blue-700"
-            onClick={Guardar}
-          >
-            Guardar
-          </button>
         </div>
       </div>
 
@@ -851,4 +849,4 @@ const ContribuyentesAgregar = ({ idEditar, Editar = false, onClose, onRegister }
   );
 };
 
-export default ContribuyentesAgregar;
+export default ContribuyenteConsultar;

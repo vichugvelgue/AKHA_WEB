@@ -10,6 +10,8 @@ import { useNotification } from '@/src/hooks/useNotifications';
 import { Modulo, Permiso, TipoUsuario, Cliente } from '@/src/Interfaces/Interfaces';
 import ContribuyentesAgregar from '@/src/app/dashboard/administracion/contribuyentes/Agregar';
 import { ObtenerSesionUsuario } from '@/src/utils/constantes';
+import ModalBitacoraContibuyente from '@/src/hooks/ModalBitacoraContibuyente';
+import ContribuyenteConsultar from '../../contador/contador/Agregar';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000';
 
@@ -32,6 +34,7 @@ const RazonesSocialesCRUD = () => {
   const [tiposUsuarios, setTiposUsuarios] = useState<Cliente[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
+  const [showBitacora, setShowBitacora] = useState(false);
   const [idEditar, setIdEditar] = useState<string>("");
   const [editar, setEditar] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -138,14 +141,16 @@ const RazonesSocialesCRUD = () => {
   };
 
   const DesactivarTipoUsuario = async (id: string = "") => {
+    setIsLoading(true);
     try {
       const response = await fetch(`${API_BASE_URL}/Clientes/DesactivarCliente/${id}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-      body: JSON.stringify({ UsuarioAplico: sesion.idUsuario }), 
+        body: JSON.stringify({ UsuarioAplico: sesion.idUsuario }),
       });
+      setShowConfirm(false);
       if (!response.ok) {
         throw new Error(`Error: ${response.statusText}`);
       }
@@ -158,14 +163,16 @@ const RazonesSocialesCRUD = () => {
   };
 
   const EliminarTipoUsuario = async (id: string = "") => {
+    setIsLoading(true);
     try {
       const response = await fetch(`${API_BASE_URL}/Clientes/EliminarCliente/${id}`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
         },
-      body: JSON.stringify({ UsuarioAplico: sesion.idUsuario }), 
+        body: JSON.stringify({ UsuarioAplico: sesion.idUsuario }),
       });
+      setShowConfirm(false);
       if (!response.ok) {
         throw new Error(`Error: ${response.statusText}`);
       }
@@ -173,6 +180,7 @@ const RazonesSocialesCRUD = () => {
       showNotification(data.mensaje, "success");
       Listar();
     } catch (err: any) {
+      setShowConfirm(false);
       showNotification(err.message || 'Hubo un error al desactivar/activar el contribuyente. Verifica que la API esté corriendo y responda correctamente.', "error");
     }
   };
@@ -198,6 +206,13 @@ const RazonesSocialesCRUD = () => {
   const handleCloceModal = () => {
     setIsModalOpen(false);
     Listar();
+  };
+  const handleOpenModalBitacora = (id: string = "") => {
+    setIdEditar(id);
+    setShowBitacora(true);
+  };
+  const handleCloceModalBitacora = () => {
+    setShowBitacora(false);
   };
 
   if (isModalOpen) {
@@ -282,20 +297,19 @@ const RazonesSocialesCRUD = () => {
                 <td className="px-4 py-2">{usuario.RazonSocial}</td>
                 <td className="px-4 py-2">{usuario.RFC}</td>
                 <td className="px-4 py-2 flex justify-end space-x-2 ">
+                  <button onClick={() => handleOpenModalBitacora(usuario._id || "")} className="rounded-md bg-blue-600 px-4 py-1 text-sm text-white transition-colors duration-200 hover:bg-blue-700">
+                     <i className="material-symbols-rounded filled">visibility</i> 
+                  </button>
                   <button onClick={() => handleEditModal(usuario._id || "")} className="rounded-md bg-blue-600 px-4 py-1 text-sm text-white transition-colors duration-200 hover:bg-blue-700">
-                    Editar
+                    <i className="material-symbols-rounded filled">stylus</i>
                   </button>
-                  <button
-                    onClick={() => handleDesactivar(usuario._id || "")}
-                    className="rounded-md bg-yellow-600 px-4 py-1 text-sm text-white transition-colors duration-200 hover:bg-yellow-700"
-                  >
-                    {usuario.Estado == 1 ? "Desactivar" : "Activar"}
+                  <button className={`rounded-md px-4 py-1 text-sm text-white transition-colors duration-200 ${usuario.Estado == 1 ? 'bg-yellow-600 hover:bg-yellow-700' : 'bg-green-600 hover:bg-green-700'}`}
+                    onClick={() => handleDesactivar(usuario._id || "")} >
+                    {usuario.Estado == 1 ? <i className="material-symbols-rounded filled">block</i> : <i className="material-symbols-rounded filled">check</i>}
                   </button>
-                  <button
-                    onClick={() => handleDelete(usuario._id || "")}
-                    className="rounded-md bg-red-600 px-4 py-1 text-sm text-white transition-colors duration-200 hover:bg-red-700"
-                  >
-                    Eliminar
+                  <button className="rounded-md bg-red-600 px-4 py-1 text-sm text-white transition-colors duration-200 hover:bg-red-700"
+                    onClick={() => handleDelete(usuario._id || "")} >
+                    <i className="material-symbols-rounded filled">delete</i> 
                   </button>
                 </td>
               </tr>
@@ -304,6 +318,13 @@ const RazonesSocialesCRUD = () => {
         </table>
       </div>
 
+      {
+        showBitacora && 
+        <ModalBitacoraContibuyente
+          Cerrar={handleCloceModalBitacora}
+          idContribuyente={idEditar}
+        />
+      }
 
       {/* Modal de confirmación de eliminación con animación */}
       {showConfirm && (
@@ -318,7 +339,7 @@ const RazonesSocialesCRUD = () => {
                 Cancelar
               </button>
               <button onClick={confirm} className="rounded-md bg-red-600 px-4 py-2 text-white transition-colors hover:bg-red-700">
-                Eliminar
+                Continuar
               </button>
             </div>
           </div>

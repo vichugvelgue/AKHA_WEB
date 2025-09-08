@@ -289,7 +289,7 @@ const ActividadesListado = () => {
               <th className="px-4 py-2">Nombre</th>
               <th className="px-4 py-2">Descripción</th>
               <th className="px-4 py-2">Frecuencia</th>
-              <th className="px-4 py-2">Acciones</th>
+              <th className="px-4 py-2 text-right">Acciones</th>
             </tr>
           </thead>
           <tbody>
@@ -298,15 +298,15 @@ const ActividadesListado = () => {
                 <td className="px-4 py-2">{actividad.nombre}</td>
                 <td className="px-4 py-2">{actividad.descripcion}</td>
                 <td className="px-4 py-2">{actividad.frecuencia}</td>
-                <td className="px-4 py-2 flex space-x-2">
+                <td className="px-4 py-2 flex space-x-2 float-end">
                   <button onClick={() => handleOpenFormModal(actividad)} className="rounded-md bg-blue-600 px-4 py-1 text-sm text-white transition-colors duration-200 hover:bg-blue-700">
-                    Editar
+                    <i className="material-symbols-rounded filled">stylus</i>
                   </button>
                   <button
                     onClick={() => handleDelete(actividad._id)}
                     className="rounded-md bg-red-600 px-4 py-1 text-sm text-white transition-colors duration-200 hover:bg-red-700"
                   >
-                    Eliminar
+                    <i className="material-symbols-rounded filled">delete</i>
                   </button>
                 </td>
               </tr>

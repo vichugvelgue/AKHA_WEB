@@ -4,6 +4,11 @@
   --background: #ffffff;
   --foreground: #171717;
 }
+/* #region GOOGLE ICONS */
+.material-symbols-rounded.filled {
+  font-variation-settings: 'FILL' 1;
+}
+/* #endregion */
 
 @theme inline {
   --color-background: var(--background);

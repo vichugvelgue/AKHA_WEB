@@ -1,8 +1,20 @@
+import { TipoEmpleado } from "../app/dashboard/administracion/usuarios/page";
+
+export interface User {
+  _id?: string;
+  Nombres?: string;
+  Apellidos?: string;
+  NombreCompleto?: string;
+  Correo?: string;
+  idTipoUsuario?: TipoEmpleado;
+}
+
 export interface Actividad {
   _id: string;
   nombre: string;
   descripcion: string;
   frecuencia: 'Diaria' | 'Semanal' | 'Mensual' | 'Trimestral';
+  Orden?: number;
 }
 
 // Nueva interfaz para el estado del formulario
@@ -37,6 +49,7 @@ export interface PersonaContacto {
   Nombre: string;
   Telefono: string;
   Correo: string;
+  Cumpleanos?: string;
 }
 
 export interface RepresentanteLegal {
@@ -77,6 +90,7 @@ export interface Cliente {
   ContactoCobranza: PersonaContacto;
   GerenteOperativo: PersonaContacto;
   EnlaceAkha: PersonaContacto;
+  Cumpleanos: string;
 }
 
 export interface ContactoPrincipal {
@@ -88,6 +102,7 @@ export interface ContactoPrincipal {
 export interface GrupoEmpresarial {
   _id?: string;
   Estado?: number;
+  idUsuarioCreacion?: string|null;
 
   Nombre?: string;
   Responsable?: string
@@ -98,7 +113,18 @@ export interface GrupoEmpresarial {
 
   Observaciones?: string;
   FechaCreacion?: Date;
-  ContactoPrincipal: ContactoPrincipal;
+  ContactoPrincipal?: ContactoPrincipal;
+  MotivoReasignacion?: string;
+}
+export interface ContribuyenteGrupo {
+    _id?: string;
+    Estado?: number;
+    idUsuarioCreacion?: string;
+    FechaCreacion: Date;
+    
+    TipoMovimiento: number;
+    idGrupo?: string;
+    idContribuyente?: string;
 }
 export interface RazonSocial {
   _id?: string;
@@ -116,4 +142,50 @@ export interface RazonSocial {
   FechaCreacion?: Date;
   FechaActualizacion?: Date;
   FechaEliminacion?: Date;
+}
+export interface Bitacora {
+    _id?: string;
+    Estado?: number;
+    TipoMovimiento?: number;
+    Descripcion?: string;
+    InfoAnterior?: GrupoEmpresarial | Cliente;
+    idGrupo?: string;
+    idCliente?: string;
+    idUsuarioAplico?: string;
+    Fecha?: Date;
+    Hora?: string;
+}
+
+export interface ClavesSAT {
+  archivoCer: string;
+  archivoKey?: string;
+  contrasenaFirma: string;
+  fechaCaducidad: Date;
+  fechaCaducidadSello: Date;
+}
+export interface ClavesIDSE {
+  rfc: string;
+  archivoKey: string;
+  archivoCer: string;
+  contrasenaFiel: string;
+  fechaCaducidad: Date;
+}
+export interface ClavesSIPARE {
+  registroPatronal: string;
+  contrasena: string;
+  fechaCaducidad: Date;
+}export interface ClavesISN {
+  rfc: string;
+  contrasena: string;
+  fechaCaducidad: Date;
+  codigoEstado: string;
+}
+export interface Credencial {
+  _id?: string;
+  Estado?: number;
+  idCliente?: string;
+  clavesSAT: ClavesSAT;
+  clavesIDSE: ClavesIDSE;
+  clavesSIPARE: ClavesSIPARE;
+  clavesISN: ClavesISN;
 }
