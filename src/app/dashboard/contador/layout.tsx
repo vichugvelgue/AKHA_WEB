@@ -38,12 +38,12 @@ export default function AdministracionLayout({ children }: { children: React.Rea
 
   return (
     // Se mantuvo el fondo claro para el tema principal
-    <div className="flex min-h-screen w-full bg-gray-100 text-gray-900">
+    <div className="flex h-screen w-full bg-gray-100 text-gray-900">
       
       {/* Se cambió el fondo de la barra lateral a un color azul más oscuro */}
       <aside className="w-64 bg-blue-900 p-6 shadow-lg text-white flex flex-col">
         <div className="mb-10 text-xl font-bold tracking-wider text-yellow-400">
-          Administración
+          Contador
         </div>
         <nav>
           <ul className="space-y-3 font-medium">

@@ -31,7 +31,7 @@ export default function RootLayout({ children, }: Readonly<{ children: React.Rea
       </head>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}      >
         {children}
-        {/* <ValidarLogin /> */}
+        <ValidarLogin />
       </body>
     </html>
   );

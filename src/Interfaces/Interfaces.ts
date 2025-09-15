@@ -189,3 +189,23 @@ export interface Credencial {
   clavesSIPARE: ClavesSIPARE;
   clavesISN: ClavesISN;
 }
+export interface Impuesto {
+  _id?: string;
+  Estado?: number;
+  Nombre: string;
+  idCliente?: string;
+}
+export interface CalculoImpuesto {
+  idImpuesto?: string | null;
+  Monto?: number;
+  Nombre?: string;
+  observaciones?: string;
+}
+export interface CalculoFiscal {
+  _id?: string;
+  Estado?: number;
+  idCliente?: string;
+  Impuestos?: CalculoImpuesto[];
+  FechaCalculo?: Date;
+  Total?: number;
+}

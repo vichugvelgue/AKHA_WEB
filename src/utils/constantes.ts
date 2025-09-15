@@ -4,18 +4,16 @@ export const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://loca
 export const ZONA_HORARIA = process.env.NEXT_PUBLIC_ZONA_HORARIA || 'America/Mazatlan';
 
 export const ObtenerSesionUsuario = () => {
-  if (typeof window === 'undefined') {
-    return {
-      idUsuario: '',
-      nombreUsuario: '',
-      permisos: []
-    };
+  let idUsuario = ""
+  let nombreUsuario = ""
+  let permisos: Modulo[] = []
+
+  if (typeof window != 'undefined') {
+    idUsuario = localStorage.getItem('idUsuario') || '';
+    nombreUsuario = localStorage.getItem('NombreUsuario') || '';
+    permisos = JSON.parse(localStorage.getItem('Permisos') || '[]') as Modulo[]
   }
-  
-  const idUsuario = localStorage.getItem('idUsuario') || '';
-  const nombreUsuario = localStorage.getItem('NombreUsuario') || '';
-  const permisos = JSON.parse(localStorage.getItem('Permisos') || '[]') as Modulo[]
-  
+
   return { idUsuario, nombreUsuario, permisos };
 };
 
@@ -26,10 +24,14 @@ export const ValidarPermisoModulo = (permiso: string) => {
 
   return permisos.find((modulo) => modulo._id === permiso) || null;
 }
-export const ValidarPermisoSeccion = (permiso: string) => {
+export const ValidarPermisoModuloPadre = (permiso: string) => {
   if (typeof window === "undefined") return null;
+  console.log(permiso)
 
   let permisos = JSON.parse(localStorage.getItem('Permisos') || '[]') as Modulo[]
-
-  return permisos.find((modulo) => modulo.idPadre === permiso) || null;
+  console.log(permisos)
+  let modulo = permisos.find((modulo) => modulo.idPadre === permiso)
+  console.log(modulo)
+  return modulo || null;
 }
+

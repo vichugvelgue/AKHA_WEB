@@ -146,7 +146,10 @@ const ContadorCRUD = () => {
   const handleCloseCredencialesModal = () => {
     setIsOpenCredenciales(false);
   };
-
+  const AbrirFicha = (id: string = "") => {
+    localStorage.setItem("idContribuyente", id);
+    router.push(`/dashboard/contador/contador/fichaContribuyente`);
+  };
   if (isModalOpen) {
     console.log({ idEditar, editar });
     return (<ContribuyenteConsultar idEditar={idEditar} Editar={editar} onClose={handleCloceModal} onRegister={handleRegister} />)
@@ -234,6 +237,9 @@ const ContadorCRUD = () => {
                   </button>
                   <button onClick={() => handleOpenCredencialesModal(usuario._id || "")} className="rounded-md bg-green-600 px-4 py-1 text-sm text-white transition-colors duration-200 hover:bg-green-700">
                     <i className="material-symbols-rounded filled">vpn_key</i>
+                  </button>
+                  <button onClick={() => AbrirFicha(usuario._id || "")} className="rounded-md bg-yellow-600 px-4 py-1 text-sm text-white transition-colors duration-200 hover:bg-yellow-700">
+                    <i className="material-symbols-rounded filled">folder</i>
                   </button>
                 </td>
               </tr>

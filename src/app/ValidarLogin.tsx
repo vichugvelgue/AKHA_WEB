@@ -7,13 +7,12 @@ export default function ValidarLogin() {
 
   useEffect(() => {
     // Este código se ejecutará solo en el cliente
-    const storedIdUsuario = localStorage.getItem('idUsuario');
-    setIdUsuario(storedIdUsuario);
-    const isRoot = window.location.pathname == "/";
-    setIsRoot(isRoot);
-
-    if (!isRoot && !idUsuario) {
-      location.href = "/"
+    if (typeof window !== 'undefined') {
+      const storedIdUsuario = localStorage.getItem('idUsuario');
+      const isRoot = window.location.pathname == "/";
+      if (!isRoot && !storedIdUsuario) {
+        location.href = "/"
+      }
     }
   }, []);
 
