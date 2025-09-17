@@ -65,6 +65,7 @@ const ContribuyenteConsultar = ({ idEditar, Editar = false, onClose, onRegister 
   const [formState, setFormState] = useState<Cliente>({
     Estado: 0,
     RazonSocial: "",
+    Cumpleanos: "",
     RFC: "",
     TipoPersona: "", // Valor inicial para el nuevo campo
     RegimenFiscal: 0,

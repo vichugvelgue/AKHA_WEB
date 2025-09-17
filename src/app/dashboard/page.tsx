@@ -2,6 +2,7 @@
 
 'use client';
 
+
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation'; // Importamos useRouter para la redirección
@@ -26,7 +27,6 @@ export default function DashboardPage() {
 
   // En una aplicación real, obtendrías el nombre del usuario de un estado global o de una API.
   // Aquí, lo simulamos para que veas la funcionalidad.
-  const nombreUsuario = "Juan Pérez";
 
   // Función para manejar el cierre de sesión
   const handleLogout = () => {
