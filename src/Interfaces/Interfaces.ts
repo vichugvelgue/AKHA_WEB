@@ -205,7 +205,22 @@ export interface CalculoFiscal {
   _id?: string;
   Estado?: number;
   idCliente?: string;
+  idCapturo?: string;
   Impuestos?: CalculoImpuesto[];
   FechaCalculo?: Date;
   Total?: number;
+}
+export interface ResumenEjecutivo {
+  _id?: string;
+  Estado?: number;
+  idCliente?: string;
+  idCapturo?: string;
+
+  Ingresos?: string;
+  Egresos?: string;
+  Nominas?: string;
+  ImpuestosFederales?: string;
+
+  FechaResumen?: Date;
+  FechaRegistro?: Date;
 }

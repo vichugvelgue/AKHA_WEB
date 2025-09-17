@@ -11,6 +11,7 @@ import { Modulo, Permiso, TipoUsuario, Cliente } from '@/src/Interfaces/Interfac
 import { ObtenerSesionUsuario } from '@/src/utils/constantes';
 import ModalBitacoraContibuyente from '@/src/hooks/ModalBitacoraContibuyente';
 import CalculosFiscales from './calculosFiscales/calculosFiscales';
+import ResumenesEjecutivos from './resumenEjecutivo/resumenesjecutivos';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000';
 
@@ -23,6 +24,7 @@ export default function FichaContribuyente() {
   const { notification, showNotification, hideNotification } = useNotification();
 
   const [OpenCalculosFiscales, setOpenCalculosFiscales] = useState(false);
+  const [OpenResumenEjecutivo, setOpenResumenEjecutivo] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [idEditar, setIdEditar] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -31,7 +33,7 @@ export default function FichaContribuyente() {
 
   useEffect(() => {
     let idContribuyente = localStorage.getItem("idContribuyente");
-    setIdEditar(idContribuyente||"");
+    setIdEditar(idContribuyente || "");
   }, []);
 
   const AbrirCalculosFiscales = (id: string = "") => {
@@ -42,6 +44,16 @@ export default function FichaContribuyente() {
     setOpenCalculosFiscales(false);
     if(exist == "success"){
       showNotification("Calculos fiscales guardados correctamente", "success");
+    }
+  };
+  const AbrirResumenEjectutivo = (id: string = "") => {
+    setIdEditar(id);
+    setOpenResumenEjecutivo(true);
+  };
+  const CerrarResumenEjectutivo  = (exist: string) => {
+    setOpenResumenEjecutivo(false);
+    if(exist == "success"){
+      showNotification("Resumen ejectutivo guardado correctamente", "success");
     }
   };
 
@@ -79,11 +91,21 @@ export default function FichaContribuyente() {
                   </button>
                 </td>
               </tr>
+              <tr className="border-t border-gray-200 hover:bg-gray-50">
+                <td className="px-4 py-2">Resumen ejecutivo</td>
+                <td className="px-4 py-2 flex justify-end space-x-2 ">
+                  <button onClick={()=>AbrirResumenEjectutivo(idEditar)} className="rounded-md bg-blue-600 px-4 py-1 text-sm text-white transition-colors duration-200 hover:bg-blue-700">
+                    <i className="material-symbols-rounded filled">stylus</i>
+                  </button>
+                </td>
+              </tr>
           </tbody>
         </table>
       </div>
 
-      <CalculosFiscales Visible={OpenCalculosFiscales} idEditar={idEditar} Cerrar={CerrarCalculosFiscales} />
+      {OpenCalculosFiscales && <CalculosFiscales Visible={OpenCalculosFiscales} idEditar={idEditar} Cerrar={CerrarCalculosFiscales} />}
+      {OpenResumenEjecutivo && <ResumenesEjecutivos Visible={OpenResumenEjecutivo} idEditar={idEditar} Cerrar={CerrarResumenEjectutivo} />}
+      
       {/* Modal de confirmación de eliminación con animación */}
       {showConfirm && (
         <div

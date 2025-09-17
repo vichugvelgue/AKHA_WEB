@@ -2,10 +2,11 @@ import React, { useState, useEffect, useMemo } from "react";
 import MensajeNotificacion from "@/src/hooks//MensajeNotificacion";
 import { useNotification } from "@/src/hooks/useNotifications";
 import { CalculoFiscal, CalculoImpuesto, Impuesto } from "@/src/Interfaces/Interfaces";
-import { API_BASE_URL } from "@/src/utils/constantes";
+import { API_BASE_URL,ObtenerSesionUsuario } from "@/src/utils/constantes";
 import ModalAgregarImpuesto from "./modalAgregarImpuesto";
 import ModalCicloFiscal from "./modalCicloFiscal";
 import { createPrerenderParamsForClientSegment } from "next/dist/server/app-render/entry-base";
+import Cargando from "@/src/hooks/Cargando";
 
 interface ModalMotivosProps {
   Visible: boolean;
@@ -15,6 +16,7 @@ interface ModalMotivosProps {
 
 export default function CalculosFiscales({ Visible, idEditar = "", Cerrar }: ModalMotivosProps) {
   if (!Visible) return null;
+  const session = ObtenerSesionUsuario()
   const { notification, showNotification, hideNotification } = useNotification();
   const [showNuevoImpuesto, setShowNuevoImpuesto] = useState<boolean>(false);
   const [showCicloFiscal, setCicloFiscal] = useState<boolean>(false);
@@ -182,6 +184,7 @@ export default function CalculosFiscales({ Visible, idEditar = "", Cerrar }: Mod
     try {
       let body = {
           _id:null,
+        idCapturo: session.idUsuario,
         ...Calculo,
         FechaCalculo: Fecha + "-01T12:00",
       }
@@ -305,7 +308,7 @@ export default function CalculosFiscales({ Visible, idEditar = "", Cerrar }: Mod
           </button>
           {Nuevo &&
             <button onClick={Guardar} className="rounded-md bg-green-600 px-4 py-2 text-white transition-colors hover:bg-green-700">
-              Aceptar
+              Guardar
             </button>
           }
         </div>
@@ -322,6 +325,7 @@ export default function CalculosFiscales({ Visible, idEditar = "", Cerrar }: Mod
         idContribuyente={idEditar}
         Cerrar={CerrarModalAgregarImpuesto}
       />
+      <Cargando isLoading={loading} />
       <MensajeNotificacion {...notification} hideNotification={hideNotification} />
     </div>
   );
