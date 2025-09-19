@@ -60,7 +60,6 @@ export default function ResumenesEjecutivos({ Visible, idEditar = "", Cerrar }: 
       const data = await respuesta.json();
 
       if (respuesta.ok) {
-        debugger
         if (data.data) {
           setNuevo(false);
           setResumen(data.data)

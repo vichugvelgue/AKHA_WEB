@@ -224,3 +224,22 @@ export interface ResumenEjecutivo {
   FechaResumen?: Date;
   FechaRegistro?: Date;
 }
+export enum EstatusValidacion {
+  Pendiente = "Pendiente",
+  Autorizado = "Autorizado",
+  Rechazado = "Rechazado",
+}
+export interface ValidacionCalculoFiscal {
+  _id?: string;
+  Estado?: number;
+  EstadoAceptacion?: EstatusValidacion;
+  idCliente?: string;
+  idCalculo?: string;
+  idCapturo?: string;
+
+  Evidencia?: string;
+  MotivosRechazo?: string;
+
+  Fecha?: Date;
+  FechaRegistro?: Date;
+}
