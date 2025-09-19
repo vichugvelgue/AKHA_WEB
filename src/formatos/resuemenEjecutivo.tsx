@@ -12,7 +12,6 @@ interface FormatoResumenProps {
 const FormatoResumenEjecutivo = ({ resumen,contribuyente }: FormatoResumenProps) => {
   useEffect(() => {
     const doc = new jsPDF({ format: "letter" });
-    debugger
       let fecha = resumen.FechaRegistro ? new Date(resumen.FechaRegistro).toLocaleDateString("es-MX", { year: "numeric", month: "long" }) : ""
 
     // === Logo ===

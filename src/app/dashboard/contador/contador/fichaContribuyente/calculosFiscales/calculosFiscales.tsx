@@ -1,12 +1,13 @@
 import React, { useState, useEffect, useMemo } from "react";
 import MensajeNotificacion from "@/src/hooks//MensajeNotificacion";
 import { useNotification } from "@/src/hooks/useNotifications";
-import { CalculoFiscal, CalculoImpuesto, Impuesto } from "@/src/Interfaces/Interfaces";
+import { CalculoFiscal, EstatusValidacion, Impuesto } from "@/src/Interfaces/Interfaces";
 import { API_BASE_URL,ObtenerSesionUsuario } from "@/src/utils/constantes";
 import ModalAgregarImpuesto from "./modalAgregarImpuesto";
 import ModalCicloFiscal from "./modalCicloFiscal";
 import { createPrerenderParamsForClientSegment } from "next/dist/server/app-render/entry-base";
 import Cargando from "@/src/hooks/Cargando";
+import ValidarCalculoFiscal from "./validarCalculoFiscal/validarCalculoFiscal";
 
 interface ModalMotivosProps {
   Visible: boolean;
@@ -19,9 +20,12 @@ export default function CalculosFiscales({ Visible, idEditar = "", Cerrar }: Mod
   const session = ObtenerSesionUsuario()
   const { notification, showNotification, hideNotification } = useNotification();
   const [showNuevoImpuesto, setShowNuevoImpuesto] = useState<boolean>(false);
+  const [showValidarCalculo, setValidarCalculo] = useState<boolean>(false);
   const [showCicloFiscal, setCicloFiscal] = useState<boolean>(false);
   const [loading, setloading] = useState<boolean>(false);
   const [Nuevo, setNuevo] = useState<boolean>(false);
+  const [EstadoAutorizado, setEstadoAutorizado] = useState<EstatusValidacion>(EstatusValidacion.Pendiente);
+  const [idValidacion, setIdValidacion] = useState<string|null>(null);
   const [Fecha, setFecha] = useState<string>("");
   const [Ciclo, setCiclo] = useState<Number>(0);
   const [Calculo, setCalculo] = useState<CalculoFiscal>({
@@ -85,12 +89,42 @@ export default function CalculosFiscales({ Visible, idEditar = "", Cerrar }: Mod
       const data = await respuesta.json();
 
       if (respuesta.ok) {
-        debugger
         if (data.data) {
           setNuevo(false);
           setCalculo(data.data)
+          await BuscarAutorizacion(data.data._id)
         } else {
           NuevoCalculo()
+        }
+      } else {
+        showNotification(data.mensaje, "error")
+      }
+      setloading(false);
+    } catch {
+      setloading(false);
+      showNotification("Ocurrio un error, intentelo mas tarde", "error")
+    }
+  }
+  const BuscarAutorizacion = async (idCalculo:string) => {
+    setloading(true);
+    try {
+      if (!Fecha) return
+      let [ciclo, mes] = Fecha.split("-").map(Number);
+      const respuesta = await fetch(`${API_BASE_URL}/validacioncalculofiscal/BuscarPorCalculo/${idCalculo}`, {
+        method: "GET",
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
+      const data = await respuesta.json();
+
+      if (respuesta.ok) {
+        if (data.data) {
+          setIdValidacion(data.data._id);
+          setEstadoAutorizado(data.data.EstadoAceptacion);
+        }else{
+          setIdValidacion(null);
+          setEstadoAutorizado(EstatusValidacion.Pendiente);
         }
       } else {
         showNotification(data.mensaje, "error")
@@ -227,13 +261,16 @@ export default function CalculosFiscales({ Visible, idEditar = "", Cerrar }: Mod
   const CerrarModalCicloFiscal = () => {
     setCicloFiscal(false);
   }
+  const CerrarValidarCalculo = () => {
+    setValidarCalculo(false);
+  }
 
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center transition-all duration-300 backdrop-blur-sm"
       style={{ backgroundColor: 'rgba(255, 255, 255, 0.60)' }}
     >
-      <div className="w-full max-w-4xl max-h-[90dvh] overflow-auto rounded-2xl bg-white p-8 shadow-2xl transform transition-transform duration-300 border-2 border-blue-500 scale-100 ">
+      <div className="w-full max-w-5xl max-h-[90dvh] overflow-auto rounded-2xl bg-white p-8 shadow-2xl transform transition-transform duration-300 border-2 border-blue-500 scale-100 ">
         <div className="text-2xl font-bold text-blue-900">
           Calculos Fiscales
         </div>
@@ -257,17 +294,26 @@ export default function CalculosFiscales({ Visible, idEditar = "", Cerrar }: Mod
               </button>
           </div>
           <div className="grid justify-items-end">
-            {Nuevo &&
+            {Nuevo ?
               <button className="mt-3 inline-block rounded-md bg-yellow-600 px-4 py-1 text-white transition-colors hover:bg-yellow-700"
-               onClick={() => setShowNuevoImpuesto(true)}>
+                onClick={() => setShowNuevoImpuesto(true)}>
                 Nuevo impuesto
+              </button> :
+              <button 
+                className={`mt-3 inline-block rounded-md px-4 py-1 transition-colors
+                  ${EstadoAutorizado == EstatusValidacion.Autorizado ? " bg-green-300 hover:bg-green-400" :
+                    EstadoAutorizado == EstatusValidacion.Rechazado ? " bg-red-300 hover:bg-red-400" : 
+                      "bg-gray-300 hover:bg-gray-400"
+                  }`}
+                onClick={() => setValidarCalculo(true)}>
+                {EstadoAutorizado}
               </button>
             }
           </div>
         </div>
         <br />
 
-        <div className={`w-full max-w-4xl rounded-2xl bg-gray-100 p-8`}>
+        <div className={`w-full rounded-2xl bg-gray-100 p-8`}>
           <table className="w-full">
             <thead>
               <tr>
@@ -324,6 +370,13 @@ export default function CalculosFiscales({ Visible, idEditar = "", Cerrar }: Mod
         Visible={showNuevoImpuesto}
         idContribuyente={idEditar}
         Cerrar={CerrarModalAgregarImpuesto}
+      />
+      <ValidarCalculoFiscal
+        Visible={showValidarCalculo}
+        idCliente={idEditar}
+        idCalculo={Calculo._id||""}
+        idValidacion={idValidacion}
+        Cerrar={CerrarValidarCalculo}
       />
       <Cargando isLoading={loading} />
       <MensajeNotificacion {...notification} hideNotification={hideNotification} />
