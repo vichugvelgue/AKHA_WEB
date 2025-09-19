@@ -8,6 +8,7 @@ import ModalCicloFiscal from "./modalCicloFiscal";
 import { createPrerenderParamsForClientSegment } from "next/dist/server/app-render/entry-base";
 import Cargando from "@/src/hooks/Cargando";
 import ValidarCalculoFiscal from "./validarCalculoFiscal/validarCalculoFiscal";
+import ModalPregunta from "@/src/hooks/ModalPregunta";
 
 interface ModalMotivosProps {
   Visible: boolean;
@@ -22,6 +23,7 @@ export default function CalculosFiscales({ Visible, idEditar = "", Cerrar }: Mod
   const [showNuevoImpuesto, setShowNuevoImpuesto] = useState<boolean>(false);
   const [showValidarCalculo, setValidarCalculo] = useState<boolean>(false);
   const [showCicloFiscal, setCicloFiscal] = useState<boolean>(false);
+  const [showPreguntaNotificacion, setShowPreguntaNotificacion] = useState<boolean>(false);
   const [loading, setloading] = useState<boolean>(false);
   const [Nuevo, setNuevo] = useState<boolean>(false);
   const [EstadoAutorizado, setEstadoAutorizado] = useState<EstatusValidacion>(EstatusValidacion.Pendiente);
@@ -264,6 +266,40 @@ export default function CalculosFiscales({ Visible, idEditar = "", Cerrar }: Mod
   const CerrarValidarCalculo = () => {
     setValidarCalculo(false);
   }
+  const PreguntarReenviarNotificacion = ()=>{
+    setShowPreguntaNotificacion(true)
+  }
+  const CerrarReenviarNotificacion = async(confirmar:boolean)=>{
+    setShowPreguntaNotificacion(false)
+    if(confirmar){
+      await ReenviarNotificacion()
+    }
+  }
+  const ReenviarNotificacion = async () => {
+    setloading(true);
+    try {
+      const respuesta = await fetch(`${API_BASE_URL}/calculosFiscales/ReenviarCorreoNotificacion`, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        method: "POST",
+        body: JSON.stringify({
+          idCalculo: Calculo._id,
+        }),
+      })
+      const data = await respuesta.json();
+
+      if (respuesta.ok) {
+        showNotification(data.mensaje, "success")
+      } else {
+        showNotification(data.mensaje, "error")
+      }
+    } catch {
+      showNotification("Ocurrio un error, intentelo mas tarde", "error")
+    }finally{
+      setloading(false);
+    }
+  }
 
   return (
     <div
@@ -349,6 +385,11 @@ export default function CalculosFiscales({ Visible, idEditar = "", Cerrar }: Mod
           </table>
         </div>
         <div className="mt-4 flex justify-end space-x-2">
+          {!Nuevo &&
+            <button onClick={PreguntarReenviarNotificacion} className="rounded-md bg-yellow-600 px-4 py-2 text-white transition-colors hover:bg-yellow-700">
+              Reenviar notificación
+            </button>
+          }
           <button onClick={() => Cerrar("")} className="rounded-md bg-gray-300 px-4 py-2 text-gray-800 transition-colors hover:bg-gray-400">
             Cancelar
           </button>
@@ -360,6 +401,10 @@ export default function CalculosFiscales({ Visible, idEditar = "", Cerrar }: Mod
         </div>
 
       </div>
+      {
+        showPreguntaNotificacion &&
+        <ModalPregunta Pregunta="¿Está seguro de reenviar la notificación del cálculo fiscal? Esta acción volverá a enviar la información al cliente." Cerrar={CerrarReenviarNotificacion} />
+      }
       <ModalCicloFiscal
         Visible={showCicloFiscal}
         Ciclo={Number(Ciclo)}
