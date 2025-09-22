@@ -243,3 +243,16 @@ export interface ValidacionCalculoFiscal {
   Fecha?: Date;
   FechaRegistro?: Date;
 }
+
+export interface ConfigAutorizacionPagos {
+    DiaLimiteConfirmacionCalculo: number ;
+}
+export interface ConfigActividades {
+    DiasRecordatorio: number ;
+}
+export interface Configuracion {
+  _id?: string;
+  AutorizacionPagos: ConfigAutorizacionPagos;
+  Actividades: ConfigActividades;
+  FechaActualizacion?: Date;
+}

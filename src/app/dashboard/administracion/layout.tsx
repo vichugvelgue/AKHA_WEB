@@ -95,12 +95,12 @@ export default function AdministracionLayout({ children }: { children: React.Rea
               text="Contadores"
               currentPath={pathname}
             /> */}
-            {/* <MenuItem 
+            <MenuItem 
               href="/dashboard/administracion/configuracion" 
               icon="⚙️" 
               text="Configuración"
               currentPath={pathname}
-            /> */}
+            />
             <MenuItem 
               href="/dashboard/administracion/razonessociales" 
               icon="🧑‍⚖️" 
