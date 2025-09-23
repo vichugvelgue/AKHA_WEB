@@ -1,22 +1,43 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation'; // Importa el hook useRouter
 import CalculosFiscales from './calculosFiscales/calculosFiscales';
 import ResumenesEjecutivos from './resumenEjecutivo/resumenesjecutivos';
 import RegistroPagos from './registroPagos/registropagos'
+import { useNotification } from '@/src/hooks/useNotifications';
+import MensajeNotificacion from "@/src/hooks//MensajeNotificacion";
+import { API_BASE_URL } from '@/src/utils/constantes';
+import { Cliente } from '@/src/Interfaces/Interfaces';
+import Cargando from '@/src/hooks/Cargando';
 
+const defaultContacto = {
+  Nombre: "",
+  Telefono: "",
+  Correo: "",
+}
 // Se utiliza un solo componente para contener toda la lógica y la interfaz.
 const App = () => {
+  const router = useRouter();
+  const { notification, showNotification, hideNotification } = useNotification();
   // Estado para simular la información del contribuyente
-  const [contribuyente, setContribuyente] = useState({
-    nombre: 'Contribuyente Ejemplo S.A. de C.V.',
-    rfc: 'CEVC900101ABC',
-    email: 'contacto@ejemplo.com',
+  const [contribuyente, setContribuyente] = useState<Cliente>({
+    RazonSocial: '.',
+    RFC: '',
+    CorreoElectronico: '',
+    ServiciosSeleccionados: [],
+    RepresentanteLegal: { Nombre: '', RFC: '', Alias: '', Cumpleanos: '' },
+    DuenoEmpresa: defaultContacto,
+    ContactoCobranza: defaultContacto,
+    GerenteOperativo: defaultContacto,
+    EnlaceAkha: defaultContacto,
+    Cumpleanos:"",
   });
 
   // Estado para la visibilidad de las secciones (simulando los componentes anidados)
   const [openSection, setOpenSection] = useState<'none' | 'calculos' | 'resumen'>('none');
   const [idEditar, setIdEditar] = useState<string>("");
+  const [cargando, setCargando] = useState<boolean>(false);
 
   // Estados para los modales
   const [OpenCalculosFiscales, setOpenCalculosFiscales] = useState(false);
@@ -28,11 +49,31 @@ const App = () => {
   useEffect(() => {
     // Aquí iría tu lógica real para obtener la información del contribuyente
     // basado en el ID, por ejemplo:
-    // const idContribuyente = localStorage.getItem("idContribuyente");
-    // setIdEditar(idContribuyente || "");
-    // fetch(`/api/contribuyente/${idContribuyente}`).then(...)
-    console.log("Simulando carga de datos del contribuyente...");
+    const idContribuyente = localStorage.getItem("idContribuyente");
+    setIdEditar(idContribuyente || "");
+    ObtenerContribuyente(idContribuyente || "")
   }, []);
+  const ObtenerContribuyente = async (idEditar:string) => {
+    setCargando(true);
+    try {
+      const response = await fetch(`${API_BASE_URL}/clientes/ObtenerCliente/${idEditar}`);
+      if (!response.ok) throw new Error(`Error: ${response.statusText}`);
+      const contentType = response.headers.get('content-type');
+      if (contentType && contentType.includes('application/json')) {
+        const data = await response.json();
+        setContribuyente(data.data);
+      } else {
+        const text = await response.text();
+        console.error('La respuesta de la API no es JSON:', text);
+        throw new Error('La API no devolvió un formato JSON válido.');
+      }
+    } catch (err: any) {
+      console.error('Error al obtener el cliente:', err);
+      // setError(err.message || 'Hubo un error al cargar el cliente. Verifica que la API esté corriendo.');
+    } finally {
+      setCargando(false);
+    }
+  };
 
   // Lógica para abrir y cerrar modales (copiada de tu código)
   const AbrirCalculosFiscales = (id: string = "") => {
@@ -42,8 +83,7 @@ const App = () => {
   const CerrarCalculosFiscales = (exist: string) => {
     setOpenCalculosFiscales(false);
     if (exist === "success") {
-      // showNotification("Calculos fiscales guardados correctamente", "success");
-      console.log("Calculos fiscales guardados correctamente");
+      showNotification("Calculos fiscales guardados correctamente", "success");
     }
   };
   const AbrirResumenEjectutivo = (id: string = "") => {
@@ -53,8 +93,7 @@ const App = () => {
   const CerrarResumenEjectutivo = (exist: string) => {
     setOpenResumenEjecutivo(false);
     if (exist === "success") {
-      // showNotification("Resumen ejectutivo guardado correctamente", "success");
-      console.log("Resumen ejectutivo guardado correctamente");
+      showNotification("Resumen ejectutivo guardado correctamente", "success");
     }
   };
 
@@ -65,7 +104,7 @@ const App = () => {
   const CerrarRegistroPagos = (exist: string) => {
     setOpenRegistroPagos(false);
     if (exist === "success") {
-      console.log("Registro de pagos guardado correctamente");
+      showNotification("Registro de pagos guardado correctamente", "success");
     }
   };
 
@@ -127,7 +166,7 @@ const App = () => {
           <h2 className="text-3xl font-extrabold text-blue-900">Ficha del Contribuyente</h2>
           <div className="flex space-x-4">
             <button
-              onClick={() => {}}
+              onClick={() => router.push(`/dashboard/contador/contador/`)}
               className="rounded-lg bg-gray-300 px-6 py-2 text-gray-800 transition-colors duration-200 hover:bg-gray-400"
             >
               Regresar
@@ -137,9 +176,9 @@ const App = () => {
 
         {/* Información del contribuyente con estilo de tarjeta */}
         <div className="rounded-xl bg-white p-6 shadow-md border-t-4 border-indigo-600">
-          <h3 className="text-xl font-bold mb-2">{contribuyente.nombre}</h3>
-          <p className="text-gray-600">RFC: <span className="font-semibold">{contribuyente.rfc}</span></p>
-          <p className="text-gray-600">Email: <span className="font-semibold">{contribuyente.email}</span></p>
+          <h3 className="text-xl font-bold mb-2">{contribuyente.RazonSocial}</h3>
+          <p className="text-gray-600">RFC: <span className="font-semibold">{contribuyente.RFC}</span></p>
+          <p className="text-gray-600">Email: <span className="font-semibold">{contribuyente.CorreoElectronico}</span></p>
         </div>
 
         {/* Sección principal del menú */}
@@ -162,8 +201,10 @@ const App = () => {
 
         {/* Modales */}
         {OpenCalculosFiscales && <CalculosFiscales Visible={OpenCalculosFiscales} idEditar={idEditar} Cerrar={CerrarCalculosFiscales} />}
-      {OpenResumenEjecutivo && <ResumenesEjecutivos Visible={OpenResumenEjecutivo} idEditar={idEditar} Cerrar={CerrarResumenEjectutivo} />}
-      {OpenRegistroPagos && <RegistroPagos Visible={OpenRegistroPagos} idEditar={idEditar} Cerrar={CerrarRegistroPagos} />}
+        {OpenResumenEjecutivo && <ResumenesEjecutivos Visible={OpenResumenEjecutivo} idEditar={idEditar} Cerrar={CerrarResumenEjectutivo} />}
+        {OpenRegistroPagos && <RegistroPagos Visible={OpenRegistroPagos} idEditar={idEditar} Cerrar={CerrarRegistroPagos} />}
+        <MensajeNotificacion  {...notification} hideNotification={hideNotification} />
+        <Cargando isLoading={cargando} />
       </div>
     </div>
   );
