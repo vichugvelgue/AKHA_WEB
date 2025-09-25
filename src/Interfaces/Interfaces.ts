@@ -198,6 +198,7 @@ export interface Impuesto {
 export interface CalculoImpuesto {
   idImpuesto?: string | null;
   Monto?: number;
+  Utilizado?: number;
   Nombre?: string;
   observaciones?: string;
 }
@@ -255,4 +256,24 @@ export interface Configuracion {
   AutorizacionPagos: ConfigAutorizacionPagos;
   Actividades: ConfigActividades;
   FechaActualizacion?: Date;
+}
+
+export interface HistorialSaldo {
+  _id?: string;
+  Estado?: number;
+  idCliente?: string;
+  idImpuesto?: string;
+  idCalculo?: string;
+  Monto?:number;
+  Observaciones?:string;
+  Fecha?: Date;
+  FechaModificacion?: Date;
+  FechaRegistro?: Date;
+}
+export interface TotalSaldoFavor {
+  _id?: string;
+  idCliente?: string;
+  Acumulado?: number;
+  Utilizado?: number;
+  Disponible?: number;
 }
