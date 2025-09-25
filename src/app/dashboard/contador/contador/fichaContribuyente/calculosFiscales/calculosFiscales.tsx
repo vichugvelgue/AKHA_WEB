@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from "react";
 import MensajeNotificacion from "@/src/hooks//MensajeNotificacion";
 import { useNotification } from "@/src/hooks/useNotifications";
-import { CalculoFiscal, EstatusValidacion, Impuesto } from "@/src/Interfaces/Interfaces";
+import { CalculoFiscal, CalculoImpuesto, EstatusValidacion, Impuesto } from "@/src/Interfaces/Interfaces";
 import { API_BASE_URL,ObtenerSesionUsuario } from "@/src/utils/constantes";
 import ModalAgregarImpuesto from "./modalAgregarImpuesto";
 import ModalCicloFiscal from "./modalCicloFiscal";
@@ -42,7 +42,6 @@ export default function CalculosFiscales({ Visible, idEditar = "", Cerrar }: Mod
     const ahora = new Date();
     setCiclo(ahora.getFullYear());          // ✅ Año actual
     setFecha(ahora.toISOString().substring(0, 7)); // YYYY-MM
-    NuevoCalculo();
   }, []);
 
   useEffect(() => {
@@ -150,25 +149,28 @@ export default function CalculosFiscales({ Visible, idEditar = "", Cerrar }: Mod
     const [ciclo, mes] = Fecha.split("-").map(Number);
 
     let baseImpuestos = [
-      { idImpuesto: "ISR", Nombre: "ISR" },
-      { idImpuesto: "ISR Retencion", Nombre: "ISR Retención" },
-      { idImpuesto: "IVA", Nombre: "IVA" },
-      { idImpuesto: "IVA Retencion", Nombre: "IVA Retención" },
-      { idImpuesto: "ISN", Nombre: "ISN" },
+      { idImpuesto: "68d2f4852c5c5d3ff8264fdf", Nombre: "ISR" },
+      { idImpuesto: "68d2f4832c5c5d3ff8264fde", Nombre: "ISR Retención" },
+      { idImpuesto: "68d2f46e2c5c5d3ff8264fdc", Nombre: "IVA" },
+      { idImpuesto: "68d2f47b2c5c5d3ff8264fdd", Nombre: "IVA Retención" },
+      { idImpuesto: "68d2f48e2c5c5d3ff8264fe0", Nombre: "ISN" },
     ].map(item => ({
       ...item,
       Monto: 0,
+      Utilizado: 0,
       observaciones: ""
     }));
 
     // fusionar con Impuestos de cliente
-    let ListaImpuestos = [...baseImpuestos];
+    // let ListaImpuestos = [...baseImpuestos];
+    let ListaImpuestos:CalculoImpuesto[] = [];
     for (let item of Impuestos) {
       if (!ListaImpuestos.find(x => x.idImpuesto == item._id)) {
         ListaImpuestos.push({
           idImpuesto: item._id ?? "",
           Nombre: item.Nombre,
           Monto: 0,
+          Utilizado: 0,
           observaciones: ""
         });
       }

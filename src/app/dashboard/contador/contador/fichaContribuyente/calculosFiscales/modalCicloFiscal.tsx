@@ -39,11 +39,11 @@ export default function ModalCicloFiscal({ Ciclo, Visible, idEditar = "", Cerrar
 
       if (respuesta.ok) {
         let impuestos: Impuesto[] = [
-          { _id:"ISR", Nombre: "ISR" },
-          { _id:"ISR Retencion", Nombre: "ISR Retención" },
-          { _id:"IVA", Nombre: "IVA" },
-          { _id:"IVA Retencion", Nombre: "IVA Retención" },
-          { _id:"ISN", Nombre: "ISN" },
+          { _id:"68d2f4852c5c5d3ff8264fdf", Nombre: "ISR" },
+          { _id:"68d2f4832c5c5d3ff8264fde", Nombre: "ISR Retención" },
+          { _id:"68d2f46e2c5c5d3ff8264fdc", Nombre: "IVA" },
+          { _id:"68d2f47b2c5c5d3ff8264fdd", Nombre: "IVA Retención" },
+          { _id:"68d2f48e2c5c5d3ff8264fe0", Nombre: "ISN" },
           ...data.data as Impuesto[]
         ]
         setImpuestos(impuestos)

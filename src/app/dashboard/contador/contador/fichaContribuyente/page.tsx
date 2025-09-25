@@ -10,6 +10,7 @@ import MensajeNotificacion from "@/src/hooks//MensajeNotificacion";
 import { API_BASE_URL } from '@/src/utils/constantes';
 import { Cliente } from '@/src/Interfaces/Interfaces';
 import Cargando from '@/src/hooks/Cargando';
+import HistoricoSaldoFavor from './historicoSaldosFavor/page'
 
 const defaultContacto = {
   Nombre: "",
@@ -43,6 +44,7 @@ const App = () => {
   const [OpenCalculosFiscales, setOpenCalculosFiscales] = useState(false);
   const [OpenResumenEjecutivo, setOpenResumenEjecutivo] = useState(false);
   const [OpenRegistroPagos, setOpenRegistroPagos] = useState(false);
+  const [OpenHistoricoSaldos, setOpenHistoricoSaldos] = useState(false);
   
 
   // Simula la carga de datos del contribuyente al inicio
@@ -77,7 +79,6 @@ const App = () => {
 
   // Lógica para abrir y cerrar modales (copiada de tu código)
   const AbrirCalculosFiscales = (id: string = "") => {
-    setIdEditar(id);
     setOpenCalculosFiscales(true);
   };
   const CerrarCalculosFiscales = (exist: string) => {
@@ -87,7 +88,6 @@ const App = () => {
     }
   };
   const AbrirResumenEjectutivo = (id: string = "") => {
-    setIdEditar(id);
     setOpenResumenEjecutivo(true);
   };
   const CerrarResumenEjectutivo = (exist: string) => {
@@ -98,11 +98,20 @@ const App = () => {
   };
 
   const AbrirRegistroPagos = (id: string = "") => {
-    setIdEditar(id);
+    // setIdEditar(id);
     setOpenRegistroPagos(true);
   };
   const CerrarRegistroPagos = (exist: string) => {
     setOpenRegistroPagos(false);
+    if (exist === "success") {
+      showNotification("Registro de pagos guardado correctamente", "success");
+    }
+  };
+  const AbrirHistoricoSaldos = () => {
+    setOpenHistoricoSaldos(true);
+  };
+  const CerrarHistoricoSaldos = (exist: string) => {
+    setOpenHistoricoSaldos(false);
     if (exist === "success") {
       showNotification("Registro de pagos guardado correctamente", "success");
     }
@@ -113,6 +122,7 @@ const App = () => {
     { id: 'calculos', icon: '📝', text: 'Cálculos Fiscales', onClick: () => AbrirCalculosFiscales(idEditar) },
     { id: 'resumen', icon: '📊', text: 'Resumen Ejecutivo', onClick: () => AbrirResumenEjectutivo(idEditar) },
     { id: 'pagos', icon: '💳', text: 'Registro de Pagos', onClick: () => AbrirRegistroPagos(idEditar) },
+    { id: 'Saldos', icon: '💵', text: 'Saldos a favor', onClick: () => AbrirHistoricoSaldos() },
     { id: 'documentos', icon: '📁', text: 'Documentos', onClick: () => console.log('Abriendo Documentos') },
     { id: 'bitacora', icon: '🗒️', text: 'Bitácora', onClick: () => console.log('Abriendo Bitácora') },
     { id: 'historial', icon: '🕒', text: 'Historial de Pagos', onClick: () => console.log('Abriendo Historial de Pagos') },
@@ -158,6 +168,10 @@ const App = () => {
       </div>
     );
   };
+
+  if (OpenHistoricoSaldos) {
+    return <HistoricoSaldoFavor idContribuyente={idEditar} Cerrar={CerrarHistoricoSaldos} />
+  }
 
   return (
     <div className="p-4 bg-gray-100 font-sans min-h-screen">
