@@ -65,7 +65,7 @@ export default function HitoricoSaldoFavor({ idContribuyente, Cerrar }: ModalPro
     BuscarPorCalculoYImpuesto()
   }, [Calculo, idImpuesto]);
   const BuscarPorCalculoYImpuesto = async () => {
-    await ObtenerSaldosImpuesto()
+    setListaMovimientos([])
     if (Calculo) {
       await BuscarMovimientosPorCalculo(Calculo)
     }
@@ -124,15 +124,6 @@ export default function HitoricoSaldoFavor({ idContribuyente, Cerrar }: ModalPro
     setCalculo(null)
     try {
       const respuesta = await fetch(`${API_BASE_URL}/calculosFiscales/BuscarPorMesCliente`, {
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        method: "POST",
-        body: JSON.stringify({
-          idCliente: idContribuyente,
-          Mes: Fecha.getMonth()+1,
-          Ciclo: Fecha.getFullYear(),
-        }),
       })
       const data = await respuesta.json();
 
@@ -150,6 +141,7 @@ export default function HitoricoSaldoFavor({ idContribuyente, Cerrar }: ModalPro
   const BuscarMovimientosPorCalculo = async (Calculo: CalculoFiscal) => {
     setloading(true);
     setListaMovimientos([])
+    if (!idImpuesto || !Calculo) return
     try {
       const respuesta = await fetch(`${API_BASE_URL}/historialsaldos/ObtenerPorCalculo/${Calculo._id}/${idImpuesto}`, {
         method: "GET",
@@ -328,7 +320,7 @@ export default function HitoricoSaldoFavor({ idContribuyente, Cerrar }: ModalPro
               <th className=" px-4 py-2 text-center">Observaciones</th>
               <th className=" px-4 py-2 text-end">Acciones</th>
             </tr>
-          </thead>
+          </thead>w
           <tbody>
             {ListaMovimientos.map(movimiento => (
               <tr key={movimiento._id} className="border-t border-gray-200 hover:bg-gray-50">

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from "react";
 import MensajeNotificacion from "@/src/hooks//MensajeNotificacion";
 import { useNotification } from "@/src/hooks/useNotifications";
-import { CalculoFiscal, EstatusValidacion, HistorialSaldo, Impuesto } from "@/src/Interfaces/Interfaces";
+import { CalculoFiscal, HistorialSaldo, Impuesto } from "@/src/Interfaces/Interfaces";
 import { API_BASE_URL,ObtenerSesionUsuario } from "@/src/utils/constantes";
 import { createPrerenderParamsForClientSegment } from "next/dist/server/app-render/entry-base";
 import Cargando from "@/src/hooks/Cargando";

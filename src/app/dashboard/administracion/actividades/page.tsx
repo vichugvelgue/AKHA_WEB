@@ -7,13 +7,15 @@ import { useState, useMemo, useEffect, ChangeEventHandler } from 'react';
 import { useNotification } from '@/src/hooks/useNotifications';
 import { Actividad,ActividadFormState } from '@/src/Interfaces/Interfaces';
 import { API_BASE_URL } from '@/src/utils/constantes';
+import { Frecuencia } from '@/src/Interfaces/enums';
 
 // Valores iniciales para el formulario
 const initialFormState: ActividadFormState = {
   _id: null,
   nombre: '',
   descripcion: '',
-  frecuencia: 'Diaria',
+  FechaFin: 1,
+  frecuencia: Frecuencia.Mensual,
 };
 
 // URL base de tu API de NestJS, ahora usando una variable de entorno
@@ -273,10 +275,11 @@ const ActividadesListado = () => {
               className="mt-1 block w-full rounded-md border-gray-300 bg-gray-50 p-2 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
             >
               <option>Todas</option>
-              <option>Diaria</option>
-              <option>Semanal</option>
-              <option>Mensual</option>
-              <option>Trimestral</option>
+              {Object.values(Frecuencia).map((item) => (
+                <option key={item} value={item}>
+                  {item}
+                </option>
+              ))}
             </select>
           </div>
         </div>
@@ -392,11 +395,26 @@ const ActividadesListado = () => {
                   onChange={handleFormChange}
                   className="mt-1 block w-full rounded-md border-gray-300 p-2 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                 >
-                  <option>Diaria</option>
-                  <option>Semanal</option>
-                  <option>Mensual</option>
-                  <option>Trimestral</option>
+                  {Object.values(Frecuencia).map((item) => (
+                    <option key={item} value={item}>
+                      {item}
+                    </option>
+                  ))}
                 </select>
+              </div>
+              <div>
+                <label htmlFor="FechaFin" className="block text-sm font-medium text-gray-700">
+                  Día de vencimiento
+                </label>
+                <input
+                  type="number"
+                  id="FechaFin"
+                  name="FechaFin"
+                  value={formState.FechaFin}
+                  onChange={handleFormChange}
+                  className="mt-1 block w-full rounded-md border-gray-300 p-2 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                  required
+                />
               </div>
             </div>
             <div className="mt-6 flex justify-end space-x-2">

@@ -13,7 +13,7 @@ import { useRouter } from 'next/navigation';
 
 const defaultError: Configuracion = {
   AutorizacionPagos: { DiaLimiteConfirmacionCalculo: 1 },
-  Actividades: { DiasRecordatorio: 1 },
+  Actividades: { DiasRecordatorio: 1,AnticipacionCreacion:1 },
 }
 // Componente principal para la gestión de usuarios
 const UserList = () => {
@@ -22,7 +22,7 @@ const UserList = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [Configuracion, setConfiguracion] = useState<Configuracion>({
     AutorizacionPagos: { DiaLimiteConfirmacionCalculo: 1 },
-    Actividades: { DiasRecordatorio: 1 },
+    Actividades: { DiasRecordatorio: 1, AnticipacionCreacion: 1 },
   });
   const [error,setError]=useState<Configuracion>(defaultError);
   
@@ -158,6 +158,18 @@ console.log(error);
 
         <Seperador Titulo="Actividades" />
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700">
+              Anticipación del creacion de actividades (en días)
+            </label>
+            <input
+              type="number"
+              name="AnticipacionCreacion"
+              value={Configuracion.Actividades.AnticipacionCreacion}
+              onChange={CambiarValorActividades}
+              className={`mt-1 block w-full rounded-md border p-2 shadow-sm focus:border-blue-500 focus:ring-blue-500 ${error.Actividades.DiasRecordatorio ? 'border-red-500' : 'border-gray-300'}`}
+            />
+          </div>
           <div>
             <label className="block text-sm font-medium text-gray-700">
               Anticipación del recordatorio (en días)

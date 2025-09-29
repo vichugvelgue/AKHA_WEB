@@ -10,7 +10,8 @@ export default function ValidarLogin() {
     if (typeof window !== 'undefined') {
       const storedIdUsuario = localStorage.getItem('idUsuario');
       const isRoot = window.location.pathname == "/";
-      if (!isRoot && !storedIdUsuario) {
+      const isValidate = window.location.pathname.includes("ValidacionCliente");
+      if (!isRoot && !isValidate && !storedIdUsuario) {
         location.href = "/"
       }
     }

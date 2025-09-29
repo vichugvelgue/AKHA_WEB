@@ -3,7 +3,7 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import React from 'react';
 
 interface MenuItemProps {
@@ -34,6 +34,7 @@ const MenuItem = ({ href, icon, text, currentPath }: MenuItemProps) => {
 };
 
 export default function AdministracionLayout({ children }: { children: React.ReactNode }) {
+  const router = useRouter()
   const pathname = usePathname();
 
   return (
@@ -61,6 +62,7 @@ export default function AdministracionLayout({ children }: { children: React.Rea
           <img
             src="/logoakha.png"            
             className="mx-auto h-12 w-auto"
+            onClick={() => router.push('/dashboard')}
           />
         </div>
       </aside>

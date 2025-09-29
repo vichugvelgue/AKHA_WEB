@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useMemo } from "react";
 import MensajeNotificacion from "@/src/hooks//MensajeNotificacion";
 import { useNotification } from "@/src/hooks/useNotifications";
-import { CalculoFiscal, CalculoImpuesto, EstatusValidacion, Impuesto, ValidacionCalculoFiscal } from "@/src/Interfaces/Interfaces";
+import { CalculoFiscal, CalculoImpuesto,  Impuesto, ValidacionCalculoFiscal } from "@/src/Interfaces/Interfaces";
+import { EstatusValidacion } from "@/src/Interfaces/enums";
 import { API_BASE_URL, ObtenerSesionUsuario } from "@/src/utils/constantes";
 import { createPrerenderParamsForClientSegment } from "next/dist/server/app-render/entry-base";
 import Cargando from "@/src/hooks/Cargando";
@@ -275,7 +276,7 @@ export default function ValidarCalculoFiscal({ Visible, idCliente, idCalculo,idV
                   <i className="material-symbols-rounded filled">delete</i> </button>
               </div>
             )}
-          </div>
+          </div> 
           {
             Validacion.EstadoAceptacion == EstatusValidacion.Rechazado &&
           <div className="col-span-2">

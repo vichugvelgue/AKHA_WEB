@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation'; // Importa el hook useRouter
 import ToggleSwitch from "@/src/hooks/ToggleSwitch";
 import Cargando from '@/src/hooks/Cargando';
 import { useNotification } from '@/src/hooks/useNotifications';
-import { Actividad, Cliente, PersonaContacto, RepresentanteLegal } from '@/src/Interfaces/Interfaces';
+import { Actividad, Cliente,  ServicioItem, RepresentanteLegal } from '@/src/Interfaces/Interfaces';
 import { ObtenerSesionUsuario } from '@/src/utils/constantes';
 
 
@@ -15,16 +15,7 @@ import { ObtenerSesionUsuario } from '@/src/utils/constantes';
 
 
 
-type servicioItem = {
-  _id: string;
-  Nombre: string;
-  Estado: number;
-  Actividades: Actividad[];
-  ActividadesServicio: {
-    idActividad: string;
-    Orden?: number;
-  }[];
-};
+
 
 interface RegimenFiscal {
   Clave: string;
@@ -116,7 +107,7 @@ const ContribuyenteConsultar = ({ idEditar, Editar = false, onClose, onRegister 
   });
 
   const [regimenfiscales, setregimenfiscales] = useState<RegimenFiscal[]>([]);
-  const [servicios, setservicios] = useState<servicioItem[]>([]);
+  const [servicios, setservicios] = useState<ServicioItem[]>([]);
   const [ServiciosSeleccionados, setSelectedServicios] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
@@ -210,7 +201,7 @@ const ContribuyenteConsultar = ({ idEditar, Editar = false, onClose, onRegister 
       showNotification('Error al cargar los servicios.', 'error');
     }
   };
-  const UnidicarActividadesServicio = (listarServicios: servicioItem[]) => {
+  const UnidicarActividadesServicio = (listarServicios: ServicioItem[]) => {
     for (const servicio of listarServicios) {
       for (const actividad of servicio.Actividades) {
         let index = servicio.ActividadesServicio.findIndex((item) => item.idActividad === actividad._id);
