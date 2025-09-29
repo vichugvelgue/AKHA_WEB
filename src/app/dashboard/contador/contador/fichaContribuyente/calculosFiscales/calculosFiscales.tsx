@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useMemo } from "react";
 import MensajeNotificacion from "@/src/hooks//MensajeNotificacion";
 import { useNotification } from "@/src/hooks/useNotifications";
-import { CalculoFiscal, CalculoImpuesto, EstatusValidacion, Impuesto } from "@/src/Interfaces/Interfaces";
+import { CalculoFiscal, CalculoImpuesto, Impuesto, ValidacionCalculoFiscal } from "@/src/Interfaces/Interfaces";
+import { EstatusValidacion } from "@/src/Interfaces/enums";
 import { API_BASE_URL,ObtenerSesionUsuario } from "@/src/utils/constantes";
 import ModalAgregarImpuesto from "./modalAgregarImpuesto";
 import ModalCicloFiscal from "./modalCicloFiscal";
@@ -26,7 +27,13 @@ export default function CalculosFiscales({ Visible, idEditar = "", Cerrar }: Mod
   const [showPreguntaNotificacion, setShowPreguntaNotificacion] = useState<boolean>(false);
   const [loading, setloading] = useState<boolean>(false);
   const [Nuevo, setNuevo] = useState<boolean>(false);
+  const [Editar, setEditar] = useState<boolean>(false);
   const [EstadoAutorizado, setEstadoAutorizado] = useState<EstatusValidacion>(EstatusValidacion.Pendiente);
+  const [Validacion, setValidacion] = useState<ValidacionCalculoFiscal>({
+    EstadoAceptacion: EstatusValidacion.Pendiente,
+    MotivosRechazo: "",
+  });
+  
   const [idValidacion, setIdValidacion] = useState<string|null>(null);
   const [Fecha, setFecha] = useState<string>("");
   const [Ciclo, setCiclo] = useState<Number>(0);
@@ -73,6 +80,7 @@ export default function CalculosFiscales({ Visible, idEditar = "", Cerrar }: Mod
 
   const BuscarPorMes = async () => {
     setloading(true);
+    setEditar(false)
     try {
       if (!Fecha) return
       let [ciclo, mes] = Fecha.split("-").map(Number);
@@ -122,10 +130,13 @@ export default function CalculosFiscales({ Visible, idEditar = "", Cerrar }: Mod
       if (respuesta.ok) {
         if (data.data) {
           setIdValidacion(data.data._id);
-          setEstadoAutorizado(data.data.EstadoAceptacion);
+          setValidacion(data.data);
         }else{
           setIdValidacion(null);
-          setEstadoAutorizado(EstatusValidacion.Pendiente);
+          setValidacion({
+            EstadoAceptacion: EstatusValidacion.Pendiente,
+            MotivosRechazo: "",
+          })
         }
       } else {
         showNotification(data.mensaje, "error")
@@ -230,7 +241,7 @@ export default function CalculosFiscales({ Visible, idEditar = "", Cerrar }: Mod
         headers: {
           'Content-Type': 'application/json',
         },
-        method: "POST",
+        method: Editar ? "PUT" : "POST",
         body: JSON.stringify(body),
       })
       const data = await respuesta.json();
@@ -302,6 +313,8 @@ export default function CalculosFiscales({ Visible, idEditar = "", Cerrar }: Mod
       setloading(false);
     }
   }
+  console.log(Validacion);
+  
 
   return (
     <div
@@ -325,29 +338,43 @@ export default function CalculosFiscales({ Visible, idEditar = "", Cerrar }: Mod
               onChange={SeleccionarFecha}
             />
           </div>
-          <div className="">
+          <div className="flex gap-4">
               <button className="mt-3 inline-block rounded-md bg-yellow-600 px-4 py-1 text-white transition-colors hover:bg-yellow-700"
                onClick={() => setCicloFiscal(true)}>
                 Ver año fiscal
               </button>
+              
+              <button className="mt-3 inline-block rounded-md bg-yellow-600 px-4 py-1 text-white transition-colors hover:bg-yellow-700"
+               onClick={() => setEditar(true)}>
+                Complementaria
+              </button>
           </div>
           <div className="grid justify-items-end">
-            {Nuevo ?
-              <button className="mt-3 inline-block rounded-md bg-yellow-600 px-4 py-1 text-white transition-colors hover:bg-yellow-700"
-                onClick={() => setShowNuevoImpuesto(true)}>
-                Nuevo impuesto
-              </button> :
+            {!Nuevo &&
               <button 
                 className={`mt-3 inline-block rounded-md px-4 py-1 transition-colors
-                  ${EstadoAutorizado == EstatusValidacion.Autorizado ? " bg-green-300 hover:bg-green-400" :
-                    EstadoAutorizado == EstatusValidacion.Rechazado ? " bg-red-300 hover:bg-red-400" : 
+                  ${Validacion.EstadoAceptacion == EstatusValidacion.Autorizado ? " bg-green-300 hover:bg-green-400" :
+                    Validacion.EstadoAceptacion == EstatusValidacion.Rechazado ? " bg-red-300 hover:bg-red-400" : 
                       "bg-gray-300 hover:bg-gray-400"
                   }`}
-                onClick={() => setValidarCalculo(true)}>
-                {EstadoAutorizado}
+                // onClick={() => setValidarCalculo(true)}
+                >
+                {Validacion.EstadoAceptacion}
               </button>
             }
           </div>
+          {
+            Validacion.EstadoAceptacion == EstatusValidacion.Rechazado &&
+            <div className="col-span-3">
+              <label htmlFor="nombreFilter" className="block text-sm font-medium text-gray-700">Motivo de rechazo</label>
+              <textarea
+                name="MotivosRechazo"
+                className={`mt-1 block w-full rounded-md bg-gray-50 p-2 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border-gray-300`}
+                value={Validacion.MotivosRechazo}
+                readOnly
+              />
+            </div>
+          }
         </div>
         <br />
 
@@ -395,7 +422,7 @@ export default function CalculosFiscales({ Visible, idEditar = "", Cerrar }: Mod
           <button onClick={() => Cerrar("")} className="rounded-md bg-gray-300 px-4 py-2 text-gray-800 transition-colors hover:bg-gray-400">
             Cancelar
           </button>
-          {Nuevo &&
+          {(Nuevo || Editar) &&
             <button onClick={Guardar} className="rounded-md bg-green-600 px-4 py-2 text-white transition-colors hover:bg-green-700">
               Guardar
             </button>

@@ -11,6 +11,7 @@ import { API_BASE_URL } from '@/src/utils/constantes';
 import { Cliente } from '@/src/Interfaces/Interfaces';
 import Cargando from '@/src/hooks/Cargando';
 import HistoricoSaldoFavor from './historicoSaldosFavor/page'
+import ActividadesCRUD from './actividades/page';
 
 const defaultContacto = {
   Nombre: "",
@@ -45,6 +46,7 @@ const App = () => {
   const [OpenResumenEjecutivo, setOpenResumenEjecutivo] = useState(false);
   const [OpenRegistroPagos, setOpenRegistroPagos] = useState(false);
   const [OpenHistoricoSaldos, setOpenHistoricoSaldos] = useState(false);
+  const [OpenActividades, setOpenActividades] = useState(false);
   
 
   // Simula la carga de datos del contribuyente al inicio
@@ -116,6 +118,15 @@ const App = () => {
       showNotification("Registro de pagos guardado correctamente", "success");
     }
   };
+  const AbrirActividades = () => {
+    setOpenActividades(true);
+  };
+  const CerrarActividades = (exist: string) => {
+    setOpenActividades(false);
+    if (exist === "success") {
+      showNotification("Registro de pagos guardado correctamente", "success");
+    }
+  };
 
   // Datos para el menú, siguiendo el estilo de la página principal
   const menuOptions = [
@@ -123,6 +134,7 @@ const App = () => {
     { id: 'resumen', icon: '📊', text: 'Resumen Ejecutivo', onClick: () => AbrirResumenEjectutivo(idEditar) },
     { id: 'pagos', icon: '💳', text: 'Registro de Pagos', onClick: () => AbrirRegistroPagos(idEditar) },
     { id: 'Saldos', icon: '💵', text: 'Saldos a favor', onClick: () => AbrirHistoricoSaldos() },
+    { id: 'Actividades', icon: '📋', text: 'Actividades', onClick: () => AbrirActividades() },
     { id: 'documentos', icon: '📁', text: 'Documentos', onClick: () => console.log('Abriendo Documentos') },
     { id: 'bitacora', icon: '🗒️', text: 'Bitácora', onClick: () => console.log('Abriendo Bitácora') },
     { id: 'historial', icon: '🕒', text: 'Historial de Pagos', onClick: () => console.log('Abriendo Historial de Pagos') },
@@ -169,7 +181,9 @@ const App = () => {
     );
   };
 
-  if (OpenHistoricoSaldos) {
+  if (OpenActividades) {
+    return <ActividadesCRUD idContribuyente={idEditar} Cerrar={CerrarActividades} />
+  } else if (OpenHistoricoSaldos) {
     return <HistoricoSaldoFavor idContribuyente={idEditar} Cerrar={CerrarHistoricoSaldos} />
   }
 

@@ -1,4 +1,5 @@
 import { TipoEmpleado } from "../app/dashboard/administracion/usuarios/page";
+import { EstatusValidacion, Frecuencia } from "./enums";
 
 export interface User {
   _id?: string;
@@ -8,12 +9,12 @@ export interface User {
   Correo?: string;
   idTipoUsuario?: TipoEmpleado;
 }
-
 export interface Actividad {
   _id: string;
   nombre: string;
   descripcion: string;
-  frecuencia: 'Diaria' | 'Semanal' | 'Mensual' | 'Trimestral';
+  FechaFin: number;
+  frecuencia: Frecuencia;
   Orden?: number;
 }
 
@@ -92,7 +93,16 @@ export interface Cliente {
   EnlaceAkha: PersonaContacto;
   Cumpleanos: string;
 }
-
+export interface ServicioItem  {
+  _id: string;
+  Nombre: string;
+  Estado: number;
+  Actividades: Actividad[];
+  ActividadesServicio: {
+    idActividad: string;
+    Orden?: number;
+  }[];
+};
 export interface ContactoPrincipal {
   Nombre: string;
   Telefono: string;
@@ -225,11 +235,6 @@ export interface ResumenEjecutivo {
   FechaResumen?: Date;
   FechaRegistro?: Date;
 }
-export enum EstatusValidacion {
-  Pendiente = "Pendiente",
-  Autorizado = "Autorizado",
-  Rechazado = "Rechazado",
-}
 export interface ValidacionCalculoFiscal {
   _id?: string;
   Estado?: number;
@@ -249,7 +254,8 @@ export interface ConfigAutorizacionPagos {
     DiaLimiteConfirmacionCalculo: number ;
 }
 export interface ConfigActividades {
-    DiasRecordatorio: number ;
+  AnticipacionCreacion: number;
+  DiasRecordatorio: number;
 }
 export interface Configuracion {
   _id?: string;
@@ -276,4 +282,22 @@ export interface TotalSaldoFavor {
   Acumulado?: number;
   Utilizado?: number;
   Disponible?: number;
+}
+export interface ActividadPeriodica {
+  _id?: string;
+  Estado?: number;
+  EstadoActividad: number;
+
+  Nombre: string;
+  SemanaOperativa: number;
+
+  idCliente: string;
+  idServicio: string;
+  idIncidencia: string;
+
+  TipoOrigen: "Sistema" | "Manual";
+  idRegistro: string;
+
+  FechaInicio: Date;
+  FechaVencimiento: Date;
 }
