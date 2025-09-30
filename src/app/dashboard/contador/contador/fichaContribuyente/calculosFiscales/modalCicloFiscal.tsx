@@ -38,15 +38,7 @@ export default function ModalCicloFiscal({ Ciclo, Visible, idEditar = "", Cerrar
       const data = await respuesta.json();
 
       if (respuesta.ok) {
-        let impuestos: Impuesto[] = [
-          { _id:"68d2f4852c5c5d3ff8264fdf", Nombre: "ISR" },
-          { _id:"68d2f4832c5c5d3ff8264fde", Nombre: "ISR Retención" },
-          { _id:"68d2f46e2c5c5d3ff8264fdc", Nombre: "IVA" },
-          { _id:"68d2f47b2c5c5d3ff8264fdd", Nombre: "IVA Retención" },
-          { _id:"68d2f48e2c5c5d3ff8264fe0", Nombre: "ISN" },
-          ...data.data as Impuesto[]
-        ]
-        setImpuestos(impuestos)
+        setImpuestos(data.data)
         await ObtenerInfoImpuestos()
       } else {
         showNotification(data.mensaje, "error")

@@ -12,6 +12,7 @@ import { ObtenerSesionUsuario } from '@/src/utils/constantes';
 import ModalBitacoraContibuyente from '@/src/hooks/ModalBitacoraContibuyente';
 import ContribuyenteConsultar from './Agregar';
 import CredencialesCliente from './credencialesCliente';
+import ActividadesCRUD from './fichaContribuyente/actividades/page';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000';
 
@@ -34,6 +35,8 @@ const ContadorCRUD = () => {
   const [tiposUsuarios, setTiposUsuarios] = useState<Cliente[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isOpenCredenciales, setIsOpenCredenciales] = useState(false);
+  const [isOpenActividades, setOpenActividades] = useState(false);
+  
   const [showConfirm, setShowConfirm] = useState(false);
   const [showBitacora, setShowBitacora] = useState(false);
   const [idEditar, setIdEditar] = useState<string>("");
@@ -147,13 +150,24 @@ const ContadorCRUD = () => {
     setIsOpenCredenciales(false);
   };
   const AbrirFicha = (id: string = "") => {
-    localStorage.setItem("idContribuyente", id);
-    router.push(`/dashboard/contador/contador/fichaContribuyente`);
+    setIdEditar(id);
+    setOpenActividades(true);
+    // router.push(`/dashboard/contador/contador/fichaContribuyente`);
+    // router.push(`/dashboard/contador/contador/fichaContribuyente/actividades`);
   };
-  if (isModalOpen) {
+  const CerrarActividades = (exist: string) => {
+    setOpenActividades(false);
+    if (exist === "success") {
+      showNotification("Registro de pagos guardado correctamente", "success");
+    }
+  };
+
+  if (isOpenActividades) {
+    return <ActividadesCRUD idContribuyente={idEditar} Cerrar={CerrarActividades} />
+  }else if (isModalOpen) {
     console.log({ idEditar, editar });
     return (<ContribuyenteConsultar idEditar={idEditar} Editar={editar} onClose={handleCloceModal} onRegister={handleRegister} />)
-  } 
+  } else
   if (isOpenCredenciales) {
     return (<CredencialesCliente idEditar={idEditar} onClose={handleCloseCredencialesModal} onRegister={handleCloseCredencialesModal} />)
   }

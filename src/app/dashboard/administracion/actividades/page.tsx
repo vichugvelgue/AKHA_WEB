@@ -20,6 +20,12 @@ const initialFormState: ActividadFormState = {
 
 // URL base de tu API de NestJS, ahora usando una variable de entorno
 const ENDPOINT_ACTUAL = '/actividades';
+export const ActividadesFijas =[
+  "68daafc6209ee6ddd4d946e7",
+  "68daafd5209ee6ddd4d946eb",
+  "68dab10c197a935fb6bb92e1",
+  "68dab4fa78038f650675da8f",
+]
 
 // Componente para la vista de listado de actividades
 const ActividadesListado = () => {
@@ -302,15 +308,16 @@ const ActividadesListado = () => {
                 <td className="px-4 py-2">{actividad.descripcion}</td>
                 <td className="px-4 py-2">{actividad.frecuencia}</td>
                 <td className="px-4 py-2 flex space-x-2 float-end">
-                  <button onClick={() => handleOpenFormModal(actividad)} className="rounded-md bg-blue-600 px-4 py-1 text-sm text-white transition-colors duration-200 hover:bg-blue-700">
-                    <i className="material-symbols-rounded filled">stylus</i>
-                  </button>
-                  <button
-                    onClick={() => handleDelete(actividad._id)}
-                    className="rounded-md bg-red-600 px-4 py-1 text-sm text-white transition-colors duration-200 hover:bg-red-700"
-                  >
-                    <i className="material-symbols-rounded filled">delete</i>
-                  </button>
+                  {!ActividadesFijas.includes(actividad._id) &&
+                    <button onClick={() => handleOpenFormModal(actividad)} className="rounded-md bg-blue-600 px-4 py-1 text-sm text-white transition-colors duration-200 hover:bg-blue-700">
+                      <i className="material-symbols-rounded filled">stylus</i>
+                    </button>
+                  }
+                  {!ActividadesFijas.includes(actividad._id) &&
+                    <button className="rounded-md bg-red-600 px-4 py-1 text-sm text-white transition-colors duration-200 hover:bg-red-700"
+                      onClick={() => handleDelete(actividad._id)}> <i className="material-symbols-rounded filled">delete</i>
+                    </button>
+                  }
                 </td>
               </tr>
             ))}

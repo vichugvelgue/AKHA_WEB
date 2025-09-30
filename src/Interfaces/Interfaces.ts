@@ -286,17 +286,17 @@ export interface TotalSaldoFavor {
 export interface ActividadPeriodica {
   _id?: string;
   Estado?: number;
-  EstadoActividad: number;
+  EstadoActividad?: number;
 
   Nombre: string;
   SemanaOperativa: number;
 
   idCliente: string;
-  idServicio: string;
-  idIncidencia: string;
+  idServicio?: string;
+  idIncidencia?: string;
 
-  TipoOrigen: "Sistema" | "Manual";
-  idRegistro: string;
+  TipoOrigen?: "Sistema" | "Manual";
+  idUsuarioRegistro?: string;
 
   FechaInicio: Date;
   FechaVencimiento: Date;

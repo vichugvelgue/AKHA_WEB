@@ -11,6 +11,9 @@ import { Modulo, Permiso, TipoUsuario, Cliente, ActividadPeriodica } from '@/src
 import { ObtenerSesionUsuario } from '@/src/utils/constantes';
 import ModalBitacoraContibuyente from '@/src/hooks/ModalBitacoraContibuyente';
 import MensajeNotificacion from '@/src/hooks/MensajeNotificacion';
+import ModalAgregarActividad from './ModalAgregarActividad';
+import { EstatusActividad, EstatusValidacion } from '@/src/Interfaces/enums';
+import { ActividadesFijas } from '@/src/app/dashboard/administracion/actividades/page';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000';
 
@@ -27,18 +30,21 @@ interface ModalProps {
 
 // Componente para la vista de CRUD de Usuarios
 export default function ActividadesCRUD({ idContribuyente, Cerrar }: ModalProps) {
+  console.log(idContribuyente);
+  
   // Inicializa el router para la navegación
   const router = useRouter();
   const sesion = ObtenerSesionUsuario();
   const { notification, showNotification, hideNotification } = useNotification();
 
-  const [tiposUsuarios, setTiposUsuarios] = useState<Cliente[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
   const [Fecha,setFecha]=useState<Date>(new Date())
   const [Servicios,setServicios]=useState<SelectServicio[]>([])
   const [idServicio, setIdServicios] = useState<string>("")
   const [ListaActividades,setListaActividades]=useState<ActividadPeriodica[]>([])
+
+  const [showAgregar, setShowAgregar] = useState<boolean>(false);
+  const [idActividad, setIdActividad] = useState<string>("")
 
 
   useEffect(() => {
@@ -49,6 +55,7 @@ export default function ActividadesCRUD({ idContribuyente, Cerrar }: ModalProps)
   }
   useEffect(() => {
     BuscarActividades()
+    setIdActividad("")
   }, [Fecha,idServicio]);
 
   const listarServicios = async () => {
@@ -72,7 +79,8 @@ export default function ActividadesCRUD({ idContribuyente, Cerrar }: ModalProps)
   };
   const BuscarActividades = async () => {
     setListaActividades([])
-    if(!idServicio)return
+    setIdActividad("")
+    // if(!idServicio)return
 
     setIsLoading(true)
     try {
@@ -102,12 +110,59 @@ export default function ActividadesCRUD({ idContribuyente, Cerrar }: ModalProps)
       setIsLoading(false)
     }
   };
+  const ActualizarEstadoActividad = async (_id: string,EstadoActividad: EstatusActividad) => {
+    setListaActividades([])
+
+    setIsLoading(true)
+    try {
+      const response = await fetch(`${API_BASE_URL}/actividadesperiodicas/ActualizarEstado`, {
+        method: "PATCH",
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          _id,
+          EstadoActividad,
+          idUsuarioRegistro: sesion.idUsuario
+        }),
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.message || 'La respuesta de la API de servicios no es un array válido.');
+      }else{
+        showNotification(data.mensaje, 'success');
+        BuscarActividades();
+      }
+    } catch (err: any) {
+      console.error('Error al cargar los servicios:', err);
+      showNotification('Error al cargar los servicios.', 'error');
+    } finally {
+      setIsLoading(false)
+    }
+  };
   const CambiarFecha = async (e:React.ChangeEvent<HTMLInputElement>) => {
     const { value } = e.target
     let valor = new Date(value+"-02")
     setFecha(valor)
   } 
+  const esMesActual = (fecha: Date) => {
+    const hoy = new Date();
+    return fecha.getFullYear() === hoy.getFullYear() &&
+      fecha.getMonth() === hoy.getMonth(); // getMonth() devuelve de 0 (enero) a 11 (diciembre)
+  }
 
+  const CerrarAgregar = (existo: string) => {
+    setShowAgregar(false);
+    if (existo === "success") {
+      showNotification("Actividad registrada correctamente", "success");
+    }
+    BuscarActividades()
+  };
+  const CambiarSelectEstatoActividad = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    let estatus = parseInt(value) as EstatusActividad
+    ActualizarEstadoActividad(idActividad, estatus)
+  };
   return (
     <div className="p-10 flex-1 overflow-auto">
       <div className="space-y-6 p-4">
@@ -116,7 +171,7 @@ export default function ActividadesCRUD({ idContribuyente, Cerrar }: ModalProps)
 
           <div className="flex space-x-4">
             <button
-              onClick={() => Cerrar("")}
+              onClick={() =>  Cerrar(``)}
               className="rounded-lg bg-gray-300 px-6 py-2 text-gray-800 transition-colors duration-200 hover:bg-gray-400"
             >
               Regresar
@@ -156,6 +211,15 @@ export default function ActividadesCRUD({ idContribuyente, Cerrar }: ModalProps)
                 }
               </select>
             </div>
+            
+            <div className="w-full sm:w-1/3">
+              {
+                esMesActual(Fecha) &&
+                <button className="float-right rounded-lg text-white bg-blue-600 px-6 py-2 text-sm font-medium transition-colors duration-200 hover:bg-blue-700"
+                  onClick={() => setShowAgregar(true)}  >
+                  Nueva actividad </button>
+              }
+            </div>
           </div>
         </div>
         
@@ -164,30 +228,48 @@ export default function ActividadesCRUD({ idContribuyente, Cerrar }: ModalProps)
             <thead>
               <tr className="bg-gray-200 text-left text-gray-700 ">
                 <th className=" px-4 py-2">Actividad</th>
-                <th className=" px-4 py-2 ">Fecha de Inicio</th>
-                <th className=" px-4 py-2 ">Fecha de vencimiento</th>
-                <th className=" px-4 py-2">Origen</th>
-                <th className=" px-4 py-2 text-end">Estado</th>
+                <th className=" px-4 py-2 text-center">Fecha de Inicio</th>
+                <th className=" px-4 py-2 text-center">Fecha de vencimiento</th>
+                <th className=" px-4 py-2 text-center">Origen</th>
+                <th className=" px-4 py-2 text-center">Estado</th>
                 <th className=" px-4 py-2 text-end">Incidencias</th>
               </tr>
             </thead>
             <tbody>
               {
-                ListaActividades.map(actividad =>
-                  <tr className=" text-left">
+                ListaActividades.map((actividad,key) =>
+                  <tr key={key} className=" text-left">
                     <td className=" px-4 py-2">{actividad.Nombre}</td>
                     <td className=" px-4 py-2 text-center">{new Date(actividad.FechaInicio).toLocaleDateString()}</td>
                     <td className=" px-4 py-2 text-center">{new Date(actividad.FechaVencimiento).toLocaleDateString()}</td>
                     <td className=" px-4 py-2 text-center">{actividad.TipoOrigen}</td>
-                    <td className=" px-4 py-2 text-center">{actividad.EstadoActividad}</td>
-                    <td className=" px-4 py-2 text-center">{actividad.idIncidencia}</td>
+                    {
+                      idActividad == actividad._id ?
+                        <td className=" px-4 py-2 text-end">
+                          <select
+                            id="EstadoActividad"
+                            value={actividad.EstadoActividad || 0}
+                            onChange={CambiarSelectEstatoActividad}
+                            className="mt-1 block w-full rounded-md border-gray-300 bg-gray-50 p-2 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                          >
+                            {Object.values(EstatusActividad).filter((value) => typeof value === "number").map((value) => (
+                              <option key={value} value={value}>
+                                {EstatusActividad[value as EstatusActividad].replace(/_/g," ")}
+                              </option>
+                            ))}
+                          </select>
+                        </td>
+                        :
+                        <td className=" px-4 py-2 text-center" onDoubleClick={() => setIdActividad(actividad._id || "")}>{EstatusActividad[actividad.EstadoActividad || 0].replace(/_/g," ")}</td>
+                    }
+                    <td className=" px-4 py-2 text-center" >{actividad.idIncidencia}</td>
                   </tr>
                 )
               }
             </tbody>
           </table>
         </div>
-
+        <ModalAgregarActividad idContribuyente={idContribuyente||""} Cerrar={CerrarAgregar} Visible={showAgregar} />
         <Cargando isLoading={isLoading} />
         <MensajeNotificacion {...notification} hideNotification={hideNotification} />
       </div>

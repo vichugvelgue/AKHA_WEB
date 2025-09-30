@@ -621,10 +621,12 @@ const confirmActivateService = async () => {
                     </span>
                   </td>
                   <td className="px-4 py-2 flex space-x-2 float-right">
-                    <button onClick={() => handleOpenFormModal(service)} className="rounded-md bg-blue-600 px-4 py-1 text-sm text-white transition-colors duration-200 hover:bg-blue-700">
-                      <i className="material-symbols-rounded filled">stylus</i>
-                    </button>
-                    {service.Estado === Estatus.Activo && (
+                    {service._id != "68dab66578038f650675da97" &&
+                      <button onClick={() => handleOpenFormModal(service)} className="rounded-md bg-blue-600 px-4 py-1 text-sm text-white transition-colors duration-200 hover:bg-blue-700">
+                        <i className="material-symbols-rounded filled">stylus</i>
+                      </button>
+                    }
+                    {service._id != "68dab66578038f650675da97" && service.Estado === Estatus.Activo && (
                         <button
                         onClick={() => openDeactivateModal(service._id)}
                         className="rounded-md bg-amber-600 px-4 py-1 text-sm text-white transition-colors duration-200 hover:bg-amber-700"
@@ -642,12 +644,12 @@ const confirmActivateService = async () => {
                         <i className="material-symbols-rounded filled">check</i>
                         </button>
                     )}
-                    <button
-                      onClick={() => handleDelete(service._id)}
-                      className="rounded-md bg-red-600 px-4 py-1 text-sm text-white transition-colors duration-200 hover:bg-red-700"
-                    >
+                    {service._id != "68dab66578038f650675da97" &&
+                      <button className="rounded-md bg-red-600 px-4 py-1 text-sm text-white transition-colors duration-200 hover:bg-red-700"
+                        onClick={() => handleDelete(service._id)} >
                         <i className="material-symbols-rounded filled">delete</i>
-                    </button>
+                      </button>
+                    }
                   </td>
                 </tr>
               ))}
