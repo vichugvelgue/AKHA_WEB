@@ -12,6 +12,7 @@ import { ObtenerSesionUsuario } from '@/src/utils/constantes';
 import ModalBitacoraContibuyente from '@/src/hooks/ModalBitacoraContibuyente';
 import MensajeNotificacion from '@/src/hooks/MensajeNotificacion';
 import ModalAgregarActividad from './ModalAgregarActividad';
+import ModalIncidencias from './ModalIncidencias';
 import { EstatusActividad, EstatusValidacion } from '@/src/Interfaces/enums';
 import { ActividadesFijas } from '@/src/app/dashboard/administracion/actividades/page';
 import CalculosFiscales from '../calculosFiscales/calculosFiscales';
@@ -50,6 +51,10 @@ export default function ActividadesCRUD({ idContribuyente, Cerrar }: ModalProps)
   const [showAgregar, setShowAgregar] = useState<boolean>(false);
   const [OpenCalculosFiscales, setOpenCalculosFiscales] = useState(false);
   const [OpenResumenEjecutivo, setOpenResumenEjecutivo] = useState(false);
+
+  const [showIncidenciasModal, setShowIncidenciasModal] = useState(false);
+  const [selectedActividadId, setSelectedActividadId] = useState<string>('');
+  const [selectedActividadNombre, setSelectedActividadNombre] = useState<string>('');
 
 
   useEffect(() => {
@@ -211,6 +216,26 @@ export default function ActividadesCRUD({ idContribuyente, Cerrar }: ModalProps)
       </button>
     )
   }
+  const openIncidenciasModal = (id: string, nombre: string) => {
+    setSelectedActividadId(id);
+    setSelectedActividadNombre(nombre);
+    setShowIncidenciasModal(true);
+  };
+
+  // Función para cerrar el modal
+  const closeIncidenciasModal = () => {
+    setShowIncidenciasModal(false);
+    setSelectedActividadId('');
+    setSelectedActividadNombre('');
+  };
+
+   const handleIncidenciaGuardada = () => {
+      // Este método se ejecuta cuando se ha guardado una incidencia con éxito en el modal.
+      console.log(`Incidencia guardada para ${selectedActividadId}. Actualizando la vista del padre...`);
+      // Aquí se podría actualizar el conteo de incidencias o forzar una recarga de la lista de actividades.
+  }
+
+
   return (
     <div className="p-10 flex-1 overflow-auto">
       <div className="space-y-6 p-4">
@@ -220,8 +245,7 @@ export default function ActividadesCRUD({ idContribuyente, Cerrar }: ModalProps)
           <div className="flex space-x-4">
             <button
               onClick={() =>  Cerrar(``)}
-              className="rounded-lg bg-gray-300 px-6 py-2 text-gray-800 transition-colors duration-200 hover:bg-gray-400"
-            >
+              className="rounded-lg bg-gray-300 px-6 py-2 text-gray-800 transition-colors duration-200 hover:bg-gray-400">
               Regresar
             </button>
           </div>
@@ -310,16 +334,37 @@ export default function ActividadesCRUD({ idContribuyente, Cerrar }: ModalProps)
                         :
                         <td className=" px-4 py-2 text-center" onDoubleClick={() => setIdActividad(actividad._id || "")}>{EstatusActividad[actividad.EstadoActividad || 0].replace(/_/g," ")}</td>
                     }
-                    <td className=" px-4 py-2 text-center" >{actividad.idIncidencia}</td>
+                    {/* Columna de Incidencias con Botón (Implementación de la solicitud del usuario) */}
+                  <td className="px-4 py-3 text-center">
+                    <button
+                        onClick={() => openIncidenciasModal(actividad._id || "", actividad.Nombre)}
+                        className="text-red-600 hover:text-red-800 font-semibold transition-colors flex items-center justify-center p-2 rounded-full bg-red-100 mx-auto shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-red-500"
+                        title="Registrar o ver incidencias"
+                    >
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            {/* Icono de Alerta */}
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.332 16c-.77 1.333.192 3 1.732 3z"></path>
+                        </svg>
+                    </button>
+                  </td>
                   </tr>
                 )
               }
             </tbody>
           </table>
         </div>
-        
         {OpenCalculosFiscales && <CalculosFiscales Visible={OpenCalculosFiscales} idEditar={idContribuyente||""} Cerrar={CerrarCalculosFiscales} />}
         {OpenResumenEjecutivo && <ResumenesEjecutivos Visible={OpenResumenEjecutivo} idEditar={idContribuyente || ""} Cerrar={CerrarResumenEjectutivo} />}
+         {/* Renderizar el Modal de Incidencias si está visible */}
+      {showIncidenciasModal && (
+          <ModalIncidencias 
+              idActividad={selectedActividadId}
+              actividadNombre={selectedActividadNombre}
+              idContribuyente={idContribuyente}
+              onClose={closeIncidenciasModal} 
+              onIncidenciaGuardada={handleIncidenciaGuardada}
+          />
+      )}
         <ModalAgregarActividad idContribuyente={idContribuyente||""} Cerrar={CerrarAgregar} Visible={showAgregar} />
         <Cargando isLoading={isLoading} />
         <MensajeNotificacion {...notification} hideNotification={hideNotification} />
