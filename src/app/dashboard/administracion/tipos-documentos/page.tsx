@@ -6,6 +6,7 @@ import { useState, useMemo, useEffect, ChangeEventHandler } from 'react';
 // Importamos el custom hook para las notificaciones con la ruta corregida
 import { useNotification } from '@/src/hooks/useNotifications';
 import { API_BASE_URL } from '@/src/utils/constantes';
+import { useRouter } from 'next/navigation';
 
 // Interfaz para el tipo de datos de un tipo de documento
 interface TipoDocumento {
@@ -31,6 +32,7 @@ const ENDPOINT_BASE = '/tiposdocumentos';
 
 // Componente para la vista de listado de tipos de documento
 const TiposDocumentosListado = () => {
+  const router = useRouter();
   const [tiposDocumentos, setTiposDocumentos] = useState<TipoDocumento[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -256,6 +258,15 @@ const TiposDocumentosListado = () => {
       <div className="flex items-center justify-between">
         <h2 className="text-3xl font-extrabold text-blue-900">Gestión de Tipos de Documentos</h2>
         <div className="flex space-x-4">
+          <button
+            onClick={() => {
+              console.log("Regresando a /dashboard...");
+              router.push('/dashboard');
+            }}
+            className="rounded-lg bg-gray-300 px-6 py-2 text-gray-800 transition-colors duration-200 hover:bg-gray-400"
+          >
+            Regresar
+          </button>
           <button
             onClick={() => handleOpenFormModal()}
             className="rounded-lg bg-yellow-400 px-6 py-2 text-gray-900 font-semibold transition-colors duration-200 hover:bg-yellow-500"

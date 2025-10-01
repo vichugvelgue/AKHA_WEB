@@ -105,13 +105,13 @@ const RazonesSocialesCRUD = () => {
   };
 
   const handleDelete = (id: string = "") => {
-    setPregunta("¿Estás seguro de que quieres eliminar este tipo de usuario?");
+    setPregunta("¿Estás seguro de que quieres eliminar esta razón social?");
     setOperacion("eliminar");
     setIdEditar(id);
     setShowConfirm(true);
   };
   const handleDesactivar = (id: string = "") => {
-    setPregunta("¿Estás seguro de que quieres desactivar/activar este tipo de usuario?");
+    setPregunta("¿Estás seguro de que quieres desactivar/activar esta razón social?");
     setOperacion("desactivar");
     setIdEditar(id);
     setShowConfirm(true);
@@ -220,7 +220,7 @@ const RazonesSocialesCRUD = () => {
             onClick={handleOpenModal}
             className="rounded-lg bg-yellow-400 px-6 py-2 text-gray-900 font-semibold transition-colors duration-200 hover:bg-yellow-500"
           >
-            Nuevo Contribuyente
+            Nueva razón social
           </button>
         </div>
       </div>
@@ -248,7 +248,7 @@ const RazonesSocialesCRUD = () => {
               id="RfcBuscar"
               value={RfcBuscar}
               onChange={(e) => setRfcBuscar(e.target.value)}
-              placeholder="Buscar por nombre..."
+              placeholder="Buscar por RFC..."
               className="mt-1 block w-full rounded-md border-gray-300 bg-gray-50 p-2 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
             />
           </div>
@@ -267,7 +267,7 @@ const RazonesSocialesCRUD = () => {
         <table className="min-w-full table-auto">
           <thead>
             <tr className="bg-gray-200 text-left text-gray-700 ">
-              <th className="px-4 py-2 ">Razon social</th>
+              <th className="px-4 py-2 ">Razón social</th>
               <th className="px-4 py-2 ">RFC</th>
               <th className=" px-4 py-2 text-right">Acciones</th>
             </tr>
@@ -285,7 +285,7 @@ const RazonesSocialesCRUD = () => {
                     onClick={() => handleDesactivar(usuario._id || "")}
                     className={`rounded-md px-4 py-1 text-sm text-white transition-colors duration-200 ${usuario.Estado == 1 ? "bg-yellow-600 hover:bg-yellow-700" : "bg-green-600 hover:bg-green-700"}`}
                   >
-                    <i className="material-symbols-rounded filled">{usuario.Estado == 1 ? "block" : "check"}</i> 
+                    <i className="material-symbols-rounded">{usuario.Estado == 1 ? "block" : "check"}</i> 
                   </button>
                   <button
                     onClick={() => handleDelete(usuario._id || "")}

@@ -14,6 +14,7 @@ export enum TipoEmpleado {
 // Interfaz para el tipo de datos de un usuario.
 // idTipoUsuario ahora usa un tipo numérico para coincidir con el enum.
 import { API_BASE_URL } from '@/src/utils/constantes';
+import { useRouter } from 'next/navigation';
 // Interfaz para el tipo de datos de un usuario
 interface User {
   _id: string;
@@ -66,6 +67,8 @@ const ENDPOINT_BUSCAR = '/Buscar';
 
 // Componente principal para la gestión de usuarios
 const UserList = () => {
+  const Router = useRouter();
+
   const [users, setUsers] = useState<User[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -380,12 +383,22 @@ const UserList = () => {
 
       <div className="flex items-center justify-between">
         <h2 className="text-3xl font-extrabold text-blue-900">Gestión de Usuarios</h2>
-        <button
+        <div className="flex space-x-4">
+          <button
+            onClick={() => {
+              Router.push('/dashboard');
+            }}
+            className="rounded-lg bg-gray-300 px-6 py-2 text-gray-800 transition-colors duration-200 hover:bg-gray-400"
+          >
+            Regresar
+          </button>
+          <button
           onClick={() => handleOpenFormModal()}
-          className="rounded-lg bg-yellow-400 px-6 py-2 text-gray-900 font-semibold transition-colors duration-200 hover:bg-yellow-500"
-        >
-          Crear Nuevo Usuario
-        </button>
+            className="rounded-lg bg-yellow-400 px-6 py-2 text-gray-900 font-semibold transition-colors duration-200 hover:bg-yellow-500"
+          >
+            Nuevo Contribuyente
+          </button>
+        </div>
       </div>
 
       {/* Formulario de búsqueda */}
@@ -504,7 +517,7 @@ const UserList = () => {
                         className="rounded-md bg-amber-600 px-4 py-1 text-sm text-white transition-colors duration-200 hover:bg-amber-700"
                         title="Desactivar servicio"
                       >
-                        <i className="material-symbols-rounded filled">block</i>
+                        <i className="material-symbols-rounded">block</i>
                       </button>
                     )}
                     {user.Estado == 2 && (
@@ -513,7 +526,7 @@ const UserList = () => {
                         className="rounded-md bg-green-600 px-4 py-1 text-sm text-white transition-colors duration-200 hover:bg-green-700"
                         title="Activar servicio"
                       >
-                        <i className="material-symbols-rounded filled">check</i>
+                        <i className="material-symbols-rounded">check</i>
                       </button>
                     )}
                     <button

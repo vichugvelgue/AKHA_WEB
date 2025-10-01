@@ -14,6 +14,8 @@ import MensajeNotificacion from '@/src/hooks/MensajeNotificacion';
 import ModalAgregarActividad from './ModalAgregarActividad';
 import { EstatusActividad, EstatusValidacion } from '@/src/Interfaces/enums';
 import { ActividadesFijas } from '@/src/app/dashboard/administracion/actividades/page';
+import CalculosFiscales from '../calculosFiscales/calculosFiscales';
+import ResumenesEjecutivos from '../resumenEjecutivo/resumenesjecutivos';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000';
 
@@ -43,8 +45,11 @@ export default function ActividadesCRUD({ idContribuyente, Cerrar }: ModalProps)
   const [idServicio, setIdServicios] = useState<string>("")
   const [ListaActividades,setListaActividades]=useState<ActividadPeriodica[]>([])
 
-  const [showAgregar, setShowAgregar] = useState<boolean>(false);
   const [idActividad, setIdActividad] = useState<string>("")
+  
+  const [showAgregar, setShowAgregar] = useState<boolean>(false);
+  const [OpenCalculosFiscales, setOpenCalculosFiscales] = useState(false);
+  const [OpenResumenEjecutivo, setOpenResumenEjecutivo] = useState(false);
 
 
   useEffect(() => {
@@ -163,6 +168,49 @@ export default function ActividadesCRUD({ idContribuyente, Cerrar }: ModalProps)
     let estatus = parseInt(value) as EstatusActividad
     ActualizarEstadoActividad(idActividad, estatus)
   };
+
+  const CerrarCalculosFiscales = (exist: string) => {
+    setOpenCalculosFiscales(false);
+    if (exist === "success") {
+      showNotification("Calculos fiscales guardados correctamente", "success");
+    }
+  };
+  const CerrarResumenEjectutivo = (exist: string) => {
+    setOpenResumenEjecutivo(false);
+    if (exist === "success") {
+      showNotification("Resumen ejectutivo guardado correctamente", "success");
+    }
+  };
+  const BotonActividad = (idActividad: string,Nombre:string) => {
+    let esFija =ActividadesFijas.includes(idActividad)
+    console.log({ idActividad,existe: esFija })
+    let onclic = ()=>{}
+    if (esFija){
+      switch(idActividad){
+        case "68daafc6209ee6ddd4d946e7": // Calculo fiscal
+          onclic = () => { setOpenCalculosFiscales(true); }
+          break;
+        case "68daafd5209ee6ddd4d946eb": // Resumen ejectivo
+          onclic = () => { setOpenResumenEjecutivo(true) }
+          break;
+        case "68dab10c197a935fb6bb92e1": // Registro de pagos
+          onclic = () => { }
+          break;
+        case "68dab4fa78038f650675da8f": // Recepción de documentos
+          onclic = () => { }
+          break;
+      }
+    }
+
+    return (
+      <button
+        onClick={onclic}
+        className={`rounded-lg px-1 py-1 text-gray-800  ${esFija && "hover:underline transition-colors duration-200 hover:bg-gray-300"}`}
+      >
+        {Nombre}
+      </button>
+    )
+  }
   return (
     <div className="p-10 flex-1 overflow-auto">
       <div className="space-y-6 p-4">
@@ -239,7 +287,7 @@ export default function ActividadesCRUD({ idContribuyente, Cerrar }: ModalProps)
               {
                 ListaActividades.map((actividad,key) =>
                   <tr key={key} className=" text-left">
-                    <td className=" px-4 py-2">{actividad.Nombre}</td>
+                    <td className=" px-4 py-2">{BotonActividad(actividad.idActividad || "",actividad.Nombre)}</td>
                     <td className=" px-4 py-2 text-center">{new Date(actividad.FechaInicio).toLocaleDateString()}</td>
                     <td className=" px-4 py-2 text-center">{new Date(actividad.FechaVencimiento).toLocaleDateString()}</td>
                     <td className=" px-4 py-2 text-center">{actividad.TipoOrigen}</td>
@@ -269,6 +317,9 @@ export default function ActividadesCRUD({ idContribuyente, Cerrar }: ModalProps)
             </tbody>
           </table>
         </div>
+        
+        {OpenCalculosFiscales && <CalculosFiscales Visible={OpenCalculosFiscales} idEditar={idContribuyente||""} Cerrar={CerrarCalculosFiscales} />}
+        {OpenResumenEjecutivo && <ResumenesEjecutivos Visible={OpenResumenEjecutivo} idEditar={idContribuyente || ""} Cerrar={CerrarResumenEjectutivo} />}
         <ModalAgregarActividad idContribuyente={idContribuyente||""} Cerrar={CerrarAgregar} Visible={showAgregar} />
         <Cargando isLoading={isLoading} />
         <MensajeNotificacion {...notification} hideNotification={hideNotification} />

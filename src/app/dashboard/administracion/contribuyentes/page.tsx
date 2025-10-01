@@ -267,7 +267,7 @@ const RazonesSocialesCRUD = () => {
               id="RfcBuscar"
               value={RfcBuscar}
               onChange={(e) => setRfcBuscar(e.target.value)}
-              placeholder="Buscar por nombre..."
+              placeholder="Buscar por RFC..."
               className="mt-1 block w-full rounded-md border-gray-300 bg-gray-50 p-2 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
             />
           </div>
@@ -286,7 +286,7 @@ const RazonesSocialesCRUD = () => {
         <table className="min-w-full table-auto">
           <thead>
             <tr className="bg-gray-200 text-left text-gray-700 ">
-              <th className="px-4 py-2 ">Razon social</th>
+              <th className="px-4 py-2 ">Razón social</th>
               <th className="px-4 py-2 ">RFC</th>
               <th className=" px-4 py-2 text-right">Acciones</th>
             </tr>
@@ -305,7 +305,7 @@ const RazonesSocialesCRUD = () => {
                   </button>
                   <button className={`rounded-md px-4 py-1 text-sm text-white transition-colors duration-200 ${usuario.Estado == 1 ? 'bg-yellow-600 hover:bg-yellow-700' : 'bg-green-600 hover:bg-green-700'}`}
                     onClick={() => handleDesactivar(usuario._id || "")} >
-                    {usuario.Estado == 1 ? <i className="material-symbols-rounded filled">block</i> : <i className="material-symbols-rounded filled">check</i>}
+                    {usuario.Estado == 1 ? <i className="material-symbols-rounded">block</i> : <i className="material-symbols-rounded">check</i>}
                   </button>
                   <button className="rounded-md bg-red-600 px-4 py-1 text-sm text-white transition-colors duration-200 hover:bg-red-700"
                     onClick={() => handleDelete(usuario._id || "")} >
