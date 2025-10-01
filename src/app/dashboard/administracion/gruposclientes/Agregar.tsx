@@ -29,7 +29,11 @@ interface ModalProps {
   onRegister: (Mensaje: string, Color: "success" | "error" | "warning") => void;
 }
 
-
+class errorInterface {
+  Nombre: boolean = false;
+  responsable: boolean = false;
+  idContador: boolean = false;
+}
 // Componente para la vista de CRUD de Usuarios
 const GruposEmpresarialesAgregar = ({ idEditar, Editar = false, onClose, onRegister }: ModalProps) => {
   // Inicializa el router para la navegación
@@ -45,6 +49,8 @@ const GruposEmpresarialesAgregar = ({ idEditar, Editar = false, onClose, onRegis
   const sesion = ObtenerSesionUsuario();
   const router = useRouter();
   const { notification, showNotification, hideNotification } = useNotification();
+  const [EditarGrupo, setEditarGrupo] = useState<boolean>(false);
+
   const [clientesAsociados, setClientesAsociados] = useState<Cliente[]>([]);
   const [contadorAsosiado, setContadorAsosiado] = useState<User | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -52,7 +58,7 @@ const GruposEmpresarialesAgregar = ({ idEditar, Editar = false, onClose, onRegis
   const [isOpenNuevoContribuyente, setIsOpenNuevoContribuyente] = useState(false);
   const [isOpenMotivos, setIsOpenMotivos] = useState(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
+  const [Errores, setErrores] = useState<errorInterface>(new errorInterface());
 
   const [asociadoEditar, setAsociadoEditar] = useState<string>("");
   const [Pregunta, setPregunta] = useState<string>("");
@@ -65,6 +71,7 @@ const GruposEmpresarialesAgregar = ({ idEditar, Editar = false, onClose, onRegis
         ...formState,
         _id: idEditar,
       });
+      setEditarGrupo(true);
       ObtenerPorId();
       ObtenerClientesDelGrupo()
     }
@@ -94,7 +101,8 @@ const GruposEmpresarialesAgregar = ({ idEditar, Editar = false, onClose, onRegis
       }
     } catch (err: any) {
       console.error('Error al obtener las actividades:', err);
-      setError(err.message || 'Hubo un error al cargar las actividades. Verifica que la API esté corriendo y responda correctamente.');
+      showNotification("Ocurrio un error, por favor intente de nuevo.","error")
+      // setError(err.message || 'Hubo un error al cargar las actividades. Verifica que la API esté corriendo y responda correctamente.');
     } finally {
       setIsLoading(false);
     }
@@ -118,7 +126,8 @@ const GruposEmpresarialesAgregar = ({ idEditar, Editar = false, onClose, onRegis
         throw new Error('La API no devolvió un formato JSON válido.');
       }
     } catch (err: any) {
-      setError(err.message || 'Hubo un error al cargar las actividades. Verifica que la API esté corriendo y responda correctamente.');
+      showNotification("Ocurrio un error, por favor intente de nuevo.","error")
+      // setError(err.message || 'Hubo un error al cargar las actividades. Verifica que la API esté corriendo y responda correctamente.');
     } finally {
       setIsLoading(false);
     }
@@ -140,17 +149,22 @@ const GruposEmpresarialesAgregar = ({ idEditar, Editar = false, onClose, onRegis
   };
   const validarDatos = () => {
     let valido = true;
+    let error = new errorInterface();
 
     if(!formState.Nombre){
       valido = false
+      error.Nombre = true
     }
     if(!formState.Responsable){
       valido = false
+      error.responsable = true
     }
     if(!contadorAsosiado){
       valido = false
+      error.idContador = true
     }
 
+    setErrores(error);
     if (!valido) {
       showNotification("Por favor, complete todos los campos", "error");
     }
@@ -182,8 +196,7 @@ const GruposEmpresarialesAgregar = ({ idEditar, Editar = false, onClose, onRegis
       showNotification("Grupo empresarial guardado exitosamente", "success");
       onClose();
     } catch (err: any) {
-      console.error('Error al guardar el grupo empresarial:', err);
-      setError(err.message || 'Hubo un error al guardar el grupo empresarial. Verifica que la API esté corriendo y responda correctamente.');
+      // setError(err.message || 'Hubo un error al guardar el grupo empresarial. Verifica que la API esté corriendo y responda correctamente.');
       showNotification("Error al guardar el grupo emrpesarial", "error");
     } finally {
       setIsLoading(false);
@@ -263,7 +276,11 @@ const GruposEmpresarialesAgregar = ({ idEditar, Editar = false, onClose, onRegis
   const CerrarModalPreguntaContador = (value: boolean) => {
     setOpenPreguntaContador(false);
     if (value) {
-    setIsOpenMotivos(true);
+      if (EditarGrupo) {
+        setIsOpenMotivos(true);
+      } else {
+        setIsOpenContador(true)
+      }
     }
   }
   const CerrarMotivo = (value: string) => {
@@ -305,7 +322,9 @@ const GruposEmpresarialesAgregar = ({ idEditar, Editar = false, onClose, onRegis
               value={formState.Nombre}
               onChange={handleInputChange}
               required
-              className="mt-1 w-full rounded-md border-gray-300 bg-gray-50 p-2 text-gray-900 focus:border-blue-500 focus:ring-blue-500"
+              // className="mt-1 w-full rounded-md border-gray-300 bg-gray-50 p-2 text-gray-900 focus:border-blue-500 focus:ring-blue-500"
+              className={`mt-1 block w-full rounded-md bg-gray-50 p-2 shadow-sm focus:border-blue-500
+               focus:ring-blue-500 sm:text-sm  ${Errores.Nombre ? "!border-red-500" : "border-gray-300"}`}
             />
           </div>
           <div className="col-span-1">
@@ -318,8 +337,9 @@ const GruposEmpresarialesAgregar = ({ idEditar, Editar = false, onClose, onRegis
               value={formState.Responsable}
               onChange={handleInputChange}
               required
-              className="mt-1 w-full rounded-md border-gray-300 bg-gray-50 p-2 text-gray-900 
-                 focus:border-blue-500 focus:ring-blue-500"
+              // className="mt-1 w-full rounded-md border-gray-300 bg-gray-50 p-2 text-gray-900 focus:border-blue-500 focus:ring-blue-500"
+              className={`mt-1 block w-full rounded-md bg-gray-50 p-2 shadow-sm focus:border-blue-500
+               focus:ring-blue-500 sm:text-sm  ${Errores.responsable ? "!border-red-500" : "border-gray-300"}`}
             />
 
           </div>
@@ -336,8 +356,8 @@ const GruposEmpresarialesAgregar = ({ idEditar, Editar = false, onClose, onRegis
         </div>
 
         <Separador Titulo="Contador asignado" />
-        <div className="flex">
-          <div className='flex-1'>
+        <div className="flex gap-4">
+          <div className="w-full !sm:w-2/3 md:w-1/3">
             <label className="block text-sm font-medium text-gray-700">Nombre</label>
             <input
               type="text"
@@ -345,7 +365,8 @@ const GruposEmpresarialesAgregar = ({ idEditar, Editar = false, onClose, onRegis
               value={contadorAsosiado?.NombreCompleto || ""}
               // onChange={(e) => handleNestedInputChange('ContactoPrincipal', e)}
               disabled
-              className="mt-1 w-full rounded-md border-gray-300 bg-gray-50 p-2 text-gray-900 focus:border-blue-500 focus:ring-blue-500"
+              className={`mt-1 block w-full rounded-md bg-gray-50 p-2 shadow-sm focus:border-blue-500
+               focus:ring-blue-500 sm:text-sm  ${Errores.idContador ? "!border-red-500" : "border-gray-300"}`}
             />
           </div>
           <div className='flex-none flex  items-end'>
@@ -462,7 +483,7 @@ const GruposEmpresarialesAgregar = ({ idEditar, Editar = false, onClose, onRegis
             )}
             {OpenPreguntaContador && (
               <ModalPregunta
-                Pregunta="¿Está seguro de cambiar el contador asignado?"
+                Pregunta={`¿Está seguro de cambiar el contador asignado?`}
                 Cerrar={CerrarModalPreguntaContador}  
               />
             )}

@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, ChangeEventHandler } from 'react';
 import { API_BASE_URL } from '@/src/utils/constantes';
+import { useRouter } from 'next/navigation';
 
 // Enum para los estados de un servicio
 export enum Estatus {
@@ -55,6 +56,7 @@ const ENDPOINT_ACTIVAR = '/servicios/Activar';
 
 // Componente principal para la gestión de servicios
 const ServiceList = () => {
+  const router = useRouter();
   const [services, setServices] = useState<Servicio[]>([]);
   const [allActivities, setAllActivities] = useState<Actividad[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -529,12 +531,23 @@ const confirmActivateService = async () => {
 
       <div className="flex items-center justify-between">
         <h2 className="text-3xl font-extrabold text-blue-900">Gestión de Servicios</h2>
-        <button
-          onClick={() => handleOpenFormModal()}
-          className="rounded-lg bg-yellow-400 px-6 py-2 text-gray-900 font-semibold transition-colors duration-200 hover:bg-yellow-500 shadow-md"
-        >
-          Crear Nuevo Servicio
-        </button>
+        <div className="flex space-x-4">
+          <button
+            onClick={() => {
+              console.log("Regresando a /dashboard...");
+              router.push('/dashboard');
+            }}
+            className="rounded-lg bg-gray-300 px-6 py-2 text-gray-800 transition-colors duration-200 hover:bg-gray-400"
+          >
+            Regresar
+          </button>
+          <button
+            onClick={() => handleOpenFormModal()}
+            className="rounded-lg bg-yellow-400 px-6 py-2 text-gray-900 font-semibold transition-colors duration-200 hover:bg-yellow-500 shadow-md"
+          >
+            Crear Nuevo Servicio
+          </button>
+        </div>
       </div>
 
       {/* Controles de Filtrado */}

@@ -110,13 +110,13 @@ const GruposEmpresarialesCRUD = () => {
   };
 
   const handleDelete = (id: string = "") => {
-    setPregunta("¿Estás seguro de que quieres eliminar este tipo de usuario?");
+    setPregunta("¿Estás seguro de que quieres eliminar este  grupo o cliente?");
     setOperacion("eliminar");
     setIdEditar(id);
     setShowConfirm(true);
   };
   const handleDesactivar = (id: string = "") => {
-    setPregunta("¿Estás seguro de que quieres desactivar/activar este tipo de usuario?");
+    setPregunta("¿Estás seguro de que quieres desactivar/activar este grupo o cliente?");
     setOperacion("desactivar");
     setIdEditar(id);
     setShowConfirm(true);
@@ -235,7 +235,7 @@ const GruposEmpresarialesCRUD = () => {
             onClick={handleOpenModal}
             className="rounded-lg bg-yellow-400 px-6 py-2 text-gray-900 font-semibold transition-colors duration-200 hover:bg-yellow-500"
           >
-            Crear Nuevo Grupo empresarial
+            Crear Nuevo Grupo o cliente
           </button>
         </div>
       </div>
@@ -324,7 +324,7 @@ const GruposEmpresarialesCRUD = () => {
                   className={`rounded-md px-4 py-1 text-sm text-white transition-colors duration-200 ${grupo.Estado == 1 ? 'bg-yellow-600 hover:bg-yellow-700' : 'bg-green-600 hover:bg-green-700'}`}
                     onClick={() => handleDesactivar(grupo._id || "")}
                   >
-                    <i className="material-symbols-rounded filled">{grupo.Estado == 1 ? "block" : "check"}</i> 
+                    <i className="material-symbols-rounded">{grupo.Estado == 1 ? "block" : "check"}</i> 
                   </button>
                   <button
                     onClick={() => handleDelete(grupo._id || "")}

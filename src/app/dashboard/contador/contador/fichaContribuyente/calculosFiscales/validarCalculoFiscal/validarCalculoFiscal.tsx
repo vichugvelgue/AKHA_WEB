@@ -245,7 +245,7 @@ export default function ValidarCalculoFiscal({ Visible, idCliente, idCalculo,idV
             <label htmlFor="nombreFilter" className="block text-sm font-medium text-gray-700">Estado de aceptación</label>
             <select
               name="EstadoAceptacion"
-              className={`mt-1 block w-full rounded-md bg-gray-50 p-2 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm ${Error?.EstadoAceptacion ? "border-red-500" : "border-gray-300"}`}
+              className={`mt-1 block w-full rounded-md bg-gray-50 p-2 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm ${Error?.EstadoAceptacion ? "!border-red-500" : "border-gray-300"}`}
               value={Validacion.EstadoAceptacion}
               onChange={CambiarValor}
             >
@@ -263,7 +263,7 @@ export default function ValidarCalculoFiscal({ Visible, idCliente, idCalculo,idV
               type="file"
               accept="image/png, image/jpeg, image/jpg, application/pdf"
               onChange={handleFileChange}
-              className={`mt-1 block w-full rounded-md bg-gray-50 p-2 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm ${Error?.Evidencia ? "border-red-500" : "border-gray-300"}`}
+              className={`mt-1 block w-full rounded-md bg-gray-50 p-2 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm ${Error?.Evidencia ? "!border-red-500" : "border-gray-300"}`}
             />)}
             {Validacion.Evidencia && (
               <div className="flex">
@@ -283,7 +283,7 @@ export default function ValidarCalculoFiscal({ Visible, idCliente, idCalculo,idV
             <label htmlFor="nombreFilter" className="block text-sm font-medium text-gray-700">Motivo de rechazo</label>
             <textarea
               name="MotivosRechazo"
-              className={`mt-1 block w-full rounded-md bg-gray-50 p-2 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm ${Error?.MotivosRechazo ? "border-red-500" : "border-gray-300"}`}
+              className={`mt-1 block w-full rounded-md bg-gray-50 p-2 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm ${Error?.MotivosRechazo ? "!border-red-500" : "border-gray-300"}`}
               value={Validacion.MotivosRechazo}
               onChange={CambiarValor}
             />

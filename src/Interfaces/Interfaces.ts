@@ -293,6 +293,7 @@ export interface ActividadPeriodica {
 
   idCliente: string;
   idServicio?: string;
+  idActividad?: string;
   idIncidencia?: string;
 
   TipoOrigen?: "Sistema" | "Manual";

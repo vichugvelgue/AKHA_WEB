@@ -325,9 +325,11 @@ const ContribuyentesAgregar = ({ idEditar, Editar = false, onClose, onRegister }
           </button>
         </div>
         <div className="flex-none">
-          <button onClick={AbrirInputXML} className="rounded-lg bg-gray-300 px-6 py-2 text-gray-800 transition-colors duration-200 hover:bg-gray-400"          >
-            Inportar con XML
-          </button>
+          {!Editar && (
+            <button onClick={AbrirInputXML} className="rounded-lg bg-gray-300 px-6 py-2 text-gray-800 transition-colors duration-200 hover:bg-gray-400"          >
+              Inportar con XML
+            </button>
+          )}
           <input ref={inputXMLREF} className='hidden' type="file" accept="text/xml" onChange={importarXML} />
         </div>
       </div>
