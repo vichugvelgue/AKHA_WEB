@@ -40,7 +40,8 @@ const ContadorCRUD = () => {
   const [showConfirm, setShowConfirm] = useState(false);
   const [showBitacora, setShowBitacora] = useState(false);
   const [idEditar, setIdEditar] = useState<string>("");
-  const [editar, setEditar] = useState<boolean>(false);
+  const [NombreContribuyente, setNombreContribuyente] = useState<string>("");
+  const [editar, setEditar] = useState<boolean>(false);  
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [pregunta, setPregunta] = useState<string>("");
@@ -149,8 +150,10 @@ const ContadorCRUD = () => {
   const handleCloseCredencialesModal = () => {
     setIsOpenCredenciales(false);
   };
-  const AbrirFicha = (id: string = "") => {
+  const AbrirFicha = (id: string = "", nombrecliente: string = "") => {
+    console.log(nombrecliente);
     setIdEditar(id);
+    setNombreContribuyente(nombrecliente);
     setOpenActividades(true);
     // router.push(`/dashboard/contador/contador/fichaContribuyente`);
     // router.push(`/dashboard/contador/contador/fichaContribuyente/actividades`);
@@ -163,7 +166,7 @@ const ContadorCRUD = () => {
   };
 
   if (isOpenActividades) {
-    return <ActividadesCRUD idContribuyente={idEditar} Cerrar={CerrarActividades} />
+    return <ActividadesCRUD idContribuyente={idEditar} NombreContribuyente={NombreContribuyente} Cerrar={CerrarActividades} />
   }else if (isModalOpen) {
     console.log({ idEditar, editar });
     return (<ContribuyenteConsultar idEditar={idEditar} Editar={editar} onClose={handleCloceModal} onRegister={handleRegister} />)
@@ -252,7 +255,7 @@ const ContadorCRUD = () => {
                   <button onClick={() => handleOpenCredencialesModal(usuario._id || "")} className="rounded-md bg-green-600 px-4 py-1 text-sm text-white transition-colors duration-200 hover:bg-green-700">
                     <i className="material-symbols-rounded filled">vpn_key</i>
                   </button>
-                  <button onClick={() => AbrirFicha(usuario._id || "")} className="rounded-md bg-yellow-600 px-4 py-1 text-sm text-white transition-colors duration-200 hover:bg-yellow-700">
+                  <button onClick={() => AbrirFicha(usuario._id || "", usuario.RazonSocial || "")} className="rounded-md bg-yellow-600 px-4 py-1 text-sm text-white transition-colors duration-200 hover:bg-yellow-700">
                     <i className="material-symbols-rounded filled">folder</i>
                   </button>
                 </td>
