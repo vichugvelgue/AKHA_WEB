@@ -28,11 +28,12 @@ interface SelectServicio {
 // Definimos una interfaz para las propiedades del modal de registro
 interface ModalProps {
   idContribuyente?: string;
+  NombreContribuyente?: string;
   Cerrar: (Mensaje: string) => void;
 }
 
 // Componente para la vista de CRUD de Usuarios
-export default function ActividadesCRUD({ idContribuyente, Cerrar }: ModalProps) {
+export default function ActividadesCRUD({ idContribuyente,NombreContribuyente, Cerrar }: ModalProps) {
   console.log(idContribuyente);
   
   // Inicializa el router para la navegación
@@ -186,32 +187,48 @@ export default function ActividadesCRUD({ idContribuyente, Cerrar }: ModalProps)
       showNotification("Resumen ejectutivo guardado correctamente", "success");
     }
   };
-  const BotonActividad = (idActividad: string,Nombre:string) => {
-    let esFija =ActividadesFijas.includes(idActividad)
-    console.log({ idActividad,existe: esFija })
-    let onclic = ()=>{}
-    if (esFija){
-      switch(idActividad){
-        case "68daafc6209ee6ddd4d946e7": // Calculo fiscal
-          onclic = () => { setOpenCalculosFiscales(true); }
-          break;
-        case "68daafd5209ee6ddd4d946eb": // Resumen ejectivo
-          onclic = () => { setOpenResumenEjecutivo(true) }
-          break;
-        case "68dab10c197a935fb6bb92e1": // Registro de pagos
-          onclic = () => { }
-          break;
-        case "68dab4fa78038f650675da8f": // Recepción de documentos
-          onclic = () => { }
-          break;
-      }
+  const BotonActividad = (idActividad: string | undefined, Nombre: string) => {
+    if (!idActividad) {
+        return <span className="text-gray-700">{Nombre}</span>;
     }
+    let esFija = ActividadesFijas.includes(idActividad);
+    let onclic = () => {};
+    let icon = null;
+
+    if (esFija) {
+        switch (idActividad) {
+            case "68daafc6209ee6ddd4d946e7": // Calculo fiscal
+                onclic = () => { setOpenCalculosFiscales(true); };
+                icon = <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 19V6l2-2l2 2v13M9 19a3 3 0 006 0M9 19a3 3 0 01-6 0m6 0a3 3 0 000-6m-6 6a3 3 0 010-6m6 0a3 3 0 01-6 0m6 0a3 3 0 006 0m-6 0a3 3 0 010 6m6 0a3 3 0 000-6"></path></svg>; // Icono de Calculadora
+                break;
+            case "68daafd5209ee6ddd4d946eb": // Resumen ejecutivo
+                onclic = () => { setOpenResumenEjecutivo(true); };
+                icon = <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 19V6l2-2l2 2v13M9 19a3 3 0 006 0m-6 0a3 3 0 01-6 0m6 0a3 3 0 000-6m-6 6a3 3 0 010-6m6 0a3 3 0 01-6 0m6 0a3 3 0 006 0m-6 0a3 3 0 010 6m6 0a3 3 0 000-6"></path></svg>; // Icono de Gráfico
+                break;
+            case "68dab10c197a935fb6bb92e1": // Registro de pagos
+            case "68dab4fa78038f650675da8f": // Recepción de documentos
+            default:
+                icon = <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-3-6v6m3 6H6a2 2 0 01-2-2V7a2 2 0 012-2h10a2 2 0 012 2v11a2 2 0 01-2 2z"></path></svg>; // Icono de Documento
+                break;
+        }
+    } else {
+        icon = <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>; // Icono de Actividad
+    }
+
 
     return (
       <button
         onClick={onclic}
-        className={`rounded-lg px-1 py-1 text-gray-800  ${esFija && "hover:underline transition-colors duration-200 hover:bg-gray-300"}`}
+        title={Nombre}
+        className={`
+          flex items-center text-left py-1 px-2 rounded-lg transition-all duration-300 
+          ${esFija 
+            ? "bg-indigo-50 text-indigo-700 font-semibold hover:bg-indigo-100 hover:shadow-md" 
+            : "text-gray-700 hover:text-blue-500"
+          }
+        `}
       >
+        {icon}
         {Nombre}
       </button>
     )
@@ -235,123 +252,174 @@ export default function ActividadesCRUD({ idContribuyente, Cerrar }: ModalProps)
       // Aquí se podría actualizar el conteo de incidencias o forzar una recarga de la lista de actividades.
   }
 
+  const getStatusClasses = (status: EstatusActividad) => {
+    switch (status) {
+        case EstatusActividad.Pendiente:
+            return 'bg-yellow-100 text-yellow-800';
+        case EstatusActividad.En_proceso:
+            return 'bg-blue-100 text-blue-800';
+        case EstatusActividad.Terminado:
+            return 'bg-green-100 text-green-800';
+        case EstatusActividad.Detenido:
+            return 'bg-purple-100 text-purple-800';
+        case EstatusActividad.Con_incidencia:
+            return 'bg-red-100 text-red-800';
+        default:
+            return 'bg-gray-100 text-gray-800';
+    }
+};
 
   return (
-    <div className="p-10 flex-1 overflow-auto">
-      <div className="space-y-6 p-4">
-        <div className="flex items-center justify-between">
-          <h2 className="text-3xl font-extrabold text-blue-900">Actividades</h2>
-
-          <div className="flex space-x-4">
-            <button
-              onClick={() =>  Cerrar(``)}
-              className="rounded-lg bg-gray-300 px-6 py-2 text-gray-800 transition-colors duration-200 hover:bg-gray-400">
-              Regresar
-            </button>
-          </div>
+        <div className="p-4 sm:p-8 flex-1 overflow-auto bg-gray-50 font-sans">
+           <style>{`
+            .font-sans { font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif; }
+            /* Estilo para las filas pares de la tabla */
+            .table-striped tbody tr:nth-child(even) {
+                background-color: #f9fafb; /* gray-50 */
+            }
+        `}</style>
+        
+            
+          {/* --- ENCABEZADO MEJORADO CON INFORMACIÓN DEL CONTRIBUYENTE --- */}
+        <div className="bg-white shadow-xl rounded-xl p-6 mb-6 border-l-4 border-indigo-600">
+            <div className="flex items-center justify-between flex-wrap">
+                <div>
+                    <h1 className="text-xl font-medium text-gray-500 mb-1">Actividades de Contribuyente</h1>
+                    <h2 className="text-3xl font-extrabold text-indigo-900 truncate max-w-lg">
+                        {NombreContribuyente}
+                    </h2>
+                </div>
+                <button
+                    onClick={() => Cerrar(``)}
+                    className="mt-4 sm:mt-0 rounded-lg bg-gray-200 px-6 py-2 text-gray-800 font-medium transition-colors duration-200 hover:bg-gray-300 flex items-center shadow-sm hover:shadow-md"
+                >
+                    <svg className="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 17l-5-5m0 0l5-5m-5 5h12"></path></svg>
+                    Regresar a Clientes
+                </button>
+            </div>
         </div>
 
-        <div className="rounded-xl bg-white p-6 shadow-md">
-          <div className="flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-6">
-            <div className="w-full sm:w-1/3">
-              <label htmlFor="nombreFilter" className="block text-sm font-medium text-gray-700">
-                Mes y año 
-              </label>
-              <input
-                type="month"
-                id="NombreBuscar"
-                value={Fecha.toLocaleString('fr-CA', { month: '2-digit', year: 'numeric' })}
-                onChange={CambiarFecha}
-                placeholder="Buscar por nombre..."
-                className="mt-1 block w-full rounded-md border-gray-300 bg-gray-50 p-2 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-              />
+          {/* --- FILTROS DE ACTIVIDADES --- */}
+        <div className="rounded-xl bg-white p-6 shadow-md mb-6">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 items-end">
+                {/* Filtro Mes y Año */}
+                <div className="col-span-1">
+                    <label htmlFor="fechaFilter" className="block text-sm font-medium text-gray-700 mb-1">
+                        Mes y Año de Actividad
+                    </label>
+                    <input
+                        type="month"
+                        id="fechaFilter"
+                        value={Fecha.toLocaleString('fr-CA', { month: '2-digit', year: 'numeric' })}
+                        onChange={CambiarFecha}
+                        className="block w-full rounded-lg border-gray-300 bg-gray-50 p-2.5 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                    />
+                </div>
+
+                {/* Filtro Servicio */}
+                <div className="col-span-1">
+                    <label htmlFor="servicioFilter" className="block text-sm font-medium text-gray-700 mb-1">
+                        Servicio Asignado
+                    </label>
+                    <select
+                        id="servicioFilter"
+                        value={idServicio || ''}
+                        onChange={(e) => setIdServicios(e.target.value)}
+                        className="block w-full rounded-lg border-gray-300 bg-gray-50 p-2.5 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                    >
+                        <option value={""}>Todos los Servicios</option>
+                        {Servicios.map((item) => (
+                            <option key={item._id} value={item._id}>{item.Nombre}</option>
+                        ))}
+                    </select>
+                </div>
+
+                {/* Botón Nueva Actividad */}
+                <div className="col-span-1 flex justify-end">
+                    {esMesActual(Fecha) && (
+                        <button 
+                            className="w-full sm:w-auto rounded-lg text-white bg-indigo-600 px-6 py-2.5 text-sm font-semibold transition-colors duration-200 hover:bg-indigo-700 shadow-lg hover:shadow-xl"
+                            onClick={() => setShowAgregar(true)}
+                        >
+                            <span className="flex items-center justify-center">
+                                <svg className="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
+                                Nueva Actividad
+                            </span>
+                        </button>
+                    )}
+                </div>
             </div>
-            <div className="w-full sm:w-1/3">
-              <label htmlFor="nombreFilter" className="block text-sm font-medium text-gray-700">
-                Servicio
-              </label>
-              <select
-                value={idServicio || ''}
-                onChange={(e) => setIdServicios(e.target.value)}
-                className="mt-1 block w-full rounded-md border-gray-300 bg-gray-50 p-2 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-              >
-                <option value={""}>Seleccione</option>
-                {
-                  Servicios.map((item) => (
-                    <option key={item._id} value={item._id}>{item.Nombre}</option>
-                  ))
-                }
-              </select>
-            </div>
-            
-            <div className="w-full sm:w-1/3">
-              {
-                esMesActual(Fecha) &&
-                <button className="float-right rounded-lg text-white bg-blue-600 px-6 py-2 text-sm font-medium transition-colors duration-200 hover:bg-blue-700"
-                  onClick={() => setShowAgregar(true)}  >
-                  Nueva actividad </button>
-              }
-            </div>
-          </div>
         </div>
         
-        <div className="rounded-xl bg-white p-6 shadow-md">
-          <table className='w-full'>
-            <thead>
-              <tr className="bg-gray-200 text-left text-gray-700 ">
-                <th className=" px-4 py-2">Actividad</th>
-                <th className=" px-4 py-2 text-center">Fecha de Inicio</th>
-                <th className=" px-4 py-2 text-center">Fecha de vencimiento</th>
-                <th className=" px-4 py-2 text-center">Origen</th>
-                <th className=" px-4 py-2 text-center">Estado</th>
-                <th className=" px-4 py-2 text-end">Incidencias</th>
-              </tr>
-            </thead>
-            <tbody>
-              {
-                ListaActividades.map((actividad,key) =>
-                  <tr key={key} className=" text-left">
-                    <td className=" px-4 py-2">{BotonActividad(actividad.idActividad || "",actividad.Nombre)}</td>
-                    <td className=" px-4 py-2 text-center">{new Date(actividad.FechaInicio).toLocaleDateString()}</td>
-                    <td className=" px-4 py-2 text-center">{new Date(actividad.FechaVencimiento).toLocaleDateString()}</td>
-                    <td className=" px-4 py-2 text-center">{actividad.TipoOrigen}</td>
-                    {
-                      idActividad == actividad._id ?
-                        <td className=" px-4 py-2 text-end">
-                          <select
-                            id="EstadoActividad"
-                            value={actividad.EstadoActividad || 0}
-                            onChange={CambiarSelectEstatoActividad}
-                            className="mt-1 block w-full rounded-md border-gray-300 bg-gray-50 p-2 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-                          >
-                            {Object.values(EstatusActividad).filter((value) => typeof value === "number").map((value) => (
-                              <option key={value} value={value}>
-                                {EstatusActividad[value as EstatusActividad].replace(/_/g," ")}
-                              </option>
-                            ))}
-                          </select>
-                        </td>
-                        :
-                        <td className=" px-4 py-2 text-center" onDoubleClick={() => setIdActividad(actividad._id || "")}>{EstatusActividad[actividad.EstadoActividad || 0].replace(/_/g," ")}</td>
-                    }
-                    {/* Columna de Incidencias con Botón (Implementación de la solicitud del usuario) */}
-                  <td className="px-4 py-3 text-center">
-                    <button
-                        onClick={() => openIncidenciasModal(actividad._id || "", actividad.Nombre)}
-                        className="text-red-600 hover:text-red-800 font-semibold transition-colors flex items-center justify-center p-2 rounded-full bg-red-100 mx-auto shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-red-500"
-                        title="Registrar o ver incidencias"
-                    >
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            {/* Icono de Alerta */}
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.332 16c-.77 1.333.192 3 1.732 3z"></path>
-                        </svg>
-                    </button>
-                  </td>
-                  </tr>
-                )
-              }
-            </tbody>
-          </table>
+        <div className="rounded-xl bg-white p-6 shadow-2xl overflow-x-auto">
+            <h3 className="text-xl font-semibold text-gray-800 mb-4 border-b pb-2">Listado de Tareas del Periodo</h3>
+            <table className='min-w-full divide-y divide-gray-200 table-striped'>
+                <thead className="bg-gray-100">
+                    <tr>
+                        <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider rounded-tl-lg">Actividad / Tarea</th>
+                        <th className="px-4 py-3 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">Fecha Inicio</th>
+                        <th className="px-4 py-3 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">Vencimiento</th>
+                        <th className="px-4 py-3 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">Origen</th>
+                        <th className="px-4 py-3 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">Estado</th>
+                        <th className="px-4 py-3 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider rounded-tr-lg">Incidencias</th>
+                    </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-200">
+                    {ListaActividades.map((actividad, key) =>
+                        <tr key={key} className="hover:bg-indigo-50 transition duration-150">
+                            {/* Actividad con Botón Resaltado */}
+                            <td className="px-4 py-3 font-medium text-sm text-gray-900">
+                                {BotonActividad(actividad.idActividad || "", actividad.Nombre)}
+                            </td>
+                            <td className="px-4 py-3 text-center text-sm text-gray-600">{new Date(actividad.FechaInicio).toLocaleDateString()}</td>
+                            <td className="px-4 py-3 text-center text-sm font-semibold text-red-600">{new Date(actividad.FechaVencimiento).toLocaleDateString()}</td>
+                            <td className="px-4 py-3 text-center text-xs">
+                                <span className="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-200 text-gray-800">
+                                    {actividad.TipoOrigen}
+                                </span>
+                            </td>
+                            {/* Columna de Estado con Badge y Doble Click para Editar */}
+                            {idActividad === actividad._id ?
+                                <td className="px-4 py-3 text-center w-40">
+                                    <select
+                                        id="EstadoActividad"
+                                        value={actividad.EstadoActividad || 0}
+                                        onChange={CambiarSelectEstatoActividad}
+                                        className="block w-full rounded-md border-gray-300 bg-white p-1.5 shadow-sm text-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                    >
+                                        {Object.values(EstatusActividad).filter((value) => typeof value === "number").map((value) => (
+                                            <option key={value} value={value}>
+                                                {EstatusActividad[value as EstatusActividad].replace(/_/g, " ")}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </td>
+                                :
+                                <td className="px-4 py-3 text-center text-xs w-40" onDoubleClick={() => setIdActividad(actividad._id || "")}>
+                                    <span className={`px-3 py-1 inline-flex text-xs leading-5 font-bold rounded-full cursor-pointer transition-colors ${getStatusClasses(actividad.EstadoActividad || 0)}`}
+                                          title="Doble click para editar"
+                                    >
+                                        {EstatusActividad[actividad.EstadoActividad || 0].replace(/_/g, " ")}
+                                    </span>
+                                </td>
+                            }
+                            {/* Columna de Incidencias con Botón Resaltado (Acción Principal) */}
+                            <td className="px-4 py-3 text-center">
+                                <button
+                                    onClick={() => openIncidenciasModal(actividad._id || "", actividad.Nombre)}
+                                    className="bg-red-500 text-white hover:bg-red-700 font-semibold transition-all flex items-center justify-center p-2 rounded-full mx-auto shadow-lg transform hover:scale-105 active:scale-95 focus:outline-none focus:ring-4 focus:ring-red-300"
+                                    title="Registrar o ver incidencias"
+                                >
+                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                        {/* Icono de Alerta / Incidencia */}
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.332 16c-.77 1.333.192 3 1.732 3z"></path>
+                                    </svg>
+                                </button>
+                            </td>
+                        </tr>
+                    )}
+                </tbody>
+            </table>
         </div>
         {OpenCalculosFiscales && <CalculosFiscales Visible={OpenCalculosFiscales} idEditar={idContribuyente||""} Cerrar={CerrarCalculosFiscales} />}
         {OpenResumenEjecutivo && <ResumenesEjecutivos Visible={OpenResumenEjecutivo} idEditar={idContribuyente || ""} Cerrar={CerrarResumenEjectutivo} />}
@@ -368,7 +436,7 @@ export default function ActividadesCRUD({ idContribuyente, Cerrar }: ModalProps)
         <ModalAgregarActividad idContribuyente={idContribuyente||""} Cerrar={CerrarAgregar} Visible={showAgregar} />
         <Cargando isLoading={isLoading} />
         <MensajeNotificacion {...notification} hideNotification={hideNotification} />
-      </div>
+      
     </div>
   );
 };
