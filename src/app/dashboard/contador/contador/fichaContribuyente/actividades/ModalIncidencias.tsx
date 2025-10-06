@@ -166,7 +166,7 @@ const handleGuardarIncidencia = async () => {
             idActividad: idActividad,
             idIncidencia: tipoIncidenciaId,
             Motivo: motivo,
-            idUsuarioRegistro: sesion.idUsuario, 
+            idContadorRegistro: sesion.idUsuario, 
             idCliente: idCliente,
             FechaRegistro: fechaRegistro,
             // Datos del archivo

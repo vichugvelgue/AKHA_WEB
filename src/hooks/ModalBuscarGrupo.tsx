@@ -1,20 +1,18 @@
 import { useState, useEffect } from "react";
-import { Cliente } from "../Interfaces/Interfaces";
+import { Cliente, GrupoEmpresarial } from "../Interfaces/Interfaces";
 import { API_BASE_URL } from "../utils/constantes";
 
 interface ModalBuscarContribuyentesProps {
     multiple?: boolean;
-    onChange: (value: boolean |null | Cliente | Cliente[]) => void; // callback al cambiar
+    onChange: (value: boolean | null | GrupoEmpresarial | GrupoEmpresarial[]) => void; // callback al cambiar
 }
-interface SeleccionCliente {
+interface SeleccionGrupo {
     _id: string;
-    RazonSocial: string;
+    Nombre: string;
     Seleccionado?: boolean;
 }
-
-
-export default function ModalBuscarContribuyentes({ multiple, onChange }: ModalBuscarContribuyentesProps) {
-    const [ListaContribuidores, setListaContribuidores] = useState<SeleccionCliente[]>([])
+export default function ModalBuscarGrupo({ multiple, onChange }: ModalBuscarContribuyentesProps) {
+    const [ListaGrupos, setListaGrupos] = useState<SeleccionGrupo[]>([])
     const [NombreBuscar, setNombreBuscar] = useState<string>("")
     const [IncluirInactivos, setIncluirInactivos] = useState<boolean>(false)
     const [isLoading, setIsLoading] = useState<boolean>(false)
@@ -26,18 +24,17 @@ export default function ModalBuscarContribuyentes({ multiple, onChange }: ModalB
 
     const Buscar = async () => {
         setIsLoading(true);
-        setListaContribuidores([]);
+        setListaGrupos([]);
         try {
-            const response = await fetch(`${API_BASE_URL}/clientes/BuscarClienteConGrupo`, {
+            const response = await fetch(`${API_BASE_URL}/gruposempresariales/BuscarGrupo`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    RazonSocial: NombreBuscar,
-                    RFC: "",
+                    Nombre: NombreBuscar,
                     Estado: IncluirInactivos ? 0 : 1,
-                } as Cliente),
+                } as GrupoEmpresarial),
             });
             if (!response.ok) {
                 throw new Error(`Error: ${response.statusText}`);
@@ -46,7 +43,7 @@ export default function ModalBuscarContribuyentes({ multiple, onChange }: ModalB
             const contentType = response.headers.get('content-type');
             if (contentType && contentType.includes('application/json')) {
                 const data = await response.json();
-                setListaContribuidores(data.data);
+                setListaGrupos(data.data);
             } else {
                 const text = await response.text();
                 console.error('La respuesta de la API no es JSON:', text);
@@ -59,30 +56,30 @@ export default function ModalBuscarContribuyentes({ multiple, onChange }: ModalB
             setIsLoading(false);
         }
     };
-    const addContribuyente = (contribuyente: SeleccionCliente) => {
-        let lista = [...ListaContribuidores]
+    const addContribuyente = (grupo: SeleccionGrupo) => {
+        let lista = [...ListaGrupos]
 
-        if(!multiple){
+        if (!multiple) {
             for (let cliente of lista) {
                 cliente.Seleccionado = false;
             }
         }
-        let index = lista.findIndex((item) => item._id == contribuyente._id)
-        if (index >= 0){
-            lista[index].Seleccionado = !contribuyente.Seleccionado
+        let index = lista.findIndex((item) => item._id == grupo._id)
+        if (index >= 0) {
+            lista[index].Seleccionado = !grupo.Seleccionado
         }
 
-        setListaContribuidores(lista)
+        setListaGrupos(lista)
     }
     const handleCloseModal = (guardar: boolean = false) => {
         if (!guardar) onChange(false);
 
         if (multiple) {
-            let lista = ListaContribuidores.filter(item => item.Seleccionado).map(item => (item as Cliente));  
+            let lista = ListaGrupos.filter(item => item.Seleccionado).map(item => (item as GrupoEmpresarial));
             onChange(lista)
         } else {
-            let item = ListaContribuidores.find(item => item.Seleccionado) 
-            onChange((item as Cliente))
+            let item = ListaGrupos.find(item => item.Seleccionado)
+            onChange((item as GrupoEmpresarial))
         }
     }
 
@@ -94,7 +91,7 @@ export default function ModalBuscarContribuyentes({ multiple, onChange }: ModalB
         >
             <div className="w-full max-w-xl rounded-2xl bg-white p-8 shadow-2xl transform transition-transform duration-300 border-2 border-blue-500 scale-100">
                 <div className="flex items-center justify-between">
-                    <h3 className="text-2xl font-bold text-gray-900">Buscar Contribuyente</h3>
+                    <h3 className="text-2xl font-bold text-gray-900">Buscar grupo o cliente</h3>
                     <button onClick={() => handleCloseModal(false)} className="text-gray-400 transition-colors duration-200 hover:text-gray-600">
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -117,24 +114,20 @@ export default function ModalBuscarContribuyentes({ multiple, onChange }: ModalB
                         <p className="mt-4 text-center text-gray-500">Cargando...</p>
                     )}
 
-                    {ListaContribuidores.length > 0 && (
+                    {ListaGrupos.length > 0 && (
                         <ul className="max-h-48 overflow-y-auto border border-gray-200 rounded-md">
-                            {ListaContribuidores.map((contribuyente) => (
-                                <li className={`p-3 cursor-pointer border-b last:border-b-0 ${!contribuyente.Seleccionado ? "border-gray-200  hover:bg-gray-100" : "bg-blue-500 hover:bg-blue-700"}`}
-                                    key={contribuyente._id} onClick={() => addContribuyente(contribuyente)}>
-                                    {contribuyente.RazonSocial}
+                            {ListaGrupos.map((grupo) => (
+                                <li className={`p-3 cursor-pointer border-b last:border-b-0 ${!grupo.Seleccionado ? "border-gray-200  hover:bg-gray-100" : "bg-blue-500 hover:bg-blue-700"}`}
+                                    key={grupo._id} onClick={() => addContribuyente(grupo)}>
+                                    {grupo.Nombre}
                                 </li>
                             ))}
                         </ul>
                     )}
-
-                    {/* {NombreBuscar.length > 2 && ListaContribuidores.length === 0 && (
-                        <p className="mt-4 text-center text-gray-500">No se encontraron resultados.</p>
-                    )} */}
                 </div>
 
                 <div className="mt-6 flex justify-end">
-                    <input 
+                    <input
                         type="checkbox"
                         checked={IncluirInactivos}
                         onChange={(e) => setIncluirInactivos(e.target.checked)}

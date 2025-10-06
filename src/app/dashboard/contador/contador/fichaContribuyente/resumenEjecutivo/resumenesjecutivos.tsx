@@ -251,7 +251,7 @@ export default function ResumenesEjecutivos({ Visible, idEditar = "", Cerrar }: 
               />
             </div>
 
-            <div className="p-4">Pagos de impuestos federale</div>
+            <div className="p-4">Pagos de impuestos federales</div>
             <div className="p-4">
               <textarea
                 name="ImpuestosFederales"

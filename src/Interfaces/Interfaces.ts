@@ -254,6 +254,7 @@ export interface ConfigAutorizacionPagos {
     DiaLimiteConfirmacionCalculo: number ;
 }
 export interface ConfigActividades {
+  LimiteIncidencias: number;
   AnticipacionCreacion: number;
   DiasRecordatorio: number;
 }
