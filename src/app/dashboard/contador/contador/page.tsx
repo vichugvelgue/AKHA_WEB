@@ -13,6 +13,7 @@ import ModalBitacoraContibuyente from '@/src/hooks/ModalBitacoraContibuyente';
 import ContribuyenteConsultar from './Agregar';
 import CredencialesCliente from './credencialesCliente';
 import ActividadesCRUD from './fichaContribuyente/actividades/page';
+import BannerSemanal from './bannerSemana';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000';
 
@@ -175,6 +176,8 @@ const ContadorCRUD = () => {
     return (<CredencialesCliente idEditar={idEditar} onClose={handleCloseCredencialesModal} onRegister={handleCloseCredencialesModal} />)
   }
 
+  
+
   return (
     <div className="space-y-6 p-4">
       <div className="flex items-center justify-between">
@@ -230,7 +233,7 @@ const ContadorCRUD = () => {
           </div>
         </div>
       </div>
-
+             <BannerSemanal />
       <div className="overflow-x-auto rounded-xl bg-white p-6 shadow-md">
         <table className="min-w-full table-auto">
           <thead>
