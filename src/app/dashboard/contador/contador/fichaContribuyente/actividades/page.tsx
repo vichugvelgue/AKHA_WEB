@@ -368,6 +368,7 @@ export default function ActividadesCRUD({ idContribuyente,NombreContribuyente, C
                 <thead className="bg-gray-100">
                     <tr>
                         <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider rounded-tl-lg">Actividad / Tarea</th>
+                        <th className="px-4 py-3 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">Semana</th>
                         <th className="px-4 py-3 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">Fecha Inicio</th>
                         <th className="px-4 py-3 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">Vencimiento</th>
                         <th className="px-4 py-3 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">Origen</th>
@@ -382,6 +383,7 @@ export default function ActividadesCRUD({ idContribuyente,NombreContribuyente, C
                             <td className="px-4 py-3 font-medium text-sm text-gray-900">
                                 {BotonActividad(actividad.idActividad || "", actividad.Nombre)}
                             </td>
+                            <td className="px-4 py-3 text-center text-sm text-gray-600">{actividad.SemanaOperativa}</td>
                             <td className="px-4 py-3 text-center text-sm text-gray-600">{new Date(actividad.FechaInicio).toLocaleDateString()}</td>
                             <td className="px-4 py-3 text-center text-sm font-semibold text-red-600">{new Date(actividad.FechaVencimiento).toLocaleDateString()}</td>
                             <td className="px-4 py-3 text-center text-xs">

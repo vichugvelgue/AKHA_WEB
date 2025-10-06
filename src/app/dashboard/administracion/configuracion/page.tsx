@@ -13,7 +13,7 @@ import { useRouter } from 'next/navigation';
 
 const defaultError: Configuracion = {
   AutorizacionPagos: { DiaLimiteConfirmacionCalculo: 1 },
-  Actividades: { DiasRecordatorio: 1,AnticipacionCreacion:1 },
+  Actividades: { DiasRecordatorio: 1,AnticipacionCreacion:1,LimiteIncidencias:1 },
 }
 // Componente principal para la gestión de usuarios
 const UserList = () => {
@@ -22,7 +22,7 @@ const UserList = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [Configuracion, setConfiguracion] = useState<Configuracion>({
     AutorizacionPagos: { DiaLimiteConfirmacionCalculo: 1 },
-    Actividades: { DiasRecordatorio: 1, AnticipacionCreacion: 1 },
+    Actividades: { DiasRecordatorio: 1, AnticipacionCreacion: 1,LimiteIncidencias:1 },
   });
   const [error,setError]=useState<Configuracion>(defaultError);
   
@@ -180,6 +180,18 @@ console.log(error);
               value={Configuracion.Actividades.DiasRecordatorio}
               onChange={CambiarValorActividades}
               className={`mt-1 block w-full rounded-md border p-2 shadow-sm focus:border-blue-500 focus:ring-blue-500 ${error.Actividades.DiasRecordatorio ? 'border-red-500' : 'border-gray-300'}`}
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700">
+              Numero de incidencias permitidas por mes fiscal
+            </label>
+            <input
+              type="number"
+              name="LimiteIncidencias"
+              value={Configuracion.Actividades.LimiteIncidencias}
+              onChange={CambiarValorActividades}
+              className={`mt-1 block w-full rounded-md border p-2 shadow-sm focus:border-blue-500 focus:ring-blue-500 ${error.Actividades.LimiteIncidencias ? 'border-red-500' : 'border-gray-300'}`}
             />
           </div>
         </div>

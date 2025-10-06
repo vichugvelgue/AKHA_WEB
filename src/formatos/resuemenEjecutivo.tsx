@@ -67,7 +67,7 @@ const FormatoResumenEjecutivo = ({ resumen,contribuyente }: FormatoResumenProps)
 
     // Descargar el PDF
     doc.save("resumen_ejecutivo.pdf");
-  }, [resumen]);
+  }, []);
 
   return null;
 };

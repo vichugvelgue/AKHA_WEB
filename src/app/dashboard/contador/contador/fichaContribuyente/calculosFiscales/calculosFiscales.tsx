@@ -323,7 +323,7 @@ export default function CalculosFiscales({ Visible, idEditar = "", Cerrar }: Mod
     >
       <div className="w-full max-w-5xl max-h-[90dvh] overflow-auto rounded-2xl bg-white p-8 shadow-2xl transform transition-transform duration-300 border-2 border-blue-500 scale-100 ">
         <div className="text-2xl font-bold text-blue-900">
-          Calculos Fiscales
+          Cálculos Fiscales
         </div>
         <br />
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
