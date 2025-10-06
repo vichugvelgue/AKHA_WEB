@@ -17,6 +17,7 @@ import { EstatusActividad, EstatusValidacion } from '@/src/Interfaces/enums';
 import { ActividadesFijas } from '@/src/app/dashboard/administracion/actividades/page';
 import CalculosFiscales from '../calculosFiscales/calculosFiscales';
 import ResumenesEjecutivos from '../resumenEjecutivo/resumenesjecutivos';
+import RegistroPagos from '../registroPagos/registropagos';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000';
 
@@ -52,6 +53,7 @@ export default function ActividadesCRUD({ idContribuyente,NombreContribuyente, C
   const [showAgregar, setShowAgregar] = useState<boolean>(false);
   const [OpenCalculosFiscales, setOpenCalculosFiscales] = useState(false);
   const [OpenResumenEjecutivo, setOpenResumenEjecutivo] = useState(false);
+  const [OpenRegistroPagos, setOpenRegistroPagos] = useState(false);
 
   const [showIncidenciasModal, setShowIncidenciasModal] = useState(false);
   const [selectedActividadId, setSelectedActividadId] = useState<string>('');
@@ -187,6 +189,12 @@ export default function ActividadesCRUD({ idContribuyente,NombreContribuyente, C
       showNotification("Resumen ejectutivo guardado correctamente", "success");
     }
   };
+  const CerrarRegistroPagos = (exist: string) => {
+    setOpenRegistroPagos(false);
+    if (exist === "success") {
+      showNotification("Registro de pagos guardado correctamente", "success");
+    }
+  };
   const BotonActividad = (idActividad: string | undefined, Nombre: string) => {
     if (!idActividad) {
         return <span className="text-gray-700">{Nombre}</span>;
@@ -206,6 +214,9 @@ export default function ActividadesCRUD({ idContribuyente,NombreContribuyente, C
                 icon = <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 19V6l2-2l2 2v13M9 19a3 3 0 006 0m-6 0a3 3 0 01-6 0m6 0a3 3 0 000-6m-6 6a3 3 0 010-6m6 0a3 3 0 01-6 0m6 0a3 3 0 006 0m-6 0a3 3 0 010 6m6 0a3 3 0 000-6"></path></svg>; // Icono de Gráfico
                 break;
             case "68dab10c197a935fb6bb92e1": // Registro de pagos
+            onclic = () => { setOpenRegistroPagos(true); };
+                icon = <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 19V6l2-2l2 2v13M9 19a3 3 0 006 0m-6 0a3 3 0 01-6 0m6 0a3 3 0 000-6m-6 6a3 3 0 010-6m6 0a3 3 0 01-6 0m6 0a3 3 0 006 0m-6 0a3 3 0 010 6m6 0a3 3 0 000-6"></path></svg>; // Icono de Gráfico
+                break;
             case "68dab4fa78038f650675da8f": // Recepción de documentos
             default:
                 icon = <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-3-6v6m3 6H6a2 2 0 01-2-2V7a2 2 0 012-2h10a2 2 0 012 2v11a2 2 0 01-2 2z"></path></svg>; // Icono de Documento
@@ -399,8 +410,7 @@ export default function ActividadesCRUD({ idContribuyente,NombreContribuyente, C
                                 :
                                 <td className="px-4 py-3 text-center text-xs w-40" onDoubleClick={() => setIdActividad(actividad._id || "")}>
                                     <span className={`px-3 py-1 inline-flex text-xs leading-5 font-bold rounded-full cursor-pointer transition-colors ${getStatusClasses(actividad.EstadoActividad || 0)}`}
-                                          title="Doble click para editar"
-                                    >
+                                          title="Doble click para editar">
                                         {EstatusActividad[actividad.EstadoActividad || 0].replace(/_/g, " ")}
                                     </span>
                                 </td>
@@ -425,6 +435,7 @@ export default function ActividadesCRUD({ idContribuyente,NombreContribuyente, C
         </div>
         {OpenCalculosFiscales && <CalculosFiscales Visible={OpenCalculosFiscales} idEditar={idContribuyente||""} Cerrar={CerrarCalculosFiscales} />}
         {OpenResumenEjecutivo && <ResumenesEjecutivos Visible={OpenResumenEjecutivo} idEditar={idContribuyente || ""} Cerrar={CerrarResumenEjectutivo} />}
+        {OpenRegistroPagos && <RegistroPagos Visible={OpenRegistroPagos} idEditar={idContribuyente || ""} Cerrar={CerrarRegistroPagos} />}
          {/* Renderizar el Modal de Incidencias si está visible */}
       {showIncidenciasModal && (
           <ModalIncidencias 

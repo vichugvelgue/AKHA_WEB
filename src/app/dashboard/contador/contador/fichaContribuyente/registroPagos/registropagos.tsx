@@ -65,6 +65,8 @@ const RegistroPagos: React.FC<RegistroPagosProps> = ({ Visible, idEditar = "", C
   const [fechaRegistro, setFechaRegistro] = useState<string>("");
   const [periodoActual, setPeriodoActual] = useState<string>("");
 
+  const [downloadingId, setDownloadingId] = useState<string | null>(null);
+
   useEffect(() => {
     const now = new Date();
     const formattedDate = now.toLocaleDateString('es-ES', {
@@ -115,7 +117,6 @@ const RegistroPagos: React.FC<RegistroPagosProps> = ({ Visible, idEditar = "", C
       });
 
       const data = await respuesta.json();
-      console.log(data);
     if (respuesta.ok) { 
         const pagosData = data.data || [];
         setPagos(pagosData);
@@ -201,36 +202,32 @@ const RegistroPagos: React.FC<RegistroPagosProps> = ({ Visible, idEditar = "", C
     setView(view === "registro" ? "historial" : "registro");
   };
 
-  // --- Nueva función para descargar el archivo ---
-  const handleDownload = async (pago: HistorialPago) => {
-    try {
-      showNotification("Iniciando la descarga...", "success");
-      const respuesta = await fetch(`${API_BASE_URL}/registrospagos/DescargarComprobante?idRegistroPago=${pago._id}&idCliente=${pago.idCliente}`, {
-        method: 'GET',
-      });
-
-      if (!respuesta.ok) {
-        const errorData = await respuesta.json();
-        throw new Error(errorData.mensaje || "Error al descargar el archivo.");
-      }
-
-      const blob = await respuesta.blob();
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.style.display = 'none';
-      a.href = url;
-      a.download = `${pago.NombreArhivo}.${pago.ExtencionArchivo}`;
-      document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(url);
-      a.remove();
-      showNotification("Descarga completada.", "success");
-
-    } catch (error) {
-      console.error("Error al descargar el archivo:", error);
-      showNotification("Ocurrió un error al descargar el archivo.", "error");
-    }
+  const handleDownload = (infopago: HistorialPago) => {    
+    setDownloadingId(infopago._id);
+     const downloadUrl = `${API_BASE_URL}/registrospagos/descargarcomprobante/${infopago._id}/${idCliente}/${infopago.ExtencionArchivo}`;       
+    window.location.href = downloadUrl;        
+    fetch(downloadUrl, {
+        method: 'GET',        
+    })
+    .then(response => {
+        if (response.status === 200) {
+            console.log("El servidor ha respondido correctamente. Descarga iniciada.");
+             setDownloadingId(null);
+        } else {
+            alert("Error al intentar descargar el archivo.");
+             setDownloadingId(null);
+        }
+    })
+    .catch(error => console.error("Error de red al intentar descargar:", error));
+    
   };
+
+    const Spinner = () => (
+    <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+    </svg>
+);
 
   // Vista de registro de pagos (original)
   const RegistroView = () => (
@@ -352,19 +349,45 @@ const RegistroPagos: React.FC<RegistroPagosProps> = ({ Visible, idEditar = "", C
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
-                    {pagos.map((pago) => (
-                      <tr key={pago._id}>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                          {new Date(pago.FechaPago).toLocaleDateString('es-ES')}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          {new Date(pago.PeriodoFiscal).toLocaleDateString('es-ES', { month: 'long', year: 'numeric' })}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-blue-600 hover:text-blue-800 cursor-pointer">
-                          {pago.NombreArhivo}.{pago.ExtencionArchivo}
-                        </td>
-                      </tr>
-                    ))}
+                    {pagos.map((pago) => {
+                      const isDownloading = downloadingId === pago._id;
+                      return(
+                        <tr key={pago._id}>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                            {new Date(pago.FechaPago).toLocaleDateString('es-ES')}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            {new Date(pago.PeriodoFiscal).toLocaleDateString('es-ES', { month: 'long', year: 'numeric' })}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-blue-600 hover:text-blue-800 cursor-pointer">
+                            <button 
+                                                  onClick={() => handleDownload(pago)}
+                                                  className={`
+                                                      text-xs flex items-center justify-center mx-auto transition-colors px-3 py-1 rounded-lg
+                                                      ${isDownloading 
+                                                          ? 'bg-blue-100 text-blue-600 cursor-not-allowed'
+                                                          : 'bg-white text-blue-600 hover:bg-blue-50 hover:text-blue-800 font-medium'
+                                                      }
+                                                  `}
+                                                  title={`Descargar ${pago.NombreArhivo}`}
+                                                  disabled={isDownloading} // Deshabilitar mientras descarga
+                                              >                                                  
+                                                  {isDownloading ? (
+                                                      <>
+                                                          <Spinner />
+                                                          <span>Descargando...</span>
+                                                      </>
+                                                  ) : (
+                                                      <>
+                                                          <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                                                          <span className="truncate max-w-[100px] inline-block">{pago.NombreArhivo}</span>
+                                                      </>
+                                                  )}
+                                              </button>
+                          </td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>
