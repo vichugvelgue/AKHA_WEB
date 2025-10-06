@@ -126,7 +126,6 @@ const ModalIncidencias: React.FC<ModalIncidenciasProps> = ({ idActividad, activi
     }
   };
 
-  // Función de descarga simulada
   const handleDownload = (incidencia: IncidenciaRegistrada) => {    
     setDownloadingId(incidencia._id);
      const downloadUrl = `${API_BASE_URL}/incidenciasactividades/descargarcomprobante/${incidencia._id}/${idCliente}/${incidencia.ExtencionArchivo}`;       
