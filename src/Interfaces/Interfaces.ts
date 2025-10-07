@@ -82,6 +82,7 @@ export interface Cliente {
   Observaciones?: string;
   Servicios?: string[];
   ServiciosSeleccionados: string[];
+  ActividadesSeleccionadas: string[];
   idUsuarioCreacion?: string;
   idGrupoEmpresarial?: string;
   idContador?: string;
