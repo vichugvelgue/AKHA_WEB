@@ -90,9 +90,11 @@ export default function ModalCicloFiscal({ Ciclo, Visible, idEditar = "", Cerrar
       cantidad = encontrado.Monto || 0
     }
 
-    return cantidad
+    return convertirPesos(cantidad)
   }
-
+const convertirPesos = (numero: number) => {
+    return new Intl.NumberFormat("es-MX", { style: "currency", currency: "MXN" }).format(numero)
+  }
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center transition-all duration-300 backdrop-blur-sm"

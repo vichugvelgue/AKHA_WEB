@@ -81,8 +81,8 @@ export interface Cliente {
   WhatsApp?: string;
   Observaciones?: string;
   Servicios?: string[];
-  ServiciosSeleccionados: string[];
-  ActividadesSeleccionadas: string[];
+  ServiciosSeleccionados?: string[];
+  ActividadesSeleccionadas?: string[];
   idUsuarioCreacion?: string;
   idGrupoEmpresarial?: string;
   idContador?: string;

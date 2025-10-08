@@ -246,12 +246,12 @@ const ContribuyentesAgregar = ({ idEditar, Editar = false, onClose, onRegister }
     setFormState(prevFormState => {
       const currentSelected = prevFormState.ServiciosSeleccionados;
       let newSelected;
-      if (currentSelected.includes(servicioId)) {
+      if (currentSelected?.includes(servicioId)) {
         // Deseleccionar el servicio
         newSelected = currentSelected.filter(id => id !== servicioId);
       } else {
         // Seleccionar el servicio
-        newSelected = [...currentSelected, servicioId];
+        newSelected = [...(currentSelected || []), servicioId];
       }
 
       // Devolver un nuevo estado de formState con la lista de servicios actualizada
@@ -335,12 +335,12 @@ const ContribuyentesAgregar = ({ idEditar, Editar = false, onClose, onRegister }
     const currentActividades = prevFormState.ActividadesSeleccionadas;
     let newActividades;
 
-    if (currentActividades.includes(actividadId)) {
+    if (currentActividades?.includes(actividadId)) {
       // Deseleccionar la actividad: eliminar su ID
-      newActividades = currentActividades.filter(id => id !== actividadId);
+      newActividades = currentActividades?.filter(id => id !== actividadId) || [];
     } else {
       // Seleccionar la actividad: añadir su ID
-      newActividades = [...currentActividades, actividadId];
+      newActividades = [...(currentActividades || []), actividadId];
     }
 
     // Devolver un nuevo estado de formState con la lista de actividades actualizada
@@ -821,11 +821,11 @@ const ContribuyentesAgregar = ({ idEditar, Editar = false, onClose, onRegister }
             ) : (
                 servicios.map((servicio) => {
                     // 1. Determina si el servicio está seleccionado (ESTADO DEL ACORDEÓN)
-                    const isServicioSelected = formState.ServiciosSeleccionados.includes(servicio._id);
+                    const isServicioSelected = formState.ServiciosSeleccionados?.includes(servicio._id) || false;
                     
                     // 2. Determina si *alguna* actividad de este servicio está seleccionada (ESTADO de SELECCIÓN PERSISTENTE)
                     const isAnyActivitySelectedInService = servicio.ActividadesDetalle && servicio.ActividadesDetalle.some(actividad => 
-                        formState.ActividadesSeleccionadas.includes(actividad._id)
+                        formState.ActividadesSeleccionadas?.includes(actividad._id) || false
                     );
 
                     // 3. Define el estado visual general de 'Activo' para el encabezado y el borde
@@ -834,7 +834,7 @@ const ContribuyentesAgregar = ({ idEditar, Editar = false, onClose, onRegister }
                     // Función de ayuda para formatear el costo (asumiendo que servicio.Costo existe)
                     const formattedCost = new Intl.NumberFormat('es-MX', { 
                         style: 'currency', 
-                        currency: 'USD' 
+                        currency: 'mxn' 
                     }).format(servicio.Costo || 0); // Asumo la propiedad 'Costo' en el objeto servicio
                     
                     return (
@@ -859,9 +859,9 @@ const ContribuyentesAgregar = ({ idEditar, Editar = false, onClose, onRegister }
                                             {servicio.Nombre}
                                         </h3>
                                         {/* NUEVO CAMPO DE COSTO */}
-                                        <p className="text-sm font-semibold text-green-600 mt-1">
+                                        {/* <p className="text-sm font-semibold text-green-600 mt-1">
                                             Costo: {formattedCost}
-                                        </p>
+                                        </p> */}
                                     </div>
                                 </div>
 
@@ -906,7 +906,7 @@ const ContribuyentesAgregar = ({ idEditar, Editar = false, onClose, onRegister }
                                             })
                                             .map((actividad) => {
                                             // Determina si esta actividad específica está seleccionada a nivel contribuyente
-                                            const isActividadSelected = formState.ActividadesSeleccionadas.includes(actividad._id);
+                                            const isActividadSelected = formState.ActividadesSeleccionadas?.includes(actividad._id) || false;
                                             
                                             return (
                                                 <div

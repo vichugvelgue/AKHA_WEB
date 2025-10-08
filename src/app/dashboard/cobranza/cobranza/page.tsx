@@ -14,26 +14,19 @@ import ModalBitacoraGrupo from '@/src/hooks/ModalBitacoraGrupo';
 import MensajeNotificacion from '@/src/hooks/MensajeNotificacion';
 import Seperador from '@/src/hooks/Separador';
 import ModalBuscarContribuyentes from '@/src/hooks/ModalBuscarContribuyentes';
+import ModalPagar from './ModalPagar';
 
-
-// Definimos una interfaz para las propiedades del modal de registro
-interface ModalProps {
-  idEditar?: string;
-  Editar: boolean;
-  onClose: () => void;
-  onRegister: (Mensaje: string, Color: "success" | "error" | "warning") => void;
-}
 
 class nuevoCliente {
   RazonSocial: string = "";
   idGrupoEmpresarial: string = "";
   RFC: string = "";
   ServiciosSeleccionados: string[] = [];
-  RepresentanteLegal: { Nombre: string, RFC: string, Alias: string, Cumpleanos: string } = { Nombre: "", RFC: "", Alias: "", Cumpleanos: "" };
-  DuenoEmpresa: { Nombre: string, Telefono: string, Correo: string, Cumpleanos: string } = { Nombre: "", Telefono: "", Correo: "", Cumpleanos: "" };
-  ContactoCobranza: { Nombre: string, Telefono: string, Correo: string, Cumpleanos: string } = { Nombre: "", Telefono: "", Correo: "", Cumpleanos: "" };
-  GerenteOperativo: { Nombre: string, Telefono: string, Correo: string, Cumpleanos: string } = { Nombre: "", Telefono: "", Correo: "", Cumpleanos: "" };
-  EnlaceAkha: { Nombre: string, Telefono: string, Correo: string, Cumpleanos: string } = { Nombre: "", Telefono: "", Correo: "", Cumpleanos: "" };
+  RepresentanteLegal= { Nombre: "", RFC: "", Alias: "", Cumpleanos: "" };
+  DuenoEmpresa = { Nombre: "", Telefono: "", Correo: "", Cumpleanos: "" };
+  ContactoCobranza = { Nombre: "", Telefono: "", Correo: "", Cumpleanos: "" };
+  GerenteOperativo = { Nombre: "", Telefono: "", Correo: "", Cumpleanos: "" };
+  EnlaceAkha = { Nombre: "", Telefono: "", Correo: "", Cumpleanos: "" };
   Cumpleanos: string = "";
 }
 
@@ -62,6 +55,7 @@ const Cobranza = () => {
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isOpenContribuyente, setIsOpenContribuyente] = useState<boolean>(false);
+  const [isOpenPagar, setIsOpenPagar] = useState<boolean>(false);
 
 
   useEffect(() => {
@@ -139,6 +133,12 @@ const Cobranza = () => {
       }
     }
   };
+  const CerrarModalPagar = (exito: string) => {
+    setIsOpenPagar(false);
+    if (exito == "success") {
+      showNotification("Pago realizado con éxito","success");
+    }
+  };
 
   return (
     <div className="space-y-6 p-4">
@@ -195,7 +195,7 @@ const Cobranza = () => {
       <div className="overflow-x-auto rounded-xl bg-white p-6 shadow-md">
         <table className="min-w-full table-auto">
           <thead>
-            <tr className="bg-gray-200 text-center text-gray-700 ">
+            <tr className="bg-gray-200 text-right text-gray-700 ">
               <th className="px-4 py-2 text-left">Descripción</th>
               <th className="px-4 py-2">Precio</th>
               <th className="px-4 py-2">Pendiente</th>
@@ -211,16 +211,26 @@ const Cobranza = () => {
                 <td className="px-4 py-2">{grupo.Nombre}</td>
                 <td className="px-4 py-2">{grupo.Nombre}</td>
                 <td className="px-4 py-2 flex justify-end space-x-2 ">
-                  <button onClick={() => { }} className="rounded-md bg-blue-600 px-4 py-1 text-sm text-white transition-colors duration-200 hover:bg-blue-700">
-                    <i className="material-symbols-rounded filled">visibility</i>
-                  </button>
+                  <input type="number" className="w-16 px-2 py-1 border border-gray-300 rounded-md" />
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
+
+        <br />
+        <button className="float-right rounded-lg text-white bg-blue-600 px-6 py-2 text-sm font-medium transition-colors duration-200 hover:bg-blue-700"
+          onClick={() => setIsOpenPagar(true)} > Pagar </button>
       </div>
 
+      {isOpenPagar &&
+        <ModalPagar
+          Visible={isOpenPagar}
+          NombreCliente={ContribuyenteBuscar.RazonSocial || ""}
+          idCliente={ContribuyenteBuscar._id || ""}
+          Cerrar={CerrarModalPagar}
+        />
+      }
       {isOpenContribuyente &&
         <ModalBuscarContribuyentes
           multiple={false}

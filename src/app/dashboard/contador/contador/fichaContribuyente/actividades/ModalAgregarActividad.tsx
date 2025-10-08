@@ -1,7 +1,7 @@
 import { useNotification } from "@/src/hooks/useNotifications";
 import MensajeNotificacion from "@/src/hooks/MensajeNotificacion";
 import { useState, useEffect } from "react";
-import { ActividadPeriodica } from "@/src/Interfaces/Interfaces";
+import { Actividad, ActividadPeriodica } from "@/src/Interfaces/Interfaces";
 import { InicioSemana } from "@/src/Interfaces/enums";
 import { API_BASE_URL, ObtenerSesionUsuario } from "@/src/utils/constantes";
 import Cargando from "@/src/hooks/Cargando";
@@ -14,6 +14,7 @@ interface ModalAgregarActividadProps {
 class errorAgregarActividad {
   FechaInicio: boolean = false
   FechaVencimiento: boolean = false
+  idActividad: boolean = false
   Nombre: boolean = false
 }
 export default function ModalAgregarActividad({ idContribuyente = "", Visible, Cerrar }: ModalAgregarActividadProps) {
@@ -23,6 +24,7 @@ export default function ModalAgregarActividad({ idContribuyente = "", Visible, C
   const [Actividad, setActividad] = useState<ActividadPeriodica>({
     idCliente: idContribuyente,
     Nombre: "",
+    idActividad: "",
     SemanaOperativa: 1,
     FechaInicio: new Date(),
     FechaVencimiento: new Date(),
@@ -30,7 +32,36 @@ export default function ModalAgregarActividad({ idContribuyente = "", Visible, C
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [Motivos, setMotivos] = useState<string>("");
   const [Errores, setErrores] = useState<errorAgregarActividad>(new errorAgregarActividad());
+  const [Actividades, setActividades] = useState<Actividad[]>([]);
 
+  useEffect(() => {
+    ListarActividades()
+  }, [])
+
+  const ListarActividades = async () => {
+    setIsLoading(true);
+    try {
+      const response = await fetch(`${API_BASE_URL}/actividades`);
+      if (!response.ok) {
+        throw new Error(`Error: ${response.statusText}`);
+      }
+      const contentType = response.headers.get('content-type');
+      if (contentType && contentType.includes('application/json')) {
+        const data: Actividad[] = await response.json();        
+        setActividades(data);
+      } else {
+        const text = await response.text();
+        console.error('La respuesta de la API no es JSON:', text);
+        throw new Error('La API no devolvió un formato JSON válido.');
+      }
+    } catch (err: any) {
+      console.error('Error al obtener las actividades:', err);
+      // Muestra una notificación de error al fallar la carga inicial
+      showNotification('Error al cargar las actividades.', 'error');
+    } finally {
+      setIsLoading(false);
+    }
+  };
   const validarDatos = () => {
     let valido = true
     let error = new errorAgregarActividad()
@@ -46,6 +77,10 @@ export default function ModalAgregarActividad({ idContribuyente = "", Visible, C
       error.Nombre = true
       valido = false
     }
+    if (!Actividades.find((item) => item._id == Actividad.idActividad)) {
+      error.idActividad = true
+      valido = false
+    }
     if (Actividad.FechaInicio < fechaInicioMes || Actividad.FechaInicio > fechaFinMes) {
       error.FechaInicio = true
       valido = false
@@ -54,7 +89,6 @@ export default function ModalAgregarActividad({ idContribuyente = "", Visible, C
       error.FechaVencimiento = true
       valido = false
     }
-    console.log(error);
 
     setErrores(error)
     if(!valido){
@@ -67,7 +101,7 @@ export default function ModalAgregarActividad({ idContribuyente = "", Visible, C
   const Guardar = async() => {
     if (!validarDatos()) return
 
-    Actividad.SemanaOperativa = await ObtenerSemana(Actividad.FechaInicio)
+    Actividad.SemanaOperativa = await ObtenerSemana(Actividad.FechaVencimiento)
 
     try {
       let body: ActividadPeriodica = {
@@ -109,7 +143,7 @@ export default function ModalAgregarActividad({ idContribuyente = "", Visible, C
     return semana
   }
 
-  const cambiarValor = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const cambiarValor = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement |HTMLSelectElement>) => {
     let { value, name, type } = e.target
 
     let valor: string | Date = value
@@ -122,7 +156,24 @@ export default function ModalAgregarActividad({ idContribuyente = "", Visible, C
       [name]: valor
     })
   }
-    console.log(Errores);
+  const cambiarValorActividad = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    let { value, name, type } = e.target
+
+    let actividad = Actividades.find((item) => item._id == value)
+    if (actividad) {
+      setActividad({
+        ...Actividad,
+        Nombre: actividad.nombre,
+        idActividad: actividad._id,
+      })
+    }else{
+      setActividad({
+        ...Actividad,
+        Nombre: "",
+        idActividad: "",
+      })
+    }
+  }
   return (
     <div
       className={`fixed inset-0 z-50 flex items-center justify-center transition-all duration-300 opacity-100 backdrop-blur-sm}`}
@@ -137,16 +188,24 @@ export default function ModalAgregarActividad({ idContribuyente = "", Visible, C
         <div className="grid grid-cols-2 gap-4">
           <div className="col-span-2">
             <label htmlFor="fecha" className="block text-sm font-medium text-gray-700">
-              Nombre
+              Actividad
             </label>
-            <input
-              type="text"
-              name="Nombre"
+            <select
+              name="idActividad"
               className={`mt-1 block w-full rounded-md bg-gray-50 p-2 shadow-sm focus:border-blue-500
-               focus:ring-blue-500 sm:text-sm  ${Errores.Nombre ? "!border-red-500" : "border-gray-300"}`}
-              value={Actividad.Nombre}
-              onChange={cambiarValor}
-            />
+               focus:ring-blue-500 sm:text-sm  ${Errores.idActividad ? "!border-red-500" : "border-gray-300"}`}
+              value={Actividad.idActividad}
+              onChange={cambiarValorActividad}
+            >
+              <option value="" disabled>Seleccione una actividad</option>
+              {
+                Actividades.map((item) => (
+                  <option key={item._id} value={item._id}>
+                    {item.nombre}
+                  </option>
+                ))
+              }
+            </select>
           </div>
           <div className="w-full">
             <label htmlFor="fecha" className="block text-sm font-medium text-gray-700">
