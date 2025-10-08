@@ -83,6 +83,7 @@ export interface Cliente {
   Servicios?: string[];
   ServiciosSeleccionados: string[];
   ActividadesSeleccionadas: string[];
+  ServiciosContribuyente: ServicioSeleccionado[];
   idUsuarioCreacion?: string;
   idGrupoEmpresarial?: string;
   idContador?: string;
@@ -94,6 +95,13 @@ export interface Cliente {
   EnlaceAkha: PersonaContacto;
   Cumpleanos: string;
 }
+
+type ServicioSeleccionado = {
+  idServicio: string;
+  ListaActividades: string[];
+  Costo: number;
+}
+
 export interface ServicioItem  {
   _id: string;
   Nombre: string;
