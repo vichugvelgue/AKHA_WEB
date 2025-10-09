@@ -315,7 +315,7 @@ const GruposEmpresarialesCRUD = () => {
                 </td>
                 <td className="px-4 py-2 flex justify-end space-x-2 ">
                   <button onClick={() => handleOpenModalBitacora(grupo._id || "")} className="rounded-md bg-blue-600 px-4 py-1 text-sm text-white transition-colors duration-200 hover:bg-blue-700">
-                     <i className="material-symbols-rounded filled">visibility</i> 
+                     <i className="material-symbols-rounded filled">folder</i> 
                   </button>
                   <button onClick={() => handleEditModal(grupo._id || "")} className="rounded-md bg-blue-600 px-4 py-1 text-sm text-white transition-colors duration-200 hover:bg-blue-700">
                      <i className="material-symbols-rounded filled">stylus</i> 

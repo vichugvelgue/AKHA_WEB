@@ -195,7 +195,7 @@ const ContadorCRUD = () => {
           </button>
         </div>
       </div>
-      <div className="rounded-xl bg-white p-6 shadow-md">
+      {/* <div className="rounded-xl bg-white p-6 shadow-md">
         <div className="flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-6">
           <div className="w-full sm:w-1/3">
             <label htmlFor="nombreFilter" className="block text-sm font-medium text-gray-700">
@@ -232,7 +232,7 @@ const ContadorCRUD = () => {
             </button>
           </div>
         </div>
-      </div>
+      </div> */}
              <BannerSemanal />
       <div className="overflow-x-auto rounded-xl bg-white p-6 shadow-md">
         <table className="min-w-full table-auto">
@@ -250,16 +250,16 @@ const ContadorCRUD = () => {
                 <td className="px-4 py-2">{usuario.RFC}</td>
                 <td className="px-4 py-2 flex justify-end space-x-2 ">
                   <button onClick={() => handleOpenModalBitacora(usuario._id || "")} className="rounded-md bg-blue-600 px-4 py-1 text-sm text-white transition-colors duration-200 hover:bg-blue-700">
-                     <i className="material-symbols-rounded filled">visibility</i> 
+                     <i className="material-symbols-rounded filled">folder</i> 
                   </button>
                   <button onClick={() => handleEditModal(usuario._id || "")} className="rounded-md bg-blue-600 px-4 py-1 text-sm text-white transition-colors duration-200 hover:bg-blue-700">
-                    <i className="material-symbols-rounded filled">stylus</i>
+                    <i className="material-symbols-rounded filled">visibility</i>
                   </button>
                   <button onClick={() => handleOpenCredencialesModal(usuario._id || "")} className="rounded-md bg-green-600 px-4 py-1 text-sm text-white transition-colors duration-200 hover:bg-green-700">
                     <i className="material-symbols-rounded filled">vpn_key</i>
                   </button>
                   <button onClick={() => AbrirFicha(usuario._id || "", usuario.RazonSocial || "")} className="rounded-md bg-yellow-600 px-4 py-1 text-sm text-white transition-colors duration-200 hover:bg-yellow-700">
-                    <i className="material-symbols-rounded filled">folder</i>
+                    <i className="material-symbols-rounded filled">list_alt_check</i>
                   </button>
                 </td>
               </tr>

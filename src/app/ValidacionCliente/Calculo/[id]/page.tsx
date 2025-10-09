@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { API_BASE_URL, ObtenerSesionUsuario } from '@/src/utils/constantes';
+import { API_BASE_URL, convertirPesos, ObtenerSesionUsuario } from '@/src/utils/constantes';
 import Cargando from '@/src/hooks/Cargando';
 import { CalculoFiscal, ValidacionCalculoFiscal } from '@/src/Interfaces/Interfaces';
 import { EstatusValidacion } from "@/src/Interfaces/enums";
@@ -155,9 +155,6 @@ export default function ValidacionCalculoPage() {
       showNotification("Ocurrio un error, intentelo mas tarde", "error")
     }
   }
-    const convertirPesos = (numero: number) => {
-        return new Intl.NumberFormat("es-MX", { style: "currency", currency: "MXN" }).format(numero)
-    }
 
     const CambiarValor = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
         var { name, value, type } = e.target;

@@ -45,10 +45,13 @@ export default function CalculosFiscales({ Visible, idEditar = "", Cerrar }: Mod
   const [Impuestos, setImpuestos] = useState<Impuesto[]>([]);
 
   useEffect(() => {
-    ObtenerImpuestos();
-    const ahora = new Date();
-    setCiclo(ahora.getFullYear());          // ✅ Año actual
-    setFecha(ahora.toISOString().substring(0, 7)); // YYYY-MM
+    async function Iniciar() {
+      await ObtenerImpuestos();
+      const ahora = new Date();
+      setCiclo(ahora.getFullYear());          // ✅ Año actual
+      setFecha(ahora.toISOString().substring(0, 7)); // YYYY-MM
+    }
+    Iniciar();
   }, []);
 
   useEffect(() => {
@@ -341,12 +344,12 @@ export default function CalculosFiscales({ Visible, idEditar = "", Cerrar }: Mod
           <div className="flex gap-4">
               <button className="mt-3 inline-block rounded-md bg-yellow-600 px-4 py-1 text-white transition-colors hover:bg-yellow-700"
                onClick={() => setCicloFiscal(true)}>
-                Ver año fiscal
+                Resultado anual
               </button>
               
               <button className="mt-3 inline-block rounded-md bg-yellow-600 px-4 py-1 text-white transition-colors hover:bg-yellow-700"
                onClick={() => setEditar(true)}>
-                Complementaria
+                Recalcular
               </button>
           </div>
           <div className="grid justify-items-end">
@@ -382,8 +385,8 @@ export default function CalculosFiscales({ Visible, idEditar = "", Cerrar }: Mod
           <table className="w-full">
             <thead>
               <tr>
-                <th className="text-left px-4 py-2">Impuesto</th>
-                <th className="px-4 py-2">Monto</th>
+                <th style={{width:"20%"}} className="text-left px-4 py-2">Impuesto</th>
+                <th style={{width:"20%"}} className="px-4 py-2">Monto</th>
                 <th className="px-4 py-2">Observaciones</th>
               </tr>
             </thead>

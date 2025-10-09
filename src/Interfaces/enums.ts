@@ -22,3 +22,11 @@ export enum EstatusActividad {
     Terminado,
     Con_incidencia,
 }
+export enum MetodoPago {
+    Efectivo = "Efectivo",
+    Tarjeta_credito = "Tarjeta_de_credito",
+    Tarjeta_debito = "Tarjeta_debito",
+    Transferencia = "Transferencia",
+    Deposito = "Depósito",
+    Cheque = "Cheque",
+}

@@ -195,7 +195,7 @@ console.log(error);
             />
           </div>
         </div>
-
+<br />
         <div className="flex justify-end">
           <button onClick={Guardar} className="rounded-md bg-blue-600 px-4 py-2 text-white transition-colors duration-200 hover:bg-blue-700">
             Guardar

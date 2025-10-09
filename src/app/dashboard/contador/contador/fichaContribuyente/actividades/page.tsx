@@ -35,8 +35,6 @@ interface ModalProps {
 
 // Componente para la vista de CRUD de Usuarios
 export default function ActividadesCRUD({ idContribuyente,NombreContribuyente, Cerrar }: ModalProps) {
-  console.log(idContribuyente);
-  
   // Inicializa el router para la navegación
   const router = useRouter();
   const sesion = ObtenerSesionUsuario();
@@ -79,7 +77,6 @@ export default function ActividadesCRUD({ idContribuyente,NombreContribuyente, C
       if (!response.ok) {
         throw new Error(result.message || 'La respuesta de la API de servicios no es un array válido.');
       }
-      console.log('servicios:', result.data);
       if (result.data) {
         setServicios(result.data as SelectServicio[])
       }
@@ -112,7 +109,6 @@ export default function ActividadesCRUD({ idContribuyente,NombreContribuyente, C
       if (!response.ok) {
         throw new Error(data.message || 'La respuesta de la API de servicios no es un array válido.');
       }
-      console.log('servicios:', data.data);
       if (data.data) {
         setListaActividades(data.data)
       }
@@ -195,10 +191,10 @@ export default function ActividadesCRUD({ idContribuyente,NombreContribuyente, C
       showNotification("Registro de pagos guardado correctamente", "success");
     }
   };
-  const BotonActividad = (idActividad: string | undefined, Nombre: string) => {
-    if (!idActividad) {
-        return <span className="text-gray-700">{Nombre}</span>;
-    }
+  const BotonActividad = (idActividad: string, Nombre: string) => {
+    // if (!idActividad) {
+    //   return <span className="px-3 py-1 inline-flex text-xs leading-5 font-bold rounded-full transition-colors bg-gray-100 text-gray-800">{Nombre}</span>;
+    // }
     let esFija = ActividadesFijas.includes(idActividad);
     let onclic = () => {};
     let icon = null;
@@ -223,7 +219,7 @@ export default function ActividadesCRUD({ idContribuyente,NombreContribuyente, C
                 break;
         }
     } else {
-        icon = <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>; // Icono de Actividad
+        // icon = <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>; // Icono de Actividad
     }
 
 
@@ -235,7 +231,7 @@ export default function ActividadesCRUD({ idContribuyente,NombreContribuyente, C
           flex items-center text-left py-1 px-2 rounded-lg transition-all duration-300 
           ${esFija 
             ? "bg-indigo-50 text-indigo-700 font-semibold hover:bg-indigo-100 hover:shadow-md" 
-            : "text-gray-700 hover:text-blue-500"
+            : "bg-gray-200 text-gray-800"
           }
         `}
       >
@@ -259,7 +255,7 @@ export default function ActividadesCRUD({ idContribuyente,NombreContribuyente, C
 
    const handleIncidenciaGuardada = () => {
       // Este método se ejecuta cuando se ha guardado una incidencia con éxito en el modal.
-      console.log(`Incidencia guardada para ${selectedActividadId}. Actualizando la vista del padre...`);
+      // console.log(`Incidencia guardada para ${selectedActividadId}. Actualizando la vista del padre...`);
       // Aquí se podría actualizar el conteo de incidencias o forzar una recarga de la lista de actividades.
   }
 
@@ -423,7 +419,6 @@ export default function ActividadesCRUD({ idContribuyente,NombreContribuyente, C
                                     title="Registrar o ver incidencias"
                                 >
                                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                        {/* Icono de Alerta / Incidencia */}
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.332 16c-.77 1.333.192 3 1.732 3z"></path>
                                     </svg>
                                 </button>
