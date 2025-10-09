@@ -60,6 +60,12 @@ export default function AdministracionLayout({ children }: { children: React.Rea
               text="Pagos"
               currentPath={pathname}
             />
+            <MenuItem 
+              href="/dashboard/cobranza/bitacoraCobranza" 
+              icon="💵" 
+              text="Bitacora de cobranza"
+              currentPath={pathname}
+            />
           </ul>
         </nav>
 

@@ -11,9 +11,9 @@ import { ObtenerSesionUsuario } from '@/src/utils/constantes';
 // Datos de los módulos para generar los botones dinámicamente
 const modulos = [
   { href: '/dashboard/administracion', icon: '⚙️', text: 'Administración' },
-  { href: '/dashboard/contador/contador', icon: '👨‍🏭', text: 'Contador' },
+  { href: '/dashboard/contador/contador', icon: '🧑‍💼​', text: 'Contador' },
   { href: '/dashboard/clientes', icon: '👥', text: 'Clientes' },
-  { href: '/dashboard/cobranza', icon: '�', text: 'Cobranza' },
+  { href: '/dashboard/cobranza', icon: '💰', text: 'Cobranza' },
   { href: '/dashboard/proyectos', icon: '📝', text: 'Proyectos' },
   { href: '/dashboard/supervision', icon: '🕵️', text: 'Supervisión' },
   { href: '/dashboard/reportes', icon: '📈', text: 'Reportes' },

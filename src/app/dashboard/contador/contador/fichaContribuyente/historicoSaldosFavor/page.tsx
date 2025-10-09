@@ -8,7 +8,7 @@ import ToggleSwitch from "@/src/hooks/ToggleSwitch";
 import Cargando from '@/src/hooks/Cargando';
 import { useNotification } from '@/src/hooks/useNotifications';
 import { CalculoFiscal, Cliente, HistorialSaldo, Impuesto } from '@/src/Interfaces/Interfaces';
-import { ObtenerSesionUsuario } from '@/src/utils/constantes';
+import { convertirPesos, ObtenerSesionUsuario } from '@/src/utils/constantes';
 import ModalBitacoraContibuyente from '@/src/hooks/ModalBitacoraContibuyente';
 import MensajeNotificacion from '@/src/hooks/MensajeNotificacion';
 import RegistrarUsoSaldo from './registrarUsoSaldo';
@@ -202,10 +202,6 @@ export default function HitoricoSaldoFavor({ idContribuyente, Cerrar }: ModalPro
       setUtilizadoImpuesto(impuesto.Utilizado || 0)
       setTotalImpuesto(impuesto.Monto || 0)
     }
-  }
-
-  const convertirPesos = (numero: number) => {
-    return new Intl.NumberFormat("es-MX", { style: "currency", currency: "MXN" }).format(numero)
   }
   const FormatearFecha = (fecha: Date) => {
     return new Intl.DateTimeFormat("es-MX", {

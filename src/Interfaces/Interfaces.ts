@@ -1,5 +1,5 @@
 import { TipoEmpleado } from "../app/dashboard/administracion/usuarios/page";
-import { EstatusValidacion, Frecuencia } from "./enums";
+import { EstatusValidacion, Frecuencia, MetodoPago } from "./enums";
 
 export interface User {
   _id?: string;
@@ -303,4 +303,50 @@ export interface ActividadPeriodica {
 
   FechaInicio: Date;
   FechaVencimiento: Date;
+}
+export interface PagoPendiente {
+  _id?: string;
+  Estado?: number;
+  idCliente?: string;
+  idServicio?: string;
+  Descripcion: string;
+  Monto: number;
+  Pendiente: number;
+  FechaVencimiento?: Date;
+  FechaRegistro?: Date;
+  FechaActualizacion?: Date;
+  Cliente:string
+}
+export interface PagoItem {
+  idPago?: string;
+  Descripcion?: string;
+  Cantidad?: number;
+  Pendiente?: number;
+  IVA?: number;
+  Subtotal?: number;
+}
+export interface Venta {
+  _id?: string;
+  Estado?: number;
+  Folio?: string;
+
+  idRazonSocial?: string;
+  idCliente?: string;
+  idUsuarioRegistro?: string;
+
+  Pagos?: PagoItem[];
+
+  Descripcion?: string;
+  Total?: number;
+  SubTotal?: number;
+  IVA?: number;
+  MetodoPago?: MetodoPago;
+  Referencia?: string;
+
+  NecesitaFactura?: boolean;
+  idFactura?: string;
+  FolioFacura?: string;
+
+  FechaRegistro?: Date;
+  FechaActualizacion?: Date;
 }

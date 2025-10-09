@@ -2,6 +2,7 @@ import { Modulo } from "../Interfaces/Interfaces";
 
 export const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000';
 export const ZONA_HORARIA = process.env.NEXT_PUBLIC_ZONA_HORARIA || 'America/Mazatlan';
+export const PORCENTAJE_IVA = Number(process.env.NEXT_PUBLIC_PORCENTAJEIVA || 0.16);
 
 export const ObtenerSesionUsuario = () => {
   let idUsuario = ""
@@ -34,4 +35,7 @@ export const ValidarPermisoModuloPadre = (permiso: string) => {
   console.log(modulo)
   return modulo || null;
 }
+export const convertirPesos = (numero: number) => {
+    return new Intl.NumberFormat("es-MX", { style: "currency", currency: "MXN" }).format(numero)
+  }
 

@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from "react";
 import MensajeNotificacion from "@/src/hooks//MensajeNotificacion";
 import { useNotification } from "@/src/hooks/useNotifications";
 import { CalculoFiscal, CalculoImpuesto, Impuesto } from "@/src/Interfaces/Interfaces";
-import { API_BASE_URL } from "@/src/utils/constantes";
+import { API_BASE_URL, convertirPesos } from "@/src/utils/constantes";
 import Cargando from "@/src/hooks/Cargando";
 
 interface ModalMotivosProps {
@@ -91,9 +91,6 @@ export default function ModalCicloFiscal({ Ciclo, Visible, idEditar = "", Cerrar
     }
 
     return convertirPesos(cantidad)
-  }
-const convertirPesos = (numero: number) => {
-    return new Intl.NumberFormat("es-MX", { style: "currency", currency: "MXN" }).format(numero)
   }
   return (
     <div
