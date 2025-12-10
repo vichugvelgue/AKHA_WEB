@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation'; // Importa el hook useRouter
 import ToggleSwitch from "@/src/hooks/ToggleSwitch";
 import Cargando from '@/src/hooks/Cargando';
 import { useNotification } from '@/src/hooks/useNotifications';
-import { Cliente, PersonaContacto, RepresentanteLegal } from '@/src/Interfaces/Interfaces';
+import { Cliente, PersonaContacto, RepresentanteLegal, ServicioSeleccionado } from '@/src/Interfaces/Interfaces';
 import { ObtenerSesionUsuario } from '@/src/utils/constantes';
 
 
@@ -14,15 +14,15 @@ import { ObtenerSesionUsuario } from '@/src/utils/constantes';
 // Definición de interfaces para los nuevos campos
 
 type ActividadServicio = {
-    idActividad: string,
-    orden: number
-  };
+  idActividad: string,
+  orden: number
+};
 
-  type ActividadesDetalle= {
-    _id: string,
-    edicion: boolean,
-    nombre: string
-  }
+type ActividadesDetalle = {
+  _id: string,
+  edicion: boolean,
+  nombre: string
+}
 
 type servicioItem = {
   _id: string;
@@ -131,7 +131,7 @@ const ContribuyentesAgregar = ({ idEditar, Editar = false, onClose, onRegister }
 
   const [regimenfiscales, setregimenfiscales] = useState<RegimenFiscal[]>([]);
   const [servicios, setservicios] = useState<servicioItem[]>([]);
-  const [ServiciosSeleccionados, setSelectedServicios] = useState<string[]>([]);  
+  const [ServiciosSeleccionados, setSelectedServicios] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const inputXMLREF = useRef<HTMLInputElement | null>(null);
@@ -172,7 +172,17 @@ const ContribuyentesAgregar = ({ idEditar, Editar = false, onClose, onRegister }
       const contentType = response.headers.get('content-type');
       if (contentType && contentType.includes('application/json')) {
         const data = await response.json();
-        setFormState(data.data);
+        const clienteData = data.data;
+
+        // Inicializar ServiciosSeleccionados con los IDs de servicios que ya tienen actividades
+        const serviciosConActividades = clienteData.ServiciosContribuyente?.map(
+          (sc: any) => sc.idServicio
+        ) || [];
+
+        setFormState({
+          ...clienteData,
+          ServiciosSeleccionados: serviciosConActividades
+        });
       } else {
         const text = await response.text();
         console.error('La respuesta de la API no es JSON:', text);
@@ -229,7 +239,7 @@ const ContribuyentesAgregar = ({ idEditar, Editar = false, onClose, onRegister }
     setFormState(prev => ({
       ...prev,
       [section]: {
-        ...(prev[section] as any), 
+        ...(prev[section] as any),
         [name]: value
       }
     }));
@@ -246,17 +256,32 @@ const ContribuyentesAgregar = ({ idEditar, Editar = false, onClose, onRegister }
 
 
   // Función para manejar el toggle del acordeón
-    const handleServicioSelect = (servicioId: string) => {
-        setFormState(prevState => {
-            const isExpanded = prevState.ServiciosSeleccionados.includes(servicioId);
-            return {
-                ...prevState,
-                ServiciosSeleccionados: isExpanded
-                    ? prevState.ServiciosSeleccionados.filter(id => id !== servicioId)
-                    : [...prevState.ServiciosSeleccionados, servicioId]
-            };
-        });
-    };
+  const handleServicioSelect = (servicioId: string) => {
+    setFormState(prevState => {
+      const isExpanded = prevState.ServiciosSeleccionados.includes(servicioId);
+      return {
+        ...prevState,
+        ServiciosSeleccionados: isExpanded
+          ? prevState.ServiciosSeleccionados.filter(id => id !== servicioId)
+          : [...prevState.ServiciosSeleccionados, servicioId]
+      };
+    });
+  };
+  const handleServicioContribuyenteSelect = (servicioId: string, idActividad: string) => {
+    let serviciosActivos = formState.ServiciosContribuyente;
+    let servicio = serviciosActivos.find((s: any) => s.idServicio === servicioId);
+    if (servicio) {
+      if (!servicio.ListaActividades.includes(idActividad)) {
+        servicio.ListaActividades.push(idActividad);
+      } else {
+        servicio.ListaActividades = servicio.ListaActividades.filter((id: string) => id !== idActividad);
+      }
+    } else {
+      let servicioNuevo: ServicioSeleccionado = { idServicio: servicioId, ListaActividades: [idActividad],Costo: 0 }
+      serviciosActivos.push(servicioNuevo);
+    }
+    setFormState({ ...formState, ServiciosContribuyente: serviciosActivos });
+  };
 
 
   const validarDatos = () => {
@@ -327,85 +352,85 @@ const ContribuyentesAgregar = ({ idEditar, Editar = false, onClose, onRegister }
   };
 
 
-    const handleActividadToggle = (servicioId: string, actividadId: string, costo: number) => {
-        setFormState(prevState => {
-            let updatedServices = [...(prevState.ServiciosContribuyente || [])];
-            
-            const serviceIndex = updatedServices.findIndex(sc => sc?.idServicio === servicioId);
-            
-            if (serviceIndex > -1) {
-                let serviceEntry = { ...updatedServices[serviceIndex] };
-                
-                let activities = serviceEntry.ListaActividades || [];
-                
-                const isSelected = activities.includes(actividadId);
-                
-                if (isSelected) {
-                    activities = activities.filter(id => id !== actividadId);
-                } else {
-                    activities = [...activities, actividadId];
-                }
+  const handleActividadToggle = (servicioId: string, actividadId: string, costo: number) => {
+    setFormState(prevState => {
+      let updatedServices = [...(prevState.ServiciosContribuyente || [])];
 
-                if (activities.length > 0) {
-                    updatedServices[serviceIndex] = { 
-                        ...serviceEntry, 
-                        Costo: serviceEntry.Costo || costo, // Mantiene el costo original
-                        ListaActividades: activities 
-                    };
-                } else {
-                    updatedServices.splice(serviceIndex, 1);
-                }
+      const serviceIndex = updatedServices.findIndex(sc => sc?.idServicio === servicioId);
 
-            } else {
-                updatedServices.push({
-                    idServicio: servicioId,
-                    Costo: costo,
-                    ListaActividades: [actividadId], 
-                });
-            }
-            
-            const cleanServices = updatedServices.filter(Boolean);
+      if (serviceIndex > -1) {
+        let serviceEntry = { ...updatedServices[serviceIndex] };
 
-            return {
-                ...prevState,
-                ServiciosContribuyente: cleanServices,
-            };
+        let activities = serviceEntry.ListaActividades || [];
+
+        const isSelected = activities.includes(actividadId);
+
+        if (isSelected) {
+          activities = activities.filter(id => id !== actividadId);
+        } else {
+          activities = [...activities, actividadId];
+        }
+
+        if (activities.length > 0) {
+          updatedServices[serviceIndex] = {
+            ...serviceEntry,
+            Costo: serviceEntry.Costo || costo, // Mantiene el costo original
+            ListaActividades: activities
+          };
+        } else {
+          updatedServices.splice(serviceIndex, 1);
+        }
+
+      } else {
+        updatedServices.push({
+          idServicio: servicioId,
+          Costo: costo,
+          ListaActividades: [actividadId],
         });
-    };
+      }
 
-    const handleCostChange = (servicioId: string, value: string) => {
-        // Convierte el valor a número, usando 0 si la entrada no es válida
-        const newCost = parseFloat(value) || 0; 
+      const cleanServices = updatedServices.filter(Boolean);
 
-        setFormState(prevState => {
-            let updatedServices = [...(prevState.ServiciosContribuyente || [])];
-            const serviceIndex = updatedServices.findIndex(sc => sc?.idServicio === servicioId);
+      return {
+        ...prevState,
+        ServiciosContribuyente: cleanServices,
+      };
+    });
+  };
 
-            if (serviceIndex > -1) {
-                // 1. El servicio existe: Actualiza solo el costo
-                updatedServices[serviceIndex] = {
-                    ...updatedServices[serviceIndex],
-                    Costo: newCost,
-                };
-            } else {
-                // 2. El servicio NO existe: Crea una nueva entrada con el costo y actividades vacías.
-                // Esto permite al usuario establecer el costo antes de seleccionar actividades.
-                updatedServices.push({
-                    idServicio: servicioId,
-                    Costo: newCost,
-                    ListaActividades: [],
-                });
-            }
-            
-            // 3. Limpieza: Si el costo es 0 y no hay actividades, lo ideal sería no tenerlo, 
-            // pero lo mantendremos para reflejar el valor del input.
-            const cleanServices = updatedServices.filter(Boolean);
+  const handleCostChange = (servicioId: string, value: string) => {
+    // Convierte el valor a número, usando 0 si la entrada no es válida
+    const newCost = parseFloat(value) || 0;
 
-            return { ...prevState, ServiciosContribuyente: cleanServices };
+    setFormState(prevState => {
+      let updatedServices = [...(prevState.ServiciosContribuyente || [])];
+      const serviceIndex = updatedServices.findIndex(sc => sc?.idServicio === servicioId);
+
+      if (serviceIndex > -1) {
+        // 1. El servicio existe: Actualiza solo el costo
+        updatedServices[serviceIndex] = {
+          ...updatedServices[serviceIndex],
+          Costo: newCost,
+        };
+      } else {
+        // 2. El servicio NO existe: Crea una nueva entrada con el costo y actividades vacías.
+        // Esto permite al usuario establecer el costo antes de seleccionar actividades.
+        updatedServices.push({
+          idServicio: servicioId,
+          Costo: newCost,
+          ListaActividades: [],
         });
-    };
+      }
 
-    
+      // 3. Limpieza: Si el costo es 0 y no hay actividades, lo ideal sería no tenerlo, 
+      // pero lo mantendremos para reflejar el valor del input.
+      const cleanServices = updatedServices.filter(Boolean);
+
+      return { ...prevState, ServiciosContribuyente: cleanServices };
+    });
+  };
+
+
 
   return (
     <div className="space-y-6 p-4">
@@ -568,14 +593,14 @@ const ContribuyentesAgregar = ({ idEditar, Editar = false, onClose, onRegister }
                 />
               </div>
               <div className='col-span-6'>
-                  <label className="block text-sm font-medium text-gray-700">Observaciones</label>
-                  <textarea
-                    name="Observaciones"
-                    value={formState.Observaciones}
-                    onChange={handleInputChange}
-                    className="mt-1 w-full rounded-md border-gray-300 bg-gray-50 p-2 text-gray-900 focus:border-blue-500 focus:ring-blue-500"
-                  />
-                </div>
+                <label className="block text-sm font-medium text-gray-700">Observaciones</label>
+                <textarea
+                  name="Observaciones"
+                  value={formState.Observaciones}
+                  onChange={handleInputChange}
+                  className="mt-1 w-full rounded-md border-gray-300 bg-gray-50 p-2 text-gray-900 focus:border-blue-500 focus:ring-blue-500"
+                />
+              </div>
             </div>
           )}
 
@@ -860,31 +885,31 @@ const ContribuyentesAgregar = ({ idEditar, Editar = false, onClose, onRegister }
             </div>
           )}
 
-       {/* Contenido de la pestaña: Servicios */}
-{activeTab === 'servicios' && (
-    <div id="Servicios" className='mt-4'>
-        
-        <div className="w-full">
-            {/* Componente Separador asumido */}
-            <h2 className="text-xl font-bold text-gray-800 mb-4 border-b pb-2">Seleccione los servicios y actividades</h2>
-        </div>
+          {/* Contenido de la pestaña: Servicios */}
+          {activeTab === 'servicios' && (
+            <div id="Servicios" className='mt-4'>
 
-        <div className="mt-4 grid grid-cols-1 gap-6">
-            {servicios.length === 0 ? (
-                <p className="col-span-full text-center text-gray-500">
+              <div className="w-full">
+                {/* Componente Separador asumido */}
+                <h2 className="text-xl font-bold text-gray-800 mb-4 border-b pb-2">Seleccione los servicios y actividades</h2>
+              </div>
+
+              <div className="mt-4 grid grid-cols-1 gap-6">
+                {servicios.length === 0 ? (
+                  <p className="col-span-full text-center text-gray-500">
                     No hay servicios disponibles.
-                </p>
-            ) : (
-                servicios.map((servicio) => {
-                    
+                  </p>
+                ) : (
+                  servicios.map((servicio) => {
+
                     // Obtiene el objeto ServicioContribuyente de la DB si existe
-                      const servicioDB = formState.ServiciosContribuyente?.find(
-                        (sc) => sc?.idServicio === servicio._id
+                    const servicioDB = formState.ServiciosContribuyente?.find(
+                      (sc) => sc?.idServicio === servicio._id
                     );
 
                     // 1. Determina si el servicio está seleccionado (ESTADO DEL ACORDEÓN)
                     const isServicioExpanded = formState.ServiciosSeleccionados.includes(servicio._id);
-                    
+
                     // 2. Determina si *alguna* actividad de este servicio está seleccionada (ESTADO de SELECCIÓN PERSISTENTE)
                     // Consultamos el objeto de la DB. Si existe, significa que está seleccionado.
                     const isAnyActivitySelectedInService = !!servicioDB; // Es true si se encuentra el objeto
@@ -892,124 +917,124 @@ const ContribuyentesAgregar = ({ idEditar, Editar = false, onClose, onRegister }
                     // 3. Define el estado visual general de 'Activo' para el encabezado y el borde
                     const isVisuallyActive = isServicioExpanded || isAnyActivitySelectedInService;
 
-                                                const currentCost = servicioDB?.Costo || 0;
+                    const currentCost = servicioDB?.Costo || 0;
 
 
                     // Función de ayuda para formatear el costo (asumiendo que servicio.Costo existe)
-                    const formattedCost = new Intl.NumberFormat('es-MX', { 
-                        style: 'currency', 
-                        currency: 'USD' 
+                    const formattedCost = new Intl.NumberFormat('es-MX', {
+                      style: 'currency',
+                      currency: 'USD'
                     }).format(servicio.Costo || 0);
-                    
+
                     return (
-                        <div
-                            key={servicio._id}
-                            className={`rounded-xl shadow-lg transition-all duration-300 overflow-hidden 
+                      <div
+                        key={servicio._id}
+                        className={`rounded-xl shadow-lg transition-all duration-300 overflow-hidden 
                                 ${isVisuallyActive ? 'border-2 border-blue-500 bg-blue-50/50' : 'border border-gray-200 bg-white hover:shadow-xl'}
                             `}
-                        >
-                           {/* HEADER DEL SERVICIO */}
-                                    <div 
-                                        className={`p-5 flex flex-col md:flex-row items-start md:items-center justify-between transition-colors duration-200 
+                      >
+                        {/* HEADER DEL SERVICIO */}
+                        <div
+                          className={`p-5 flex flex-col md:flex-row items-start md:items-center justify-between transition-colors duration-200 
                                             ${isVisuallyActive ? 'bg-blue-50' : 'bg-white hover:bg-gray-50'}`}
-                                    >
-                                        <div className="flex items-center space-x-4 flex-grow min-w-0 mb-3 md:mb-0">
-                                            {/* Indicador de Selección */}
-                                            <span 
-                                                onClick={() => handleServicioSelect(servicio._id)} 
-                                                className={`h-5 w-5 rounded-full border-2 flex-shrink-0 transition-colors cursor-pointer
+                        >
+                          <div className="flex items-center space-x-4 flex-grow min-w-0 mb-3 md:mb-0">
+                            {/* Indicador de Selección */}
+                            <span
+                              onClick={() => handleServicioSelect(servicio._id)}
+                              className={`h-5 w-5 rounded-full border-2 flex-shrink-0 transition-colors cursor-pointer
                                                     ${isVisuallyActive ? 'bg-blue-600 border-blue-700' : 'bg-white border-gray-400'}`}
-                                            ></span>
-                                            
-                                            <div className='min-w-0'>
-                                                <h3 className="text-xl font-bold text-gray-800 truncate">
-                                                    {servicio.Nombre}
-                                                </h3>
-                                            </div>
-                                        </div>
+                            ></span>
 
-                                        {/* CAMPO DE COSTO PERSONALIZADO */}
-                                        <div className="flex items-center space-x-4 flex-shrink-0 w-full md:w-auto">
-                                            <div className="relative flex items-center">
-                                                <span className="text-gray-600 font-semibold mr-2">$</span>
-                                                <input
-                                                    type="number"
-                                                    value={currentCost}
-                                                    onChange={(e) => handleCostChange(servicio._id, e.target.value)}
-                                                    placeholder="0.00"
-                                                    min="0"
-                                                    step="0.01"
-                                                    className={`w-32 p-2 border-2 rounded-lg text-lg font-bold text-center transition-colors focus:ring-2 focus:ring-blue-500
+                            <div className='min-w-0'>
+                              <h3 className="text-xl font-bold text-gray-800 truncate">
+                                {servicio.Nombre}
+                              </h3>
+                            </div>
+                          </div>
+
+                          {/* CAMPO DE COSTO PERSONALIZADO */}
+                          <div className="flex items-center space-x-4 flex-shrink-0 w-full md:w-auto">
+                            <div className="relative flex items-center">
+                              <span className="text-gray-600 font-semibold mr-2">$</span>
+                              <input
+                                type="number"
+                                value={currentCost}
+                                onChange={(e) => handleCostChange(servicio._id, e.target.value)}
+                                placeholder="0.00"
+                                min="0"
+                                step="0.01"
+                                className={`w-32 p-2 border-2 rounded-lg text-lg font-bold text-center transition-colors focus:ring-2 focus:ring-blue-500
                                                         ${currentCost > 0 ? 'border-green-400 bg-white' : 'border-gray-300 bg-gray-100'}
                                                     `}
-                                                />
-                                            </div>
+                              />
+                            </div>
 
-                                            {/* Icono de acordeón (Clickable) */}
-                                            <span 
-                                                onClick={() => handleServicioSelect(servicio._id)} 
-                                                className="text-gray-500 hover:text-gray-700 transition-transform duration-300 ml-4 cursor-pointer"
-                                            >
-                                                {isServicioExpanded ? '▲' : '▼'}
-                                            </span>
-                                        </div>
-                                    </div>
-
-                            {/* CONTENIDO (ACTIVIDADES) - Solo visible si el servicio está expandido (isServicioExpanded) */}
-                            {isServicioExpanded && servicio.ActividadesDetalle && servicio.ActividadesDetalle.length > 0 && (
-                                <div className="p-5 pt-0 bg-white/70 border-t border-gray-200">
-                                    <p className="text-sm text-gray-600 font-medium mb-3">Actividades incluidas:</p>
-                                    
-                                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                                        {servicio.ActividadesDetalle
-                                            .sort((a, b) => {
-                                                const orderA = servicio.ActividadesServicio.find(as => as.idActividad === a._id)?.orden || Infinity;
-                                                const orderB = servicio.ActividadesServicio.find(as => as.idActividad === b._id)?.orden || Infinity;
-                                                return orderA - orderB;
-                                            })
-                                            .map((actividad) => {                                            
-                                            const isActividadSelected = servicioDB?.ListaActividades?.includes(actividad._id) || false;
-                                            
-                                            return (
-                                                <div
-                                                    key={actividad._id}
-                                                    // Le pasamos el costo del servicio a la función de toggle (asumiendo que es el costo por servicio completo)
-                                                    onClick={() => handleActividadToggle(servicio._id, actividad._id, servicio.Costo)} 
-                                                    className={`flex items-center justify-between p-3 rounded-md cursor-pointer transition-all duration-150 ${isActividadSelected ? 'bg-blue-100/80' : 'bg-gray-50 hover:bg-gray-100'}`}
-                                                >
-                                                    <div className="flex items-center space-x-2">
-                                                        {/* Checkbox visual para la actividad */}
-                                                        <input 
-                                                            type="checkbox"
-                                                            checked={isActividadSelected}
-                                                            onChange={() => {}} // Se maneja con el onClick del div padre
-                                                            className="form-checkbox h-5 w-5 text-blue-600 rounded border-gray-300"
-                                                        />
-                                                          <span className="text-base font-medium text-gray-700 break-words flex-grow min-w-0">
-                                                              {actividad.nombre}</span>
-                                                    </div>
-                                                </div>
-                                            );
-                                        })}
-                                    </div>
-                                </div>
-                            )}
-                            {/* Mensaje si no hay actividades, pero el servicio sí tiene detalles */}
-                            {isServicioExpanded && servicio.ActividadesDetalle && servicio.ActividadesDetalle.length === 0 && (
-                                <div className="p-5 pt-0 bg-white/70 border-t border-gray-200">
-                                    <p className="text-sm text-gray-500 italic">Este servicio no tiene actividades configuradas.</p>
-                                </div>
-                            )}
+                            {/* Icono de acordeón (Clickable) */}
+                            <span
+                              onClick={() => handleServicioSelect(servicio._id)}
+                              className="text-gray-500 hover:text-gray-700 transition-transform duration-300 ml-4 cursor-pointer"
+                            >
+                              {isServicioExpanded ? '▲' : '▼'}
+                            </span>
+                          </div>
                         </div>
+
+                        {/* CONTENIDO (ACTIVIDADES) - Solo visible si el servicio está expandido (isServicioExpanded) */}
+                        {isServicioExpanded && servicio.ActividadesDetalle && servicio.ActividadesDetalle.length > 0 && (
+                          <div className="p-5 pt-0 bg-white/70 border-t border-gray-200">
+                            <p className="text-sm text-gray-600 font-medium mb-3">Actividades incluidas:</p>
+
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                              {servicio.ActividadesDetalle
+                                .sort((a, b) => {
+                                  const orderA = servicio.ActividadesServicio.find(as => as.idActividad === a._id)?.orden || Infinity;
+                                  const orderB = servicio.ActividadesServicio.find(as => as.idActividad === b._id)?.orden || Infinity;
+                                  return orderA - orderB;
+                                })
+                                .map((actividad) => {
+                                  const isActividadSelected = servicioDB?.ListaActividades?.includes(actividad._id) || false;
+
+                                  return (
+                                    <div
+                                      key={actividad._id}
+                                      // Le pasamos el costo del servicio a la función de toggle (asumiendo que es el costo por servicio completo)
+                                      onClick={() => handleActividadToggle(servicio._id, actividad._id, servicio.Costo)}
+                                      className={`flex items-center justify-between p-3 rounded-md cursor-pointer transition-all duration-150 ${isActividadSelected ? 'bg-blue-100/80' : 'bg-gray-50 hover:bg-gray-100'}`}
+                                    >
+                                      <div className="flex items-center space-x-2">
+                                        {/* Checkbox visual para la actividad */}
+                                        <input
+                                          type="checkbox"
+                                          checked={isActividadSelected}
+                                          onChange={() => handleServicioContribuyenteSelect(servicio._id, actividad._id)} // Se maneja con el onClick del div padre
+                                          className="form-checkbox h-5 w-5 text-blue-600 rounded border-gray-300"
+                                        />
+                                        <span className="text-base font-medium text-gray-700 break-words flex-grow min-w-0">
+                                          {actividad.nombre}</span>
+                                      </div>
+                                    </div>
+                                  );
+                                })}
+                            </div>
+                          </div>
+                        )}
+                        {/* Mensaje si no hay actividades, pero el servicio sí tiene detalles */}
+                        {isServicioExpanded && servicio.ActividadesDetalle && servicio.ActividadesDetalle.length === 0 && (
+                          <div className="p-5 pt-0 bg-white/70 border-t border-gray-200">
+                            <p className="text-sm text-gray-500 italic">Este servicio no tiene actividades configuradas.</p>
+                          </div>
+                        )}
+                      </div>
                     );
-                }) 
-            )}
-        </div>
+                  })
+                )}
+              </div>
 
 
-    </div>
+            </div>
 
-)}
+          )}
 
 
         </div>
