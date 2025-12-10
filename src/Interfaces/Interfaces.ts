@@ -96,13 +96,13 @@ export interface Cliente {
   Cumpleanos: string;
 }
 
-type ServicioSeleccionado = {
+export type ServicioSeleccionado = {
   idServicio: string;
   ListaActividades: string[];
   Costo: number;
 }
 
-export interface ServicioItem  {
+export interface ServicioItem {
   _id: string;
   Nombre: string;
   Estado: number;
@@ -121,11 +121,11 @@ export interface ContactoPrincipal {
 export interface GrupoEmpresarial {
   _id?: string;
   Estado?: number;
-  idUsuarioCreacion?: string|null;
+  idUsuarioCreacion?: string | null;
 
   Nombre?: string;
   Responsable?: string
-  idResponsable?: string|null;
+  idResponsable?: string | null;
   Contacto?: string
 
   Integrantes?: Cliente[];
@@ -136,14 +136,14 @@ export interface GrupoEmpresarial {
   MotivoReasignacion?: string;
 }
 export interface ContribuyenteGrupo {
-    _id?: string;
-    Estado?: number;
-    idUsuarioCreacion?: string;
-    FechaCreacion: Date;
-    
-    TipoMovimiento: number;
-    idGrupo?: string;
-    idContribuyente?: string;
+  _id?: string;
+  Estado?: number;
+  idUsuarioCreacion?: string;
+  FechaCreacion: Date;
+
+  TipoMovimiento: number;
+  idGrupo?: string;
+  idContribuyente?: string;
 }
 export interface RazonSocial {
   _id?: string;
@@ -163,16 +163,16 @@ export interface RazonSocial {
   FechaEliminacion?: Date;
 }
 export interface Bitacora {
-    _id?: string;
-    Estado?: number;
-    TipoMovimiento?: number;
-    Descripcion?: string;
-    InfoAnterior?: GrupoEmpresarial | Cliente;
-    idGrupo?: string;
-    idCliente?: string;
-    idUsuarioAplico?: string;
-    Fecha?: Date;
-    Hora?: string;
+  _id?: string;
+  Estado?: number;
+  TipoMovimiento?: number;
+  Descripcion?: string;
+  InfoAnterior?: GrupoEmpresarial | Cliente;
+  idGrupo?: string;
+  idCliente?: string;
+  idUsuarioAplico?: string;
+  Fecha?: Date;
+  Hora?: string;
 }
 
 export interface ClavesSAT {
@@ -260,7 +260,7 @@ export interface ValidacionCalculoFiscal {
 }
 
 export interface ConfigAutorizacionPagos {
-    DiaLimiteConfirmacionCalculo: number ;
+  DiaLimiteConfirmacionCalculo: number;
 }
 export interface ConfigActividades {
   LimiteIncidencias: number;
@@ -280,8 +280,8 @@ export interface HistorialSaldo {
   idCliente?: string;
   idImpuesto?: string;
   idCalculo?: string;
-  Monto?:number;
-  Observaciones?:string;
+  Monto?: number;
+  Observaciones?: string;
   Fecha?: Date;
   FechaModificacion?: Date;
   FechaRegistro?: Date;
@@ -323,7 +323,7 @@ export interface PagoPendiente {
   FechaVencimiento?: Date;
   FechaRegistro?: Date;
   FechaActualizacion?: Date;
-  Cliente:string
+  Cliente: string
 }
 export interface PagoItem {
   idPago?: string;
