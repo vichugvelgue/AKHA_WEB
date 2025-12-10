@@ -59,8 +59,8 @@ export default function DashboardPage() {
           <Image
             src="/logoakha.png" // Asegúrate de colocar tu logo en la carpeta `public`
             alt="Logo de la aplicación"
-            width={120}
-            height={120}
+            width={200}
+            height={200}
             className="mx-auto mb-4"
             unoptimized={true}
           />
