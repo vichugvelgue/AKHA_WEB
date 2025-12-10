@@ -374,31 +374,25 @@ const ContribuyentesAgregar = ({ idEditar, Editar = false, onClose, onRegister }
     };
 
     const handleCostChange = (servicioId: string, value: string) => {
-        // Convierte el valor a número, usando 0 si la entrada no es válida
+        // Convierte el valor a número, 0 si la entrada no es válida
         const newCost = parseFloat(value) || 0; 
 
         setFormState(prevState => {
             let updatedServices = [...(prevState.ServiciosContribuyente || [])];
             const serviceIndex = updatedServices.findIndex(sc => sc?.idServicio === servicioId);
 
-            if (serviceIndex > -1) {
-                // 1. El servicio existe: Actualiza solo el costo
+            if (serviceIndex > -1) {                
                 updatedServices[serviceIndex] = {
                     ...updatedServices[serviceIndex],
                     Costo: newCost,
                 };
-            } else {
-                // 2. El servicio NO existe: Crea una nueva entrada con el costo y actividades vacías.
-                // Esto permite al usuario establecer el costo antes de seleccionar actividades.
+            } else {              
                 updatedServices.push({
                     idServicio: servicioId,
                     Costo: newCost,
                     ListaActividades: [],
                 });
-            }
-            
-            // 3. Limpieza: Si el costo es 0 y no hay actividades, lo ideal sería no tenerlo, 
-            // pero lo mantendremos para reflejar el valor del input.
+            }                      
             const cleanServices = updatedServices.filter(Boolean);
 
             return { ...prevState, ServiciosContribuyente: cleanServices };
