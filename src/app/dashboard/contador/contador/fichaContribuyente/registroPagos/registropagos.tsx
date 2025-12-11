@@ -1,9 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { API_BASE_URL } from "@/src/utils/constantes";
-
-
-// Se asume que estos se manejan globalmente y se simplifican para este archivo
-const session = { idUsuario: "ejemplo_id_usuario_abc" };
+import { ObtenerSesionUsuario } from '@/src/utils/constantes';
 
 // Nueva interfaz para la estructura de los datos a enviar.
 interface RegistroPagoData {
@@ -51,6 +48,7 @@ const fileToBase64 = (file: File): Promise<string> => {
 };
 
 const RegistroPagos: React.FC<RegistroPagosProps> = ({ Visible, idEditar = "", Cerrar }) => {
+  const session = ObtenerSesionUsuario();
   const [view, setView] = useState<"registro" | "historial">("registro");
   const [pagos, setPagos] = useState<HistorialPago[]>([]);
   const [historialLoading, setHistorialLoading] = useState<boolean>(false);
@@ -410,7 +408,7 @@ const RegistroPagos: React.FC<RegistroPagosProps> = ({ Visible, idEditar = "", C
       <div className="w-full max-w-4xl max-h-[90dvh] overflow-auto rounded-2xl bg-white p-8 shadow-2xl transform transition-transform duration-300 border-2 border-blue-500 scale-100">
         <div className="flex justify-between items-center mb-6">
           <div className="text-2xl font-bold text-blue-900">
-            {view === "registro" ? "Registro de Pagos" : "Historial de Pagos"}
+            {view === "registro" ? "Registro de acuse y formato de pago" : "Historial de acuse y formato de pago"}
           </div>
           <button
             onClick={handleToggleView}
