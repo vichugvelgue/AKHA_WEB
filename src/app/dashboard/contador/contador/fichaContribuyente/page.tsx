@@ -28,8 +28,6 @@ const App = () => {
     RFC: '',
     CorreoElectronico: '',
     ServiciosSeleccionados: [],
-    ActividadesSeleccionadas: [],
-    ServiciosContribuyente: [],
     RepresentanteLegal: { Nombre: '', RFC: '', Alias: '', Cumpleanos: '' },
     DuenoEmpresa: defaultContacto,
     ContactoCobranza: defaultContacto,

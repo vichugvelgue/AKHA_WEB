@@ -30,3 +30,7 @@ export enum MetodoPago {
     Deposito = "Depósito",
     Cheque = "Cheque",
 }
+export enum TipoRegistroPago {
+    Acuse = "Acuse",
+    Recibo = "Formato_de_pago",
+}
