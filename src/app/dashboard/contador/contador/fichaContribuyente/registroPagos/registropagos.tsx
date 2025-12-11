@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { API_BASE_URL } from "@/src/utils/constantes";
 import { ObtenerSesionUsuario } from '@/src/utils/constantes';
+import { TipoRegistroPago } from "@/src/Interfaces/enums";
+import { useNotification } from "@/src/hooks/useNotifications";
+import MensajeNotificacion from "@/src/hooks/MensajeNotificacion";
 
 // Nueva interfaz para la estructura de los datos a enviar.
 interface RegistroPagoData {
@@ -8,6 +11,7 @@ interface RegistroPagoData {
   idUsuarioRegistro: string;
   NombreArhivo: string;
   ExtencionArchivo: string;
+  Tipo:TipoRegistroPago;
   FechaPago: Date;
   PeriodoFiscal: Date;
   FechaRegistro: Date;
@@ -21,6 +25,7 @@ interface HistorialPago {
   idUsuarioRegistro: string;
   NombreArhivo: string;
   ExtencionArchivo: string;
+  Tipo:TipoRegistroPago;
   FechaPago: string; // Se reciben como string del backend
   PeriodoFiscal: string; // Se reciben como string del backend
   FechaRegistro: string; // Se reciben como string del backend
@@ -31,11 +36,6 @@ interface RegistroPagosProps {
   idEditar: string;
   Cerrar: (exito: string) => void;
 }
-
-// Función para simular una notificación
-const showNotification = (mensaje: string, tipo: "success" | "error") => {
-  console.log(`Notificación (${tipo}): ${mensaje}`);
-};
 
 // Función para convertir un archivo a Base64 de forma asíncrona
 const fileToBase64 = (file: File): Promise<string> => {
@@ -48,11 +48,13 @@ const fileToBase64 = (file: File): Promise<string> => {
 };
 
 const RegistroPagos: React.FC<RegistroPagosProps> = ({ Visible, idEditar = "", Cerrar }) => {
+  const { showNotification, hideNotification,notification } = useNotification();
   const session = ObtenerSesionUsuario();
   const [view, setView] = useState<"registro" | "historial">("registro");
   const [pagos, setPagos] = useState<HistorialPago[]>([]);
   const [historialLoading, setHistorialLoading] = useState<boolean>(false);
   const [idCliente, setIdCliente] = useState<string>(idEditar);
+  const [tipo, setTipo] = useState<TipoRegistroPago>(TipoRegistroPago.Recibo);
 
   if (!Visible) return null;
 
@@ -118,9 +120,7 @@ const RegistroPagos: React.FC<RegistroPagosProps> = ({ Visible, idEditar = "", C
     if (respuesta.ok) { 
         const pagosData = data.data || [];
         setPagos(pagosData);
-        console.log('Son los pagos ------>');
-        console.log(pagos);
-        showNotification("Historial de pagos cargado.", "success");
+        // showNotification("Historial de pagos cargado.", "success");
       } else {
         showNotification(data.mensaje || "Error al cargar el historial.", "error");
       }
@@ -154,10 +154,10 @@ const RegistroPagos: React.FC<RegistroPagosProps> = ({ Visible, idEditar = "", C
       const datosParaGuardar: RegistroPagoData = {    
         idCliente: idCliente,
         idUsuarioRegistro: session.idUsuario,
-        
+        Tipo: tipo,
         NombreArhivo: fileName,
         ExtencionArchivo: fileExtension,
-        FechaPago: new Date(fechaPago),
+        FechaPago: new Date(fechaPago+"T12:00"),
         // Se usa la fecha construida localmente para evitar problemas de zona horaria.
         PeriodoFiscal: periodoFiscalDate, 
         FechaRegistro: new Date(),
@@ -257,6 +257,17 @@ const RegistroPagos: React.FC<RegistroPagosProps> = ({ Visible, idEditar = "", C
               className="w-full border border-gray-300 rounded-md px-4 py-2 bg-white"
             />
           </div>
+          <div className="p-4">Formato</div>
+          <div className="p-4">
+            <select
+              value={tipo}
+              onChange={(e) => setTipo(e.target.value as TipoRegistroPago)}
+              className="w-full border border-gray-300 rounded-md px-4 py-2 bg-white"
+            >
+              <option value={TipoRegistroPago.Recibo}>Formato de pago</option>
+              <option value={TipoRegistroPago.Acuse}>Acuse</option>
+            </select>
+          </div>
           <div className="p-4">Cargar comprobante</div>
           <div className="p-4">
             <label className="block w-full cursor-pointer rounded-md border border-gray-300 bg-white px-4 py-2 text-center text-gray-700 transition-colors hover:bg-gray-200">
@@ -342,6 +353,9 @@ const RegistroPagos: React.FC<RegistroPagosProps> = ({ Visible, idEditar = "", C
                         Periodo Fiscal
                       </th>
                       <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Tipo de formato
+                      </th>
+                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Archivo
                       </th>
                     </tr>
@@ -352,10 +366,13 @@ const RegistroPagos: React.FC<RegistroPagosProps> = ({ Visible, idEditar = "", C
                       return(
                         <tr key={pago._id}>
                           <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                            {new Date(pago.FechaPago).toLocaleDateString('es-ES')}
+                            {new Date(pago.FechaPago).toLocaleDateString('es-MX')}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            {new Date(pago.PeriodoFiscal).toLocaleDateString('es-ES', { month: 'long', year: 'numeric' })}
+                            {new Date(pago.PeriodoFiscal).toLocaleDateString('es-MX', { month: 'long', year: 'numeric' })}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            {pago.Tipo.replace(/_/g, " ")}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-blue-600 hover:text-blue-800 cursor-pointer">
                             <button 
@@ -419,6 +436,7 @@ const RegistroPagos: React.FC<RegistroPagosProps> = ({ Visible, idEditar = "", C
         </div>
         {view === "registro" ? <RegistroView /> : <HistorialView />}
       </div>
+      <MensajeNotificacion {...notification} hideNotification={hideNotification}/>
     </div>
   );
 };
