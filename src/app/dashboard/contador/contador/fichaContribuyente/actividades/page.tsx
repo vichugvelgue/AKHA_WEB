@@ -200,10 +200,6 @@ export default function ActividadesCRUD({ idContribuyente,NombreContribuyente, C
     }
   };
   const BotonActividad = (idActividad: string, Nombre: string) => {
-    // if (!idActividad) {
-    //   return <span className="px-3 py-1 inline-flex text-xs leading-5 font-bold rounded-full transition-colors bg-gray-100 text-gray-800">{Nombre}</span>;
-    // }
-    console.log("la aciti---->",idActividad);
     let esFija = ActividadesFijas.includes(idActividad);
     let onclic = () => {};
     let icon = null;

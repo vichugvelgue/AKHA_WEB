@@ -83,7 +83,7 @@ export interface Cliente {
   Servicios?: string[];
   ServiciosSeleccionados: string[];
   ActividadesSeleccionadas: string[];
-  ServiciosContribuyente: ServicioSeleccionado[];
+  ServiciosContribuyente?: ServicioSeleccionado[];
   idUsuarioCreacion?: string;
   idGrupoEmpresarial?: string;
   idContador?: string;
