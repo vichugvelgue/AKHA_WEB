@@ -19,6 +19,7 @@ import CalculosFiscales from '../calculosFiscales/calculosFiscales';
 import ResumenesEjecutivos from '../resumenEjecutivo/resumenesjecutivos';
 import RegistroPagos from '../registroPagos/registropagos';
 import RegistroArchivoGeneral from '../archivoGeneral/registroarchivogeneral';
+import ComprobanteActividadManual from '../comprobantesactividadesmanuales/comprobanteactividadesmanuales';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000';
 
@@ -48,12 +49,14 @@ export default function ActividadesCRUD({ idContribuyente,NombreContribuyente, C
   const [ListaActividades,setListaActividades]=useState<ActividadPeriodica[]>([])
 
   const [idActividad, setIdActividad] = useState<string>("")
+  const [NombreActividad, setNombreActividad] = useState<string>("")
   
   const [showAgregar, setShowAgregar] = useState<boolean>(false);
   const [OpenCalculosFiscales, setOpenCalculosFiscales] = useState(false);
   const [OpenResumenEjecutivo, setOpenResumenEjecutivo] = useState(false);
   const [OpenRegistroPagos, setOpenRegistroPagos] = useState(false);
   const [OpenComprobantesActividades, setOpenComprobantesActividades] = useState(false);
+  const [OpenComprobantesActividadesManuales, setOpenComprobantesActividadesManuales] = useState(false);
 
   const [showIncidenciasModal, setShowIncidenciasModal] = useState(false);
   const [selectedActividadId, setSelectedActividadId] = useState<string>('');
@@ -199,11 +202,16 @@ export default function ActividadesCRUD({ idContribuyente,NombreContribuyente, C
       showNotification("Registro de comprobante guardado correctamente", "success");
     }
   };
+  const CerrarRegistroComprobanteActividadesManuales = (exist: string) => {
+    setOpenComprobantesActividadesManuales(false);
+    if (exist === "success") {
+      showNotification("Registro de comprobante guardado correctamente", "success");
+    }
+  };
   const BotonActividad = (idActividad: string, Nombre: string) => {
     // if (!idActividad) {
     //   return <span className="px-3 py-1 inline-flex text-xs leading-5 font-bold rounded-full transition-colors bg-gray-100 text-gray-800">{Nombre}</span>;
-    // }
-    console.log("la aciti---->",idActividad);
+    // }    
     let esFija = ActividadesFijas.includes(idActividad);
     let onclic = () => {};
     let icon = null;
@@ -234,8 +242,10 @@ export default function ActividadesCRUD({ idContribuyente,NombreContribuyente, C
             case "68dab4fa78038f650675da8f": // Recepción de documentos
             default:                          
               onclic = () => { 
+                //manuales
                 setIdActividad(idActividad);
-                setOpenComprobantesActividades(true);
+                setNombreActividad(Nombre);
+                setOpenComprobantesActividadesManuales(true);
                };
                 icon = <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-3-6v6m3 6H6a2 2 0 01-2-2V7a2 2 0 012-2h10a2 2 0 012 2v11a2 2 0 01-2 2z"></path></svg>; // Icono de Documento
                 break;
@@ -431,17 +441,25 @@ export default function ActividadesCRUD({ idContribuyente,NombreContribuyente, C
                                 </td>
                             }
                             {/* Columna de Incidencias con Botón Resaltado (Acción Principal) */}
-                            <td className="px-4 py-3 text-center">
-                                <button
-                                    onClick={() => openIncidenciasModal(actividad._id || "", actividad.Nombre)}
-                                    className="bg-red-500 text-white hover:bg-red-700 font-semibold transition-all flex items-center justify-center p-2 rounded-full mx-auto shadow-lg transform hover:scale-105 active:scale-95 focus:outline-none focus:ring-4 focus:ring-red-300"
-                                    title="Registrar o ver incidencias"
-                                >
-                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.332 16c-.77 1.333.192 3 1.732 3z"></path>
-                                    </svg>
-                                </button>
-                            </td>
+                             <td className="px-4 py-3 text-center">
+                      <button
+                          onClick={() => openIncidenciasModal(actividad._id || "", actividad.Nombre)}
+                          // Mantenemos el color azul para "Gestión de Procesos"
+                          className="bg-blue-600 text-white hover:bg-blue-700 font-semibold transition-all flex items-center justify-center p-2 rounded-full mx-auto shadow-lg transform hover:scale-105 active:scale-95 focus:outline-none focus:ring-4 focus:ring-blue-400"
+                          // Título actualizado para reflejar "Incidencias"
+                          title="Gestionar Incidencias de la Actividad"
+                      >
+                          {/* Ícono de Documento con Exclamación (Lista/Reporte de Incidencia) */}
+                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                              <path 
+                                  strokeLinecap="round" 
+                                  strokeLinejoin="round" 
+                                  strokeWidth="2" 
+                                  d="M9 12h6m-6 4h6m-6 4h6m-12 1h16a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2zm12-7h.01M16 16h.01"
+                              />
+                          </svg>
+                      </button>
+                  </td>
                         </tr>
                     )}
                 </tbody>
@@ -451,6 +469,7 @@ export default function ActividadesCRUD({ idContribuyente,NombreContribuyente, C
         {OpenResumenEjecutivo && <ResumenesEjecutivos Visible={OpenResumenEjecutivo} idEditar={idContribuyente || ""} Cerrar={CerrarResumenEjectutivo} />}
         {OpenRegistroPagos && <RegistroPagos Visible={OpenRegistroPagos} idEditar={idContribuyente || ""} Cerrar={CerrarRegistroPagos} />}
         {OpenComprobantesActividades && <RegistroArchivoGeneral idActividad={idActividad} Visible={OpenComprobantesActividades} idEditar={idContribuyente || ""} Cerrar={CerrarRegistroComprobanteActividades} />}
+        {OpenComprobantesActividadesManuales && <ComprobanteActividadManual idActividad={idActividad} Visible={OpenComprobantesActividadesManuales} idEditar={idContribuyente || ""} NombreActividad={NombreActividad} Cerrar={CerrarRegistroComprobanteActividadesManuales} />}
          {/* Renderizar el Modal de Incidencias si está visible */}
       {showIncidenciasModal && (
           <ModalIncidencias 

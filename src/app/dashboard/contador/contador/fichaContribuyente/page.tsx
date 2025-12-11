@@ -34,6 +34,8 @@ const App = () => {
     GerenteOperativo: defaultContacto,
     EnlaceAkha: defaultContacto,
     Cumpleanos:"",
+    ActividadesSeleccionadas: [], 
+    ServiciosContribuyente: [],
   });
 
   // Estado para la visibilidad de las secciones (simulando los componentes anidados)

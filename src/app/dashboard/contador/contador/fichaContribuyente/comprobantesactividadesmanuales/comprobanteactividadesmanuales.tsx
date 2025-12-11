@@ -33,6 +33,7 @@ interface RegistroArchivosProps {
     idActividad: string;
   Visible: boolean;
   idEditar: string;
+  NombreActividad: string;
   Cerrar: (exito: string) => void;
 }
 
@@ -46,7 +47,7 @@ const fileToBase64 = (file: File): Promise<string> => {
   });
 };
 
-const RegistroArchivoGeneral: React.FC<RegistroArchivosProps> = ({ idActividad, Visible, idEditar = "", Cerrar }) => {
+const ComprobanteActividadManual: React.FC<RegistroArchivosProps> = ({ idActividad, Visible, idEditar = "", NombreActividad, Cerrar }) => {
     const sesion = ObtenerSesionUsuario();
   const [view, setView] = useState<"registro" | "historial">("registro");
   const [arvhivos, setPagos] = useState<HistorialArchivo[]>([]);
@@ -103,7 +104,7 @@ const RegistroArchivoGeneral: React.FC<RegistroArchivosProps> = ({ idActividad, 
       const [year, month] = periodoActual.split('-').map(Number);
       const fechaParaBackend = new Date(year, month - 1, 1);
 
-      const respuesta = await fetch(`${API_BASE_URL}/registroscomprobantesactividades/ListadoPorMesCliente`, {
+      const respuesta = await fetch(`${API_BASE_URL}/comprobantesactividadesmanuales/ListadoPorMesCliente`, {
         headers: {
           'Content-Type': 'application/json',
         },
@@ -166,7 +167,7 @@ const RegistroArchivoGeneral: React.FC<RegistroArchivosProps> = ({ idActividad, 
         ArchivoBase64: archivoBase64,
       };
 
-      const respuesta = await fetch(`${API_BASE_URL}/registroscomprobantesactividades/Guardar`, {
+      const respuesta = await fetch(`${API_BASE_URL}/comprobantesactividadesmanuales/Guardar`, {
         headers: {
           'Content-Type': 'application/json',
         },
@@ -204,7 +205,7 @@ const RegistroArchivoGeneral: React.FC<RegistroArchivosProps> = ({ idActividad, 
 
   const handleDownload = (infopago: HistorialArchivo) => {    
     setDownloadingId(infopago._id);
-     const downloadUrl = `${API_BASE_URL}/registroscomprobantesactividades/descargarcomprobante/${infopago._id}/${idCliente}/${infopago.ExtencionArchivo}`;       
+     const downloadUrl = `${API_BASE_URL}/comprobantesactividadesmanuales/descargarcomprobante/${infopago._id}/${idCliente}/${infopago.ExtencionArchivo}`;       
     window.location.href = downloadUrl;        
     fetch(downloadUrl, {
         method: 'GET',        
@@ -400,7 +401,15 @@ const RegistroArchivoGeneral: React.FC<RegistroArchivosProps> = ({ idActividad, 
       <div className="w-full max-w-4xl max-h-[90dvh] overflow-auto rounded-2xl bg-white p-8 shadow-2xl transform transition-transform duration-300 border-2 border-blue-500 scale-100">
         <div className="flex justify-between items-center mb-6">
           <div className="text-2xl font-bold text-blue-900">
-            {view === "registro" ? "Recepción de documentos" : "Historial de comprobantes"}
+             {view === "registro" ? (                
+                <span className="flex items-baseline gap-2">                    
+                    
+                        {NombreActividad}
+                    
+                </span>
+            ) : (
+                "Historial de Comprobantes"
+            )}
           </div>
           <button
             onClick={handleToggleView}
@@ -415,4 +424,4 @@ const RegistroArchivoGeneral: React.FC<RegistroArchivosProps> = ({ idActividad, 
   );
 };
 
-export default RegistroArchivoGeneral;
+export default ComprobanteActividadManual;
