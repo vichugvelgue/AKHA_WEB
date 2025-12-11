@@ -28,6 +28,8 @@ const App = () => {
     RFC: '',
     CorreoElectronico: '',
     ServiciosSeleccionados: [],
+    ActividadesSeleccionadas: [],
+    ServiciosContribuyente: [],
     RepresentanteLegal: { Nombre: '', RFC: '', Alias: '', Cumpleanos: '' },
     DuenoEmpresa: defaultContacto,
     ContactoCobranza: defaultContacto,
@@ -35,7 +37,7 @@ const App = () => {
     EnlaceAkha: defaultContacto,
     Cumpleanos:"",
     ActividadesSeleccionadas: [], 
-    ServiciosContribuyente: [],
+    ServiciosContribuyente: [],    
   });
 
   // Estado para la visibilidad de las secciones (simulando los componentes anidados)
@@ -49,7 +51,7 @@ const App = () => {
   const [OpenRegistroPagos, setOpenRegistroPagos] = useState(false);
   const [OpenHistoricoSaldos, setOpenHistoricoSaldos] = useState(false);
   const [OpenActividades, setOpenActividades] = useState(false);
-  
+
 
   // Simula la carga de datos del contribuyente al inicio
   useEffect(() => {
@@ -59,7 +61,7 @@ const App = () => {
     setIdEditar(idContribuyente || "");
     ObtenerContribuyente(idContribuyente || "")
   }, []);
-  const ObtenerContribuyente = async (idEditar:string) => {
+  const ObtenerContribuyente = async (idEditar: string) => {
     setCargando(true);
     try {
       const response = await fetch(`${API_BASE_URL}/clientes/ObtenerCliente/${idEditar}`);

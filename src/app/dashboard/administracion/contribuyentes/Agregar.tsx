@@ -269,7 +269,7 @@ const ContribuyentesAgregar = ({ idEditar, Editar = false, onClose, onRegister }
   };
   const handleServicioContribuyenteSelect = (servicioId: string, idActividad: string) => {
     let serviciosActivos = formState.ServiciosContribuyente;
-    let servicio = serviciosActivos.find((s: any) => s.idServicio === servicioId);
+    let servicio = serviciosActivos?.find((s: any) => s.idServicio === servicioId);
     if (servicio) {
       if (!servicio.ListaActividades.includes(idActividad)) {
         servicio.ListaActividades.push(idActividad);
@@ -278,7 +278,7 @@ const ContribuyentesAgregar = ({ idEditar, Editar = false, onClose, onRegister }
       }
     } else {
       let servicioNuevo: ServicioSeleccionado = { idServicio: servicioId, ListaActividades: [idActividad],Costo: 0 }
-      serviciosActivos.push(servicioNuevo);
+      serviciosActivos?.push(servicioNuevo);
     }
     setFormState({ ...formState, ServiciosContribuyente: serviciosActivos });
   };
