@@ -10,8 +10,8 @@ import MensajeNotificacion from "@/src/hooks//MensajeNotificacion";
 import { API_BASE_URL } from '@/src/utils/constantes';
 import { Cliente } from '@/src/Interfaces/Interfaces';
 import Cargando from '@/src/hooks/Cargando';
-import HistoricoSaldoFavor from './historicoSaldosFavor/page'
-import ActividadesCRUD from './actividades/page';
+import HistoricoSaldoFavor from './historicoSaldosFavor/historicoSaldoFavor'
+import ActividadesCRUD from './actividades/listaActividades';
 
 const defaultContacto = {
   Nombre: "",
@@ -33,9 +33,9 @@ const App = () => {
     ContactoCobranza: defaultContacto,
     GerenteOperativo: defaultContacto,
     EnlaceAkha: defaultContacto,
-    Cumpleanos:"",
-    ActividadesSeleccionadas: [], 
-    ServiciosContribuyente: [],    
+    Cumpleanos: "",
+    ActividadesSeleccionadas: [],
+    ServiciosContribuyente: [],
   });
 
   // Estado para la visibilidad de las secciones (simulando los componentes anidados)

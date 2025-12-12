@@ -27,6 +27,7 @@ class nuevoCliente {
   GerenteOperativo = { Nombre: "", Telefono: "", Correo: "", Cumpleanos: "" };
   EnlaceAkha = { Nombre: "", Telefono: "", Correo: "", Cumpleanos: "" };
   Cumpleanos: string = "";
+  ActividadesSeleccionadas: string[] = [];
 }
 
 interface PagoPendienteItem extends PagoPendiente {

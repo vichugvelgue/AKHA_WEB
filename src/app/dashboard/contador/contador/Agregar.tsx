@@ -73,7 +73,8 @@ const ContribuyenteConsultar = ({ idEditar, Editar = false, onClose, onRegister 
     WhatsApp: "",
     Observaciones: "",
     Servicios: [],
-    ServiciosSeleccionados: [],
+    ServiciosSeleccionados: [],   
+    ActividadesSeleccionadas: [],
     idUsuarioCreacion: "",
     idGrupoEmpresarial: "",
     idContador: "",
@@ -194,7 +195,7 @@ const ContribuyenteConsultar = ({ idEditar, Editar = false, onClose, onRegister 
       }
       console.log('servicios:', result.data);
       if(result.data){
-      UnidicarActividadesServicio(result.data);
+        UnidicarActividadesServicio(result.data);
       }
     } catch (err: any) {
       console.error('Error al cargar los servicios:', err);
@@ -794,7 +795,7 @@ const ContribuyenteConsultar = ({ idEditar, Editar = false, onClose, onRegister 
                         <h3 className="text-lg font-semibold text-gray-800">
                           {servicio.Nombre}
                         </h3>
-                        
+
                         {servicio.Actividades.map((actividad) => (
                           <h4 key={actividad._id} className="text-sm text-gray-500 mt-1">
                             {actividad.Orden} - {actividad.nombre}
