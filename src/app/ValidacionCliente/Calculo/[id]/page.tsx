@@ -8,7 +8,6 @@ import { CalculoFiscal, ValidacionCalculoFiscal } from '@/src/Interfaces/Interfa
 import { EstatusValidacion } from "@/src/Interfaces/enums";
 import { useNotification } from '@/src/hooks/useNotifications';
 import MensajeNotificacion from '@/src/hooks/MensajeNotificacion';
-import ModalPregunta from '@/src/hooks/ModalPregunta';
 import ConfirmacionPage from '@/src/hooks/ConfirmacionPage';
 
 interface Error {

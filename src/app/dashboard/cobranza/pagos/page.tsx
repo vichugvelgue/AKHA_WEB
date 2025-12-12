@@ -30,6 +30,7 @@ class nuevoCliente {
   idGrupoEmpresarial: string = "";
   RFC: string = "";
   ServiciosSeleccionados: string[] = [];
+  ActividadesSeleccionadas: string[] = [];
   RepresentanteLegal: { Nombre: string, RFC: string, Alias: string, Cumpleanos: string } = { Nombre: "", RFC: "", Alias: "", Cumpleanos: "" };
   DuenoEmpresa: { Nombre: string, Telefono: string, Correo: string, Cumpleanos: string } = { Nombre: "", Telefono: "", Correo: "", Cumpleanos: "" };
   ContactoCobranza: { Nombre: string, Telefono: string, Correo: string, Cumpleanos: string } = { Nombre: "", Telefono: "", Correo: "", Cumpleanos: "" };
@@ -51,7 +52,7 @@ export default function Pagos() {
   const [FechaFin, setFechaFin] = useState<string>("");
   const [Filtro, setFiltro] = useState<TipoFiltro>(TipoFiltro.Fechas);
   const [ContribuyenteBuscar, setContribuyenteBuscar] = useState<Cliente>(new nuevoCliente());
-  const [GrupoBuscar, setGrupoBuscar] = useState<GrupoEmpresarial>({_id: "",Nombre: ""});
+  const [GrupoBuscar, setGrupoBuscar] = useState<GrupoEmpresarial>({ _id: "", Nombre: "" });
   const [FolioVenta, setFolioVenta] = useState<string>("");
   const [FolioFactura, setFolioFactura] = useState<string>("");
 

@@ -12,7 +12,7 @@ import { ObtenerSesionUsuario } from '@/src/utils/constantes';
 import ModalBitacoraContibuyente from '@/src/hooks/ModalBitacoraContibuyente';
 import ContribuyenteConsultar from './Agregar';
 import CredencialesCliente from './credencialesCliente';
-import ActividadesCRUD from './fichaContribuyente/actividades/page';
+import ActividadesCRUD from './fichaContribuyente/actividades/listaActividades';
 import BannerSemanal from './bannerSemana';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000';
@@ -37,12 +37,12 @@ const ContadorCRUD = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isOpenCredenciales, setIsOpenCredenciales] = useState(false);
   const [isOpenActividades, setOpenActividades] = useState(false);
-  
+
   const [showConfirm, setShowConfirm] = useState(false);
   const [showBitacora, setShowBitacora] = useState(false);
   const [idEditar, setIdEditar] = useState<string>("");
   const [NombreContribuyente, setNombreContribuyente] = useState<string>("");
-  const [editar, setEditar] = useState<boolean>(false);  
+  const [editar, setEditar] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [pregunta, setPregunta] = useState<string>("");
@@ -168,15 +168,15 @@ const ContadorCRUD = () => {
 
   if (isOpenActividades) {
     return <ActividadesCRUD idContribuyente={idEditar} NombreContribuyente={NombreContribuyente} Cerrar={CerrarActividades} />
-  }else if (isModalOpen) {
+  } else if (isModalOpen) {
     console.log({ idEditar, editar });
     return (<ContribuyenteConsultar idEditar={idEditar} Editar={editar} onClose={handleCloceModal} onRegister={handleRegister} />)
   } else
-  if (isOpenCredenciales) {
-    return (<CredencialesCliente idEditar={idEditar} onClose={handleCloseCredencialesModal} onRegister={handleCloseCredencialesModal} />)
-  }
+    if (isOpenCredenciales) {
+      return (<CredencialesCliente idEditar={idEditar} onClose={handleCloseCredencialesModal} onRegister={handleCloseCredencialesModal} />)
+    }
 
-  
+
 
   return (
     <div className="space-y-6 p-4">
@@ -233,7 +233,7 @@ const ContadorCRUD = () => {
           </div>
         </div>
       </div> */}
-             <BannerSemanal />
+      <BannerSemanal />
       <div className="overflow-x-auto rounded-xl bg-white p-6 shadow-md">
         <table className="min-w-full table-auto">
           <thead>
@@ -250,7 +250,7 @@ const ContadorCRUD = () => {
                 <td className="px-4 py-2">{usuario.RFC}</td>
                 <td className="px-4 py-2 flex justify-end space-x-2 ">
                   <button onClick={() => handleOpenModalBitacora(usuario._id || "")} className="rounded-md bg-blue-600 px-4 py-1 text-sm text-white transition-colors duration-200 hover:bg-blue-700">
-                     <i className="material-symbols-rounded filled">folder</i> 
+                    <i className="material-symbols-rounded filled">folder</i>
                   </button>
                   <button onClick={() => handleEditModal(usuario._id || "")} className="rounded-md bg-blue-600 px-4 py-1 text-sm text-white transition-colors duration-200 hover:bg-blue-700">
                     <i className="material-symbols-rounded filled">visibility</i>
@@ -269,7 +269,7 @@ const ContadorCRUD = () => {
       </div>
 
       {
-        showBitacora && 
+        showBitacora &&
         <ModalBitacoraContibuyente
           Cerrar={handleCloceModalBitacora}
           idContribuyente={idEditar}
@@ -285,10 +285,10 @@ const ContadorCRUD = () => {
           <div className={`w-full max-w-sm rounded-2xl bg-white p-8 shadow-2xl transform transition-transform duration-300 border-2 border-blue-500 scale-100`}>
             <p className="text-lg font-semibold text-gray-800">{pregunta}</p>
             <div className="mt-4 flex justify-end space-x-2">
-              <button onClick={()=>{}} className="rounded-md bg-gray-300 px-4 py-2 text-gray-800 transition-colors hover:bg-gray-400">
+              <button onClick={() => { }} className="rounded-md bg-gray-300 px-4 py-2 text-gray-800 transition-colors hover:bg-gray-400">
                 Cancelar
               </button>
-              <button onClick={()=>{}} className="rounded-md bg-red-600 px-4 py-2 text-white transition-colors hover:bg-red-700">
+              <button onClick={() => { }} className="rounded-md bg-red-600 px-4 py-2 text-white transition-colors hover:bg-red-700">
                 Eliminar
               </button>
             </div>

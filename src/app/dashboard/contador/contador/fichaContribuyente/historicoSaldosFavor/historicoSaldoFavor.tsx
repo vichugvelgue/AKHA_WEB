@@ -19,13 +19,13 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5
 
 
 // Definimos una interfaz para las propiedades del modal de registro
-interface ModalProps {
+interface historicoSaldoFavorProps {
   idContribuyente?: string;
   Cerrar: (exito: string) => void;
 }
 
 // Componente para la vista de CRUD de Usuarios
-export default function HitoricoSaldoFavor({ idContribuyente, Cerrar }: ModalProps) {
+export default function HitoricoSaldoFavor({ idContribuyente, Cerrar }: historicoSaldoFavorProps) {
   // Inicializa el router para la navegación
   const router = useRouter();
   const sesion = ObtenerSesionUsuario();

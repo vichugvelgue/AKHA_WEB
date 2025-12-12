@@ -36,6 +36,7 @@ class nuevoCliente {
   GerenteOperativo: { Nombre: string, Telefono: string, Correo: string, Cumpleanos: string } = { Nombre: "", Telefono: "", Correo: "", Cumpleanos: "" };
   EnlaceAkha: { Nombre: string, Telefono: string, Correo: string, Cumpleanos: string } = { Nombre: "", Telefono: "", Correo: "", Cumpleanos: "" };
   Cumpleanos: string = "";
+  ActividadesSeleccionadas: string[] = [];
 }
 export default function Pagos() {
   // Inicializa el router para la navegación
