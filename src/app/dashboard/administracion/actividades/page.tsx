@@ -9,6 +9,7 @@ import { Actividad,ActividadFormState } from '@/src/Interfaces/Interfaces';
 import { API_BASE_URL } from '@/src/utils/constantes';
 import { Frecuencia } from '@/src/Interfaces/enums';
 import { useRouter } from 'next/navigation';
+import { ActividadesFijas } from '@/src/Interfaces/Interfaces';
 
 // Valores iniciales para el formulario
 const initialFormState: ActividadFormState = {
@@ -21,12 +22,12 @@ const initialFormState: ActividadFormState = {
 
 // URL base de tu API de NestJS, ahora usando una variable de entorno
 const ENDPOINT_ACTUAL = '/actividades';
-export const ActividadesFijas =[
+/*export const ActividadesFijas =[
   "68daafc6209ee6ddd4d946e7",
   "68daafd5209ee6ddd4d946eb",
   "68dab10c197a935fb6bb92e1",
   "68dab4fa78038f650675da8f",
-]
+]*/
 
 // Componente para la vista de listado de actividades
 const ActividadesListado = () => {

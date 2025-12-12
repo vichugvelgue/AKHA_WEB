@@ -2,6 +2,7 @@
   "name": "web_akha",
   "version": "0.1.0",
   "private": true,
+  "homepage": "http://44.204.178.217/DemoContabilidad", 
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build",

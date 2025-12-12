@@ -14,7 +14,7 @@ import MensajeNotificacion from '@/src/hooks/MensajeNotificacion';
 import ModalAgregarActividad from './ModalAgregarActividad';
 import ModalIncidencias from './ModalIncidencias';
 import { EstatusActividad, EstatusValidacion } from '@/src/Interfaces/enums';
-import { ActividadesFijas } from '@/src/app/dashboard/administracion/actividades/page';
+import { ActividadesFijas } from '@/src/Interfaces/Interfaces';
 import CalculosFiscales from '../calculosFiscales/calculosFiscales';
 import ResumenesEjecutivos from '../resumenEjecutivo/resumenesjecutivos';
 import RegistroPagos from '../registroPagos/registropagos';
@@ -30,7 +30,7 @@ interface SelectServicio {
 
 // Definimos una interfaz para las propiedades del modal de registro
 interface ModalProps {
-  idContribuyente?: string;
+  idContribuyente: string;
   NombreContribuyente?: string;
   Cerrar: (Mensaje: string) => void;
 }

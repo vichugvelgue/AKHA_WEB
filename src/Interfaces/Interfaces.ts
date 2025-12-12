@@ -1,5 +1,13 @@
-import { TipoEmpleado } from "../app/dashboard/administracion/usuarios/page";
+
 import { EstatusValidacion, Frecuencia, MetodoPago } from "./enums";
+
+export enum TipoEmpleado {
+  Administrador = 0,
+  Contador = 1,
+  Supervisor = 2,
+  Cobranza = 3,
+  Auxiliar = 4,
+}
 
 export interface User {
   _id?: string;
@@ -358,3 +366,10 @@ export interface Venta {
   FechaRegistro?: Date;
   FechaActualizacion?: Date;
 }
+
+export const ActividadesFijas =[
+  "68daafc6209ee6ddd4d946e7",
+  "68daafd5209ee6ddd4d946eb",
+  "68dab10c197a935fb6bb92e1",
+  "68dab4fa78038f650675da8f",
+]
