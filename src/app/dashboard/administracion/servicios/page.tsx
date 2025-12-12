@@ -5,7 +5,7 @@ import { API_BASE_URL } from '@/src/utils/constantes';
 import { useRouter } from 'next/navigation';
 
 // Enum para los estados de un servicio
-export enum Estatus {
+enum Estatus {
     Cancelado = 'Cancelado',
     Activo = 'Activo',
     Desactivado = 'Desactivado',

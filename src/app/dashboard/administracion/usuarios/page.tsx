@@ -1,15 +1,9 @@
 "use client";
 
 import React, { useState, useEffect, ChangeEventHandler } from 'react';
+import { TipoEmpleado } from '@/src/Interfaces/Interfaces';
 
-// Enum fijo para los tipos de usuario, coincidiendo con la API.
-export enum TipoEmpleado {
-  Administrador = 0,
-  Contador = 1,
-  Supervisor = 2,
-  Cobranza = 3,
-  Auxiliar = 4,
-}
+
 
 // Interfaz para el tipo de datos de un usuario.
 // idTipoUsuario ahora usa un tipo numérico para coincidir con el enum.
@@ -396,7 +390,7 @@ const UserList = () => {
           onClick={() => handleOpenFormModal()}
             className="rounded-lg bg-yellow-400 px-6 py-2 text-gray-900 font-semibold transition-colors duration-200 hover:bg-yellow-500"
           >
-            Nuevo Contribuyente
+            Nuevo Usuario
           </button>
         </div>
       </div>
