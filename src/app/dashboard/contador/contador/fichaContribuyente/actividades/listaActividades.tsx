@@ -36,21 +36,21 @@ interface ModalProps {
 }
 
 // Componente para la vista de CRUD de Usuarios
-export default function ActividadesCRUD({ idContribuyente,NombreContribuyente, Cerrar }: ModalProps) {
+export default function ActividadesCRUD({ idContribuyente, NombreContribuyente, Cerrar }: ModalProps) {
   // Inicializa el router para la navegación
   const router = useRouter();
-  const sesion = ObtenerSesionUsuario();  
+  const sesion = ObtenerSesionUsuario();
   const { notification, showNotification, hideNotification } = useNotification();
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [Fecha,setFecha]=useState<Date>(new Date())
-  const [Servicios,setServicios]=useState<SelectServicio[]>([])
+  const [Fecha, setFecha] = useState<Date>(new Date())
+  const [Servicios, setServicios] = useState<SelectServicio[]>([])
   const [idServicio, setIdServicios] = useState<string>("")
-  const [ListaActividades,setListaActividades]=useState<ActividadPeriodica[]>([])
+  const [ListaActividades, setListaActividades] = useState<ActividadPeriodica[]>([])
 
   const [idActividad, setIdActividad] = useState<string>("")
   const [NombreActividad, setNombreActividad] = useState<string>("")
-  
+
   const [showAgregar, setShowAgregar] = useState<boolean>(false);
   const [OpenCalculosFiscales, setOpenCalculosFiscales] = useState(false);
   const [OpenResumenEjecutivo, setOpenResumenEjecutivo] = useState(false);
@@ -62,6 +62,9 @@ export default function ActividadesCRUD({ idContribuyente,NombreContribuyente, C
   const [selectedActividadId, setSelectedActividadId] = useState<string>('');
   const [selectedActividadNombre, setSelectedActividadNombre] = useState<string>('');
 
+  const [EsPrimeraCarga, setEsPrimeraCarga] = useState<boolean>(true)
+  const [MostrarGenerar, setMostrarGenerar] = useState<boolean>(false)
+
 
   useEffect(() => {
     iniciar()
@@ -72,7 +75,7 @@ export default function ActividadesCRUD({ idContribuyente,NombreContribuyente, C
   useEffect(() => {
     BuscarActividades()
     setIdActividad("")
-  }, [Fecha,idServicio]);
+  }, [Fecha, idServicio]);
 
   const listarServicios = async () => {
     setIsLoading(true)
@@ -105,18 +108,23 @@ export default function ActividadesCRUD({ idContribuyente,NombreContribuyente, C
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          FechaInicio:Fecha,
-          idServicio:idServicio,
-          idCliente:idContribuyente,
+          FechaInicio: Fecha,
+          idServicio: idServicio,
+          idCliente: idContribuyente,
         }),
       });
       const data = await response.json();
       if (!response.ok) {
         throw new Error(data.message || 'La respuesta de la API de servicios no es un array válido.');
       }
+      console.log(data.data)
       if (data.data) {
         setListaActividades(data.data)
-      }
+        if (data.data.length == 0 && EsPrimeraCarga) {
+          setMostrarGenerar(true)
+          setEsPrimeraCarga(false)
+        }
+      } 
     } catch (err: any) {
       console.error('Error al cargar los servicios:', err);
       showNotification('Error al cargar los servicios.', 'error');
@@ -124,7 +132,7 @@ export default function ActividadesCRUD({ idContribuyente,NombreContribuyente, C
       setIsLoading(false)
     }
   };
-  const ActualizarEstadoActividad = async (_id: string,EstadoActividad: EstatusActividad) => {
+  const ActualizarEstadoActividad = async (_id: string, EstadoActividad: EstatusActividad) => {
     setListaActividades([])
 
     setIsLoading(true)
@@ -143,7 +151,7 @@ export default function ActividadesCRUD({ idContribuyente,NombreContribuyente, C
       const data = await response.json();
       if (!response.ok) {
         throw new Error(data.message || 'La respuesta de la API de servicios no es un array válido.');
-      }else{
+      } else {
         showNotification(data.mensaje, 'success');
         BuscarActividades();
       }
@@ -154,11 +162,41 @@ export default function ActividadesCRUD({ idContribuyente,NombreContribuyente, C
       setIsLoading(false)
     }
   };
-  const CambiarFecha = async (e:React.ChangeEvent<HTMLInputElement>) => {
+  const GenerarActividadesMes= async () => {
+    setListaActividades([])
+
+    setIsLoading(true)
+    try {
+      const response = await fetch(`${API_BASE_URL}/actividadesperiodicas/GenerarActividadesMes`, {
+        method: "POST",
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          idCliente:idContribuyente,
+          idUsuarioRegistro: sesion.idUsuario
+        }),
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.message || 'La respuesta de la API de servicios no es un array válido.');
+      } else {
+        setMostrarGenerar(false)
+        showNotification(data.mensaje, 'success');
+        BuscarActividades();
+      }
+    } catch (err: any) {
+      console.error('Error al cargar los servicios:', err);
+      showNotification('Error al cargar los servicios.', 'error');
+    } finally {
+      setIsLoading(false)
+    }
+  };
+  const CambiarFecha = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const { value } = e.target
-    let valor = new Date(value+"-02")
+    let valor = new Date(value + "-02")
     setFecha(valor)
-  } 
+  }
   const esMesActual = (fecha: Date) => {
     const hoy = new Date();
     return fecha.getFullYear() === hoy.getFullYear() &&
@@ -213,61 +251,61 @@ export default function ActividadesCRUD({ idContribuyente,NombreContribuyente, C
     //   return <span className="px-3 py-1 inline-flex text-xs leading-5 font-bold rounded-full transition-colors bg-gray-100 text-gray-800">{Nombre}</span>;
     // }    
     let esFija = ActividadesFijas.includes(idActividad);
-    let onclic = () => {};
+    let onclic = () => { };
     let icon = null;
-    
-    
-        switch (idActividad) {
-            case "68daafc6209ee6ddd4d946e7": // Calculo fiscal
-                onclic = () => { 
-                  setIdActividad(idActividad);
-                  setOpenCalculosFiscales(true); 
-                };
-                icon = <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 19V6l2-2l2 2v13M9 19a3 3 0 006 0M9 19a3 3 0 01-6 0m6 0a3 3 0 000-6m-6 6a3 3 0 010-6m6 0a3 3 0 01-6 0m6 0a3 3 0 006 0m-6 0a3 3 0 010 6m6 0a3 3 0 000-6"></path></svg>; // Icono de Calculadora
-                break;
-            case "68daafd5209ee6ddd4d946eb": // Resumen ejecutivo
-                onclic = () => { 
-                  setIdActividad(idActividad);
-                  setOpenResumenEjecutivo(true);
-                 };
-                icon = <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 19V6l2-2l2 2v13M9 19a3 3 0 006 0m-6 0a3 3 0 01-6 0m6 0a3 3 0 000-6m-6 6a3 3 0 010-6m6 0a3 3 0 01-6 0m6 0a3 3 0 006 0m-6 0a3 3 0 010 6m6 0a3 3 0 000-6"></path></svg>; // Icono de Gráfico
-                break;
-            case "68dab10c197a935fb6bb92e1": // Registro de pagos
-            onclic = () => { 
-              setIdActividad(idActividad);
-              setOpenRegistroPagos(true); 
-            };
-                icon = <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 19V6l2-2l2 2v13M9 19a3 3 0 006 0m-6 0a3 3 0 01-6 0m6 0a3 3 0 000-6m-6 6a3 3 0 010-6m6 0a3 3 0 01-6 0m6 0a3 3 0 006 0m-6 0a3 3 0 010 6m6 0a3 3 0 000-6"></path></svg>; // Icono de Gráfico
-                break;
-            case "68dab4fa78038f650675da8f": // Recepción de documentos
-            default:                          
-              onclic = () => { 
-                //manuales
-                setIdActividad(idActividad);
-                setNombreActividad(Nombre);
-                setOpenComprobantesActividadesManuales(true);
-               };
-                icon = <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-3-6v6m3 6H6a2 2 0 01-2-2V7a2 2 0 012-2h10a2 2 0 012 2v11a2 2 0 01-2 2z"></path></svg>; // Icono de Documento
-                break;
-        }
-    
 
 
-      return (
-        <button
-          onClick={onclic}
-          title={Nombre}
-          className={`
+    switch (idActividad) {
+      case "68daafc6209ee6ddd4d946e7": // Calculo fiscal
+        onclic = () => {
+          setIdActividad(idActividad);
+          setOpenCalculosFiscales(true);
+        };
+        icon = <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 19V6l2-2l2 2v13M9 19a3 3 0 006 0M9 19a3 3 0 01-6 0m6 0a3 3 0 000-6m-6 6a3 3 0 010-6m6 0a3 3 0 01-6 0m6 0a3 3 0 006 0m-6 0a3 3 0 010 6m6 0a3 3 0 000-6"></path></svg>; // Icono de Calculadora
+        break;
+      case "68daafd5209ee6ddd4d946eb": // Resumen ejecutivo
+        onclic = () => {
+          setIdActividad(idActividad);
+          setOpenResumenEjecutivo(true);
+        };
+        icon = <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 19V6l2-2l2 2v13M9 19a3 3 0 006 0m-6 0a3 3 0 01-6 0m6 0a3 3 0 000-6m-6 6a3 3 0 010-6m6 0a3 3 0 01-6 0m6 0a3 3 0 006 0m-6 0a3 3 0 010 6m6 0a3 3 0 000-6"></path></svg>; // Icono de Gráfico
+        break;
+      case "68dab10c197a935fb6bb92e1": // Registro de pagos
+        onclic = () => {
+          setIdActividad(idActividad);
+          setOpenRegistroPagos(true);
+        };
+        icon = <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 19V6l2-2l2 2v13M9 19a3 3 0 006 0m-6 0a3 3 0 01-6 0m6 0a3 3 0 000-6m-6 6a3 3 0 010-6m6 0a3 3 0 01-6 0m6 0a3 3 0 006 0m-6 0a3 3 0 010 6m6 0a3 3 0 000-6"></path></svg>; // Icono de Gráfico
+        break;
+      case "68dab4fa78038f650675da8f": // Recepción de documentos
+      default:
+        onclic = () => {
+          //manuales
+          setIdActividad(idActividad);
+          setNombreActividad(Nombre);
+          setOpenComprobantesActividadesManuales(true);
+        };
+        icon = <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-3-6v6m3 6H6a2 2 0 01-2-2V7a2 2 0 012-2h10a2 2 0 012 2v11a2 2 0 01-2 2z"></path></svg>; // Icono de Documento
+        break;
+    }
+
+
+
+    return (
+      <button
+        onClick={onclic}
+        title={Nombre}
+        className={`
             flex items-center text-left py-1 px-2 rounded-lg transition-all duration-300 
-            ${esFija 
-              ? "bg-indigo-50 text-indigo-700 font-semibold hover:bg-indigo-100 hover:shadow-md" 
-              : "bg-gray-200 text-gray-800"
-            }
+            ${esFija
+            ? "bg-indigo-50 text-indigo-700 font-semibold hover:bg-indigo-100 hover:shadow-md"
+            : "bg-gray-200 text-gray-800"
+          }
           `}>
-          {icon}
-          {Nombre}
-        </button>
-      )
+        {icon}
+        {Nombre}
+      </button>
+    )
   }
   const openIncidenciasModal = (id: string, nombre: string) => {
     setSelectedActividadId(id);
@@ -282,208 +320,216 @@ export default function ActividadesCRUD({ idContribuyente,NombreContribuyente, C
     setSelectedActividadNombre('');
   };
 
-   const handleIncidenciaGuardada = () => {
-      // Este método se ejecuta cuando se ha guardado una incidencia con éxito en el modal.
-      // console.log(`Incidencia guardada para ${selectedActividadId}. Actualizando la vista del padre...`);
-      // Aquí se podría actualizar el conteo de incidencias o forzar una recarga de la lista de actividades.
+  const handleIncidenciaGuardada = () => {
+    // Este método se ejecuta cuando se ha guardado una incidencia con éxito en el modal.
+    // console.log(`Incidencia guardada para ${selectedActividadId}. Actualizando la vista del padre...`);
+    // Aquí se podría actualizar el conteo de incidencias o forzar una recarga de la lista de actividades.
   }
 
   const getStatusClasses = (status: EstatusActividad) => {
     switch (status) {
-        case EstatusActividad.Pendiente:
-            return 'bg-yellow-100 text-yellow-800';
-        case EstatusActividad.En_proceso:
-            return 'bg-blue-100 text-blue-800';
-        case EstatusActividad.Terminado:
-            return 'bg-green-100 text-green-800';
-        case EstatusActividad.Detenido:
-            return 'bg-purple-100 text-purple-800';
-        case EstatusActividad.Con_incidencia:
-            return 'bg-red-100 text-red-800';
-        default:
-            return 'bg-gray-100 text-gray-800';
+      case EstatusActividad.Pendiente:
+        return 'bg-yellow-100 text-yellow-800';
+      case EstatusActividad.En_proceso:
+        return 'bg-blue-100 text-blue-800';
+      case EstatusActividad.Terminado:
+        return 'bg-green-100 text-green-800';
+      case EstatusActividad.Detenido:
+        return 'bg-purple-100 text-purple-800';
+      case EstatusActividad.Con_incidencia:
+        return 'bg-red-100 text-red-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
     }
-};
+  };
 
+console.log(MostrarGenerar)
   return (
-        <div className="p-4 sm:p-8 flex-1 overflow-auto bg-gray-50 font-sans">
-           <style>{`
+    <div className="p-4 sm:p-8 flex-1 overflow-auto bg-gray-50 font-sans">
+      <style>{`
             .font-sans { font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif; }
             /* Estilo para las filas pares de la tabla */
             .table-striped tbody tr:nth-child(even) {
                 background-color: #f9fafb; /* gray-50 */
             }
         `}</style>
-        
-            
-          {/* --- ENCABEZADO MEJORADO CON INFORMACIÓN DEL CONTRIBUYENTE --- */}
-        <div className="bg-white shadow-xl rounded-xl p-6 mb-6 border-l-4 border-indigo-600">
-            <div className="flex items-center justify-between flex-wrap">
-                <div>
-                    <h1 className="text-xl font-medium text-gray-500 mb-1">Actividades de Contribuyente</h1>
-                    <h2 className="text-3xl font-extrabold text-indigo-900 truncate max-w-lg">
-                        {NombreContribuyente}
-                    </h2>
-                </div>
-                <button
-                    onClick={() => Cerrar(``)}
-                    className="mt-4 sm:mt-0 rounded-lg bg-gray-200 px-6 py-2 text-gray-800 font-medium transition-colors duration-200 hover:bg-gray-300 flex items-center shadow-sm hover:shadow-md"
-                >
-                    <svg className="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 17l-5-5m0 0l5-5m-5 5h12"></path></svg>
-                    Regresar a Clientes
+
+
+      {/* --- ENCABEZADO MEJORADO CON INFORMACIÓN DEL CONTRIBUYENTE --- */}
+      <div className="bg-white shadow-xl rounded-xl p-6 mb-6 border-l-4 border-indigo-600">
+        <div className="flex items-center justify-between flex-wrap">
+          <div>
+            <h1 className="text-xl font-medium text-gray-500 mb-1">Actividades de Contribuyente</h1>
+            <h2 className="text-3xl font-extrabold text-indigo-900 truncate max-w-lg">
+              {NombreContribuyente}
+            </h2>
+          </div>
+          <button
+            onClick={() => Cerrar(``)}
+            className="mt-4 sm:mt-0 rounded-lg bg-gray-200 px-6 py-2 text-gray-800 font-medium transition-colors duration-200 hover:bg-gray-300 flex items-center shadow-sm hover:shadow-md"
+          >
+            <svg className="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 17l-5-5m0 0l5-5m-5 5h12"></path></svg>
+            Regresar a Clientes
+          </button>
+        </div>
+      </div>
+
+      {/* --- FILTROS DE ACTIVIDADES --- */}
+      <div className="rounded-xl bg-white p-6 shadow-md mb-6">
+        <div className="grid grid-cols-1 sm:grid-cols-4 gap-6 items-end">
+          {/* Filtro Mes y Año */}
+          <div className="col-span-1">
+            <label htmlFor="fechaFilter" className="block text-sm font-medium text-gray-700 mb-1">
+              Mes y Año de Actividad
+            </label>
+            <input
+              type="month"
+              id="fechaFilter"
+              value={Fecha.toLocaleString('fr-CA', { month: '2-digit', year: 'numeric' })}
+              onChange={CambiarFecha}
+              className="block w-full rounded-lg border-gray-300 bg-gray-50 p-2.5 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+            />
+          </div>
+
+          {/* Filtro Servicio */}
+          <div className="col-span-1">
+            <label htmlFor="servicioFilter" className="block text-sm font-medium text-gray-700 mb-1">
+              Servicio Asignado
+            </label>
+            <select
+              id="servicioFilter"
+              value={idServicio || ''}
+              onChange={(e) => setIdServicios(e.target.value)}
+              className="block w-full rounded-lg border-gray-300 bg-gray-50 p-2.5 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+            >
+              <option value={""}>Todos los Servicios</option>
+              {Servicios.map((item) => (
+                <option key={item._id} value={item._id}>{item.Nombre}</option>
+              ))}
+            </select>
+          </div>
+
+          {/* Botón Nueva Actividad */}
+          {esMesActual(Fecha) && (
+            <div className="col-span-2 flex justify-end">
+              {MostrarGenerar && (
+                <button className="w-full sm:w-auto mr-2 rounded-lg text-white bg-indigo-600 px-6 py-2.5 text-sm font-semibold transition-colors duration-200 hover:bg-indigo-700 shadow-lg hover:shadow-xl"
+                  onClick={() => GenerarActividadesMes()}>
+                  <span className="flex items-center justify-center">
+                    <span className="material-symbols-outlined">calendar_add_on</span>
+                    Generar Actividades
+                  </span>
                 </button>
+              )}
+              <button className="w-full sm:w-auto rounded-lg text-white bg-indigo-600 px-6 py-2.5 text-sm font-semibold transition-colors duration-200 hover:bg-indigo-700 shadow-lg hover:shadow-xl"
+                onClick={() => setShowAgregar(true)}>
+                <span className="flex items-center justify-center">
+                  <span className="material-symbols-outlined">add</span>
+                  Nueva Actividad
+                </span>
+              </button>
             </div>
+          )}
         </div>
+      </div>
 
-          {/* --- FILTROS DE ACTIVIDADES --- */}
-        <div className="rounded-xl bg-white p-6 shadow-md mb-6">
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 items-end">
-                {/* Filtro Mes y Año */}
-                <div className="col-span-1">
-                    <label htmlFor="fechaFilter" className="block text-sm font-medium text-gray-700 mb-1">
-                        Mes y Año de Actividad
-                    </label>
-                    <input
-                        type="month"
-                        id="fechaFilter"
-                        value={Fecha.toLocaleString('fr-CA', { month: '2-digit', year: 'numeric' })}
-                        onChange={CambiarFecha}
-                        className="block w-full rounded-lg border-gray-300 bg-gray-50 p-2.5 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                    />
-                </div>
-
-                {/* Filtro Servicio */}
-                <div className="col-span-1">
-                    <label htmlFor="servicioFilter" className="block text-sm font-medium text-gray-700 mb-1">
-                        Servicio Asignado
-                    </label>
+      <div className="rounded-xl bg-white p-6 shadow-2xl overflow-x-auto">
+        <h3 className="text-xl font-semibold text-gray-800 mb-4 border-b pb-2">Listado de Tareas del Periodo</h3>
+        <table className='min-w-full divide-y divide-gray-200 table-striped'>
+          <thead className="bg-gray-100">
+            <tr>
+              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider rounded-tl-lg">Actividad / Tarea</th>
+              <th className="px-4 py-3 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">Semana</th>
+              <th className="px-4 py-3 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">Fecha Inicio</th>
+              <th className="px-4 py-3 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">Vencimiento</th>
+              <th className="px-4 py-3 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">Origen</th>
+              <th className="px-4 py-3 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">Estado</th>
+              <th className="px-4 py-3 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider rounded-tr-lg">Incidencias</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-gray-200">
+            {ListaActividades.map((actividad, key) =>
+              <tr key={key} className="hover:bg-indigo-50 transition duration-150">
+                {/* Actividad con Botón Resaltado */}
+                <td className="px-4 py-3 font-medium text-sm text-gray-900">
+                  {BotonActividad(actividad.idActividad || "", actividad.Nombre)}
+                </td>
+                <td className="px-4 py-3 text-center text-sm text-gray-600">{actividad.SemanaOperativa}</td>
+                <td className="px-4 py-3 text-center text-sm text-gray-600">{new Date(actividad.FechaInicio).toLocaleDateString()}</td>
+                <td className="px-4 py-3 text-center text-sm font-semibold text-red-600">{new Date(actividad.FechaVencimiento).toLocaleDateString()}</td>
+                <td className="px-4 py-3 text-center text-xs">
+                  <span className="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-200 text-gray-800">
+                    {actividad.TipoOrigen}
+                  </span>
+                </td>
+                {/* Columna de Estado con Badge y Doble Click para Editar */}
+                {idActividad === actividad._id ?
+                  <td className="px-4 py-3 text-center w-40">
                     <select
-                        id="servicioFilter"
-                        value={idServicio || ''}
-                        onChange={(e) => setIdServicios(e.target.value)}
-                        className="block w-full rounded-lg border-gray-300 bg-gray-50 p-2.5 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                      id="EstadoActividad"
+                      value={actividad.EstadoActividad || 0}
+                      onChange={CambiarSelectEstatoActividad}
+                      className="block w-full rounded-md border-gray-300 bg-white p-1.5 shadow-sm text-sm focus:border-indigo-500 focus:ring-indigo-500"
                     >
-                        <option value={""}>Todos los Servicios</option>
-                        {Servicios.map((item) => (
-                            <option key={item._id} value={item._id}>{item.Nombre}</option>
-                        ))}
+                      {Object.values(EstatusActividad).filter((value) => typeof value === "number").map((value) => (
+                        <option key={value} value={value}>
+                          {EstatusActividad[value as EstatusActividad].replace(/_/g, " ")}
+                        </option>
+                      ))}
                     </select>
-                </div>
-
-                {/* Botón Nueva Actividad */}
-                <div className="col-span-1 flex justify-end">
-                    {esMesActual(Fecha) && (
-                        <button 
-                            className="w-full sm:w-auto rounded-lg text-white bg-indigo-600 px-6 py-2.5 text-sm font-semibold transition-colors duration-200 hover:bg-indigo-700 shadow-lg hover:shadow-xl"
-                            onClick={() => setShowAgregar(true)}
-                        >
-                            <span className="flex items-center justify-center">
-                                <svg className="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
-                                Nueva Actividad
-                            </span>
-                        </button>
-                    )}
-                </div>
-            </div>
-        </div>
-        
-        <div className="rounded-xl bg-white p-6 shadow-2xl overflow-x-auto">
-            <h3 className="text-xl font-semibold text-gray-800 mb-4 border-b pb-2">Listado de Tareas del Periodo</h3>
-            <table className='min-w-full divide-y divide-gray-200 table-striped'>
-                <thead className="bg-gray-100">
-                    <tr>
-                        <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider rounded-tl-lg">Actividad / Tarea</th>
-                        <th className="px-4 py-3 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">Semana</th>
-                        <th className="px-4 py-3 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">Fecha Inicio</th>
-                        <th className="px-4 py-3 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">Vencimiento</th>
-                        <th className="px-4 py-3 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">Origen</th>
-                        <th className="px-4 py-3 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">Estado</th>
-                        <th className="px-4 py-3 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider rounded-tr-lg">Incidencias</th>
-                    </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-200">
-                    {ListaActividades.map((actividad, key) =>
-                        <tr key={key} className="hover:bg-indigo-50 transition duration-150">
-                            {/* Actividad con Botón Resaltado */}
-                            <td className="px-4 py-3 font-medium text-sm text-gray-900">
-                                {BotonActividad(actividad.idActividad || "", actividad.Nombre)}
-                            </td>
-                            <td className="px-4 py-3 text-center text-sm text-gray-600">{actividad.SemanaOperativa}</td>
-                            <td className="px-4 py-3 text-center text-sm text-gray-600">{new Date(actividad.FechaInicio).toLocaleDateString()}</td>
-                            <td className="px-4 py-3 text-center text-sm font-semibold text-red-600">{new Date(actividad.FechaVencimiento).toLocaleDateString()}</td>
-                            <td className="px-4 py-3 text-center text-xs">
-                                <span className="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-200 text-gray-800">
-                                    {actividad.TipoOrigen}
-                                </span>
-                            </td>
-                            {/* Columna de Estado con Badge y Doble Click para Editar */}
-                            {idActividad === actividad._id ?
-                                <td className="px-4 py-3 text-center w-40">
-                                    <select
-                                        id="EstadoActividad"
-                                        value={actividad.EstadoActividad || 0}
-                                        onChange={CambiarSelectEstatoActividad}
-                                        className="block w-full rounded-md border-gray-300 bg-white p-1.5 shadow-sm text-sm focus:border-indigo-500 focus:ring-indigo-500"
-                                    >
-                                        {Object.values(EstatusActividad).filter((value) => typeof value === "number").map((value) => (
-                                            <option key={value} value={value}>
-                                                {EstatusActividad[value as EstatusActividad].replace(/_/g, " ")}
-                                            </option>
-                                        ))}
-                                    </select>
-                                </td>
-                                :
-                                <td className="px-4 py-3 text-center text-xs w-40" onDoubleClick={() => setIdActividad(actividad._id || "")}>
-                                    <span className={`px-3 py-1 inline-flex text-xs leading-5 font-bold rounded-full cursor-pointer transition-colors ${getStatusClasses(actividad.EstadoActividad || 0)}`}
-                                          title="Doble click para editar">
-                                        {EstatusActividad[actividad.EstadoActividad || 0].replace(/_/g, " ")}
-                                    </span>
-                                </td>
-                            }
-                            {/* Columna de Incidencias con Botón Resaltado (Acción Principal) */}
-                             <td className="px-4 py-3 text-center">
-                      <button
-                          onClick={() => openIncidenciasModal(actividad._id || "", actividad.Nombre)}
-                          // Mantenemos el color azul para "Gestión de Procesos"
-                          className="bg-blue-600 text-white hover:bg-blue-700 font-semibold transition-all flex items-center justify-center p-2 rounded-full mx-auto shadow-lg transform hover:scale-105 active:scale-95 focus:outline-none focus:ring-4 focus:ring-blue-400"
-                          // Título actualizado para reflejar "Incidencias"
-                          title="Gestionar Incidencias de la Actividad"
-                      >
-                          {/* Ícono de Documento con Exclamación (Lista/Reporte de Incidencia) */}
-                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                              <path 
-                                  strokeLinecap="round" 
-                                  strokeLinejoin="round" 
-                                  strokeWidth="2" 
-                                  d="M9 12h6m-6 4h6m-6 4h6m-12 1h16a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2zm12-7h.01M16 16h.01"
-                              />
-                          </svg>
-                      </button>
                   </td>
-                        </tr>
-                    )}
-                </tbody>
-            </table>
-        </div>
-        {OpenCalculosFiscales && <CalculosFiscales Visible={OpenCalculosFiscales} idEditar={idContribuyente||""} Cerrar={CerrarCalculosFiscales} />}
-        {OpenResumenEjecutivo && <ResumenesEjecutivos Visible={OpenResumenEjecutivo} idEditar={idContribuyente || ""} Cerrar={CerrarResumenEjectutivo} />}
-        {OpenRegistroPagos && <RegistroPagos Visible={OpenRegistroPagos} idEditar={idContribuyente || ""} Cerrar={CerrarRegistroPagos} />}
-        {OpenComprobantesActividades && <RegistroArchivoGeneral idActividad={idActividad} Visible={OpenComprobantesActividades} idEditar={idContribuyente || ""} Cerrar={CerrarRegistroComprobanteActividades} />}
-        {OpenComprobantesActividadesManuales && <ComprobanteActividadManual idActividad={idActividad} Visible={OpenComprobantesActividadesManuales} idEditar={idContribuyente || ""} NombreActividad={NombreActividad} Cerrar={CerrarRegistroComprobanteActividadesManuales} />}
-         {/* Renderizar el Modal de Incidencias si está visible */}
+                  :
+                  <td className="px-4 py-3 text-center text-xs w-40" onDoubleClick={() => setIdActividad(actividad._id || "")}>
+                    <span className={`px-3 py-1 inline-flex text-xs leading-5 font-bold rounded-full cursor-pointer transition-colors ${getStatusClasses(actividad.EstadoActividad || 0)}`}
+                      title="Doble click para editar">
+                      {EstatusActividad[actividad.EstadoActividad || 0].replace(/_/g, " ")}
+                    </span>
+                  </td>
+                }
+                {/* Columna de Incidencias con Botón Resaltado (Acción Principal) */}
+                <td className="px-4 py-3 text-center">
+                  <button
+                    onClick={() => openIncidenciasModal(actividad._id || "", actividad.Nombre)}
+                    // Mantenemos el color azul para "Gestión de Procesos"
+                    className="bg-blue-600 text-white hover:bg-blue-700 font-semibold transition-all flex items-center justify-center p-2 rounded-full mx-auto shadow-lg transform hover:scale-105 active:scale-95 focus:outline-none focus:ring-4 focus:ring-blue-400"
+                    // Título actualizado para reflejar "Incidencias"
+                    title="Gestionar Incidencias de la Actividad"
+                  >
+                    {/* Ícono de Documento con Exclamación (Lista/Reporte de Incidencia) */}
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        d="M9 12h6m-6 4h6m-6 4h6m-12 1h16a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2zm12-7h.01M16 16h.01"
+                      />
+                    </svg>
+                  </button>
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+      {OpenCalculosFiscales && <CalculosFiscales Visible={OpenCalculosFiscales} idEditar={idContribuyente || ""} Cerrar={CerrarCalculosFiscales} />}
+      {OpenResumenEjecutivo && <ResumenesEjecutivos Visible={OpenResumenEjecutivo} idEditar={idContribuyente || ""} Cerrar={CerrarResumenEjectutivo} />}
+      {OpenRegistroPagos && <RegistroPagos Visible={OpenRegistroPagos} idEditar={idContribuyente || ""} Cerrar={CerrarRegistroPagos} />}
+      {OpenComprobantesActividades && <RegistroArchivoGeneral idActividad={idActividad} Visible={OpenComprobantesActividades} idEditar={idContribuyente || ""} Cerrar={CerrarRegistroComprobanteActividades} />}
+      {OpenComprobantesActividadesManuales && <ComprobanteActividadManual idActividad={idActividad} Visible={OpenComprobantesActividadesManuales} idEditar={idContribuyente || ""} NombreActividad={NombreActividad} Cerrar={CerrarRegistroComprobanteActividadesManuales} />}
+      {/* Renderizar el Modal de Incidencias si está visible */}
       {showIncidenciasModal && (
-          <ModalIncidencias 
-              idActividad={selectedActividadId}
-              actividadNombre={selectedActividadNombre}
-              idContribuyente={idContribuyente}
-              onClose={closeIncidenciasModal} 
-              onIncidenciaGuardada={handleIncidenciaGuardada}
-          />
+        <ModalIncidencias
+          idActividad={selectedActividadId}
+          actividadNombre={selectedActividadNombre}
+          idContribuyente={idContribuyente}
+          onClose={closeIncidenciasModal}
+          onIncidenciaGuardada={handleIncidenciaGuardada}
+        />
       )}
-        <ModalAgregarActividad idContribuyente={idContribuyente||""} Cerrar={CerrarAgregar} Visible={showAgregar} />
-        <Cargando isLoading={isLoading} />
-        <MensajeNotificacion {...notification} hideNotification={hideNotification} />
-      
+      <ModalAgregarActividad idContribuyente={idContribuyente || ""} Cerrar={CerrarAgregar} Visible={showAgregar} />
+      <Cargando isLoading={isLoading} />
+      <MensajeNotificacion {...notification} hideNotification={hideNotification} />
+
     </div>
   );
 };
