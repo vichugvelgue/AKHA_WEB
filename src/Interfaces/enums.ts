@@ -1,8 +1,16 @@
 
+export enum PermisoPadre {
+    Administracion = "689e0ae4f51a6574612d500a",
+    Contador = "689e0b62f51a6574612d5026",
+    Clientes = "Clientes",
+    Cobranza = "Cobranza",
+    Proyectos = "Proyectos",
+    Supervision = "Supervision",
+}
 export enum EstatusValidacion {
-  Pendiente = "Pendiente",
-  Autorizado = "Autorizado",
-  Rechazado = "Rechazado",
+    Pendiente = "Pendiente",
+    Autorizado = "Autorizado",
+    Rechazado = "Rechazado",
 }
 export enum Frecuencia {
     Mensual = "Mensual",

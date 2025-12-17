@@ -124,7 +124,7 @@ export default function ActividadesCRUD({ idContribuyente, NombreContribuyente, 
           setMostrarGenerar(true)
           setEsPrimeraCarga(false)
         }
-      } 
+      }
     } catch (err: any) {
       console.error('Error al cargar los servicios:', err);
       showNotification('Error al cargar los servicios.', 'error');
@@ -162,7 +162,7 @@ export default function ActividadesCRUD({ idContribuyente, NombreContribuyente, 
       setIsLoading(false)
     }
   };
-  const GenerarActividadesMes= async () => {
+  const GenerarActividadesMes = async () => {
     setListaActividades([])
 
     setIsLoading(true)
@@ -173,7 +173,7 @@ export default function ActividadesCRUD({ idContribuyente, NombreContribuyente, 
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          idCliente:idContribuyente,
+          idCliente: idContribuyente,
           idUsuarioRegistro: sesion.idUsuario
         }),
       });
@@ -343,7 +343,7 @@ export default function ActividadesCRUD({ idContribuyente, NombreContribuyente, 
     }
   };
 
-console.log(MostrarGenerar)
+  console.log(MostrarGenerar)
   return (
     <div className="p-4 sm:p-8 flex-1 overflow-auto bg-gray-50 font-sans">
       <style>{`
@@ -488,23 +488,33 @@ console.log(MostrarGenerar)
                 }
                 {/* Columna de Incidencias con Botón Resaltado (Acción Principal) */}
                 <td className="px-4 py-3 text-center">
-                  <button
-                    onClick={() => openIncidenciasModal(actividad._id || "", actividad.Nombre)}
-                    // Mantenemos el color azul para "Gestión de Procesos"
-                    className="bg-blue-600 text-white hover:bg-blue-700 font-semibold transition-all flex items-center justify-center p-2 rounded-full mx-auto shadow-lg transform hover:scale-105 active:scale-95 focus:outline-none focus:ring-4 focus:ring-blue-400"
-                    // Título actualizado para reflejar "Incidencias"
-                    title="Gestionar Incidencias de la Actividad"
-                  >
-                    {/* Ícono de Documento con Exclamación (Lista/Reporte de Incidencia) */}
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth="2"
-                        d="M9 12h6m-6 4h6m-6 4h6m-12 1h16a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2zm12-7h.01M16 16h.01"
-                      />
-                    </svg>
-                  </button>
+                  {actividad.tieneIncidencia ? (
+                    <button
+                      onClick={() => openIncidenciasModal(actividad._id || "", actividad.Nombre)}
+                      className="bg-red-500 text-white hover:bg-red-600 font-semibold transition-all flex items-center justify-center p-2 rounded-full mx-auto shadow-lg transform hover:scale-105 active:scale-95 focus:outline-none focus:ring-4 focus:ring-red-400"
+                      title="Gestionar Incidencias de la Actividad"
+                    >
+                      <span className="material-symbols-rounded">warning_amber</span>
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => openIncidenciasModal(actividad._id || "", actividad.Nombre)}
+                      // Mantenemos el color azul para "Gestión de Procesos"
+                      className="bg-blue-500 text-white hover:bg-blue-700 font-semibold transition-all flex items-center justify-center p-2 rounded-full mx-auto shadow-lg transform hover:scale-105 active:scale-95 focus:outline-none focus:ring-4 focus:ring-blue-400"
+                      // Título actualizado para reflejar "Incidencias"
+                      title="Gestionar Incidencias de la Actividad"
+                    >
+                      {/* Ícono de Documento con Exclamación (Lista/Reporte de Incidencia) */}
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="2"
+                          d="M9 12h6m-6 4h6m-6 4h6m-12 1h16a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2zm12-7h.01M16 16h.01"
+                        />
+                      </svg>
+                    </button>
+                  )}
                 </td>
               </tr>
             )}

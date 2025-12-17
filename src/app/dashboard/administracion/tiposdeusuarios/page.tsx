@@ -420,6 +420,7 @@ const RegistroUsuarioModal = ({ idEditar, Editar = false, onClose, onRegister }:
       let permiso: Permiso = {
         idTipoUsuario: formState._id,
         idModulo: nuevosModulos[index]._id!,
+        idPadre: nuevosModulos[index].idPadre
       }
       formState.Permisos?.push(permiso)
     } else {

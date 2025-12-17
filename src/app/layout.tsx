@@ -24,7 +24,6 @@ export default function RootLayout({ children, }: Readonly<{ children: React.Rea
   return (
     <html lang="en">
       <head>
-        {/* <title>AKHA</title> */}
         <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" />
         <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:FILL@0..1" rel="stylesheet" />
         <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:FILL@0..1" rel="stylesheet" />
