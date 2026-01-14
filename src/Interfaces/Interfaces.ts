@@ -48,6 +48,7 @@ export interface Permiso {
   _id?: string;
   idTipoUsuario?: string | null;
   idModulo: string;
+  idPadre?: string;
 }
 export interface RegimenFiscal {
   _id?: string;
@@ -319,6 +320,8 @@ export interface ActividadPeriodica {
 
   FechaInicio: Date;
   FechaVencimiento: Date;
+
+  tieneIncidencia?: boolean;
 }
 export interface PagoPendiente {
   _id?: string;

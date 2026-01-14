@@ -6,17 +6,18 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation'; // Importamos useRouter para la redirección
-import { ObtenerSesionUsuario } from '@/src/utils/constantes';
+import { ObtenerSesionUsuario, ValidarPermisoModuloPadre } from '@/src/utils/constantes';
+import { PermisoPadre } from '@/src/Interfaces/enums';
 
 // Datos de los módulos para generar los botones dinámicamente
 const modulos = [
-  { href: '/dashboard/administracion', icon: '⚙️', text: 'Administración' },
-  { href: '/dashboard/contador/contador', icon: '🧑‍💼​', text: 'Contador' },
-  { href: '/dashboard/clientes', icon: '👥', text: 'Clientes' },
-  { href: '/dashboard/cobranza', icon: '💰', text: 'Cobranza' },
-  { href: '/dashboard/proyectos', icon: '📝', text: 'Proyectos' },
-  { href: '/dashboard/supervision', icon: '🕵️', text: 'Supervisión' },
-  { href: '/dashboard/reportes', icon: '📈', text: 'Reportes' },
+  { href: '/dashboard/administracion', icon: '⚙️', text: 'Administración', permiso: PermisoPadre.Administracion },
+  { href: '/dashboard/contador/contador', icon: '🧑‍💼​', text: 'Contador', permiso: PermisoPadre.Contador },
+  { href: '/dashboard/clientes', icon: '👥', text: 'Clientes', permiso: PermisoPadre.Clientes },
+  { href: '/dashboard/cobranza', icon: '💰', text: 'Cobranza', permiso: PermisoPadre.Cobranza },
+  { href: '/dashboard/proyectos', icon: '📝', text: 'Proyectos', permiso: PermisoPadre.Proyectos },
+  { href: '/dashboard/supervision', icon: '🕵️', text: 'Supervisión', permiso: PermisoPadre.Supervision },
+  { href: '/dashboard/reportes', icon: '📈', text: 'Reportes', permiso: PermisoPadre.Supervision },
 ];
 
 
@@ -52,7 +53,7 @@ export default function DashboardPage() {
           Cerrar Sesión
         </button>
       </div>
-      
+
       <div className="z-10 w-full max-w-5xl p-8">
         {/* Contenedor del logo y título principal */}
         <div className="mb-12 text-center">
@@ -76,16 +77,16 @@ export default function DashboardPage() {
         {/* Cuadrícula de botones de los módulos */}
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
           {modulos.map((modulo) => (
-            <Link key={modulo.href} href={modulo.href}>
-              {/* Se cambió el fondo de los módulos de bg-gray-800 a bg-white */}
-              {/* Se ajustó el color del texto de los módulos */}
-              <div className="group flex transform cursor-pointer flex-col items-center justify-center rounded-2xl bg-white p-8 text-center shadow-lg transition-all duration-300 hover:scale-105 hover:bg-indigo-600 hover:text-white hover:shadow-2xl">
-                <div className="mb-4 text-5xl transition-transform duration-300 group-hover:scale-110">
-                  {modulo.icon}
+            (modulo.permiso && ValidarPermisoModuloPadre(modulo.permiso as string)) && (
+              <Link key={modulo.href} href={modulo.href}>
+                <div className="group flex transform cursor-pointer flex-col items-center justify-center rounded-2xl bg-white p-8 text-center shadow-lg transition-all duration-300 hover:scale-105 hover:bg-indigo-600 hover:text-white hover:shadow-2xl">
+                  <div className="mb-4 text-5xl transition-transform duration-300 group-hover:scale-110">
+                    {modulo.icon}
+                  </div>
+                  <h2 className="text-xl font-semibold text-gray-900 group-hover:text-white">{modulo.text}</h2>
                 </div>
-                <h2 className="text-xl font-semibold text-gray-900 group-hover:text-white">{modulo.text}</h2>
-              </div>
-            </Link>
+              </Link>
+            )
           ))}
         </div>
       </div>

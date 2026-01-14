@@ -143,7 +143,7 @@ const ContribuyentesAgregar = ({ idEditar, Editar = false, onClose, onRegister }
   const tabs = [
     { id: 'informacion-interna', label: 'Información Interna' },
     { id: 'contactos-empresa', label: 'Contactos de la Empresa' },
-    { id: 'enlace-akha', label: 'Enlace AKHA' },
+    { id: 'enlace-akha', label: 'Enlace' },
     { id: 'servicios', label: 'Servicios' },
 
   ];
